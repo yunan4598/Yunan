@@ -81,7 +81,6 @@ def read_secret(name, default=""):
 
 APP_USERNAME = read_secret("APP_USERNAME")
 APP_PASSWORD = read_secret("APP_PASSWORD")
-FRED_API_KEY = read_secret("FRED_API_KEY")
 
 if not APP_USERNAME or not APP_PASSWORD:
     st.info("لم يتم إعداد بيانات الدخول بعد. أضف APP_USERNAME و APP_PASSWORD في Streamlit Secrets.")
@@ -94,32 +93,37 @@ if "change_logs" not in st.session_state: st.session_state.change_logs = [
     {"الوقت": "التحديث الأولي", "العامل": "النظام العام", "التغير المرصود": "تم إطلاق محرك FUSION بنجاح", "الحالة": "مستقر 🟢"}
 ]
 
+# --- إدارة المصادقة الآمنة ---
 if not st.session_state.authenticated:
     st.markdown('<div class="hero"><div class="eyebrow">YUNAN GOLD INTELLIGENCE</div><h1>تسجيل الدخول المؤسسي</h1><p>لوحة قرار استخبارات الذهب الخاصة.</p></div>', unsafe_allow_html=True)
     with st.form("login_form"):
         u = st.text_input("اسم المستخدم")
         p = st.text_input("كلمة المرور", type="password")
-        if st.form_submit_button("دخول إلى المنصة", use_container_width=True):
+        submitted = st.form_submit_button("دخول إلى المنصة", use_container_width=True)
+        if submitted:
             import hmac
             if hmac.compare_digest(u.encode(), APP_USERNAME.encode()) and hmac.compare_digest(p.encode(), APP_PASSWORD.encode()):
                 st.session_state.authenticated = True
                 st.rerun()
-            else: st.error("بيانات الدخول غير صحيحة.")
+            else:
+                st.error("بيانات الدخول غير صحيحة.")
     st.stop()
 
+# --- جلب البيانات الحية بأمان تام ومعالجة الأخطاء ---
+@st.cache_data(ttl=300)
 def fetch_macro_data():
     data = {"dxy": 102.24, "real_yield": "2.87%", "breakeven": "DATA UNAVAILABLE"}
     try:
         dxy = yf.Ticker("DX-Y.NYB").history(period="2d")
         if not dxy.empty:
-            data["dxy"] = round(dxy["Close"].iloc[-1], 2)
+            data["dxy"] = round(float(dxy["Close"].iloc[-1]), 2)
     except Exception:
         pass
 
     try:
         tnx = yf.Ticker("^TNX").history(period="2d")
         if not tnx.empty:
-            val = round(tnx["Close"].iloc[-1], 2)
+            val = round(float(tnx["Close"].iloc[-1]), 2)
             data["real_yield"] = f"{val}%"
     except Exception:
         pass
@@ -133,13 +137,17 @@ macro_live = st.session_state.macro_cache
 
 def get_smart_alerts(dxy_val):
     alerts = []
-    if isinstance(dxy_val, (int, float)):
-        if dxy_val > 104.0:
+    try:
+        val = float(dxy_val)
+        if val > 104.0:
             alerts.append("🚨 **تنبيه استراتيجي:** مؤشر الدولار (DXY) يسجل مستويات مرتفعة فوق 104.0، مما يشكل ضغطاً هبوطياً محتملاً على الذهب ما لم يتدخل الطلب المؤسسي.")
-        elif dxy_val < 101.0:
+        elif val < 101.0:
             alerts.append("🟢 **فرصة داعمة:** مؤشر الدولار يتراجع قرب مستويات دعم رئيسية، وهو ما يدعم اندفاع عقود الشراء على الذهب.")
         else:
             alerts.append("⚖️ **حالة استقرار:** مؤشر DXY في نطاق تذبذب آمن، ويُنصح بمراقبة سحب السيولة عند جلسة نيويورك.")
+    except Exception:
+        alerts.append("⚠️ **تنبيه بيانات:** مؤشر DXY غير متاح حالياً للتنبيهات الآلية.")
+    
     alerts.append("📌 **تنبيه فني:** احرص على عدم الدخول إلا بعد إغلاق شمعة تأكيد وسحب السيولة (Stop Run) عند قيعان آسيا أو اليوم السابق.")
     return alerts
 
@@ -230,7 +238,7 @@ if navigation == "🔥 GOLD INTELLIGENCE FUSION":
     with col_m2: st.metric("توقعات التضخم Breakeven", f"{macro_live['breakeven']}", "حسب التوفر")
     with col_m3: st.metric("مؤشر الدولار DXY", f"{macro_live['dxy']}", "تحديث مباشر")
 
-    # --- إضافة المرحلة 6: التفاعل الفني والسيولة المتقدمة ---
+    # حاسبة تقييم وتوافق الصفقة (SMC Confluence Tracker)
     st.markdown("### E. TRADE SETUP VALIDATION (حاسبة تقييم وتوافق الصفقة)")
     with st.expander("🔍 فحص توافق الفرصة الفنية مع الاقتصاد الكلي (SMC Confluence Tracker)", expanded=True):
         col_v1, col_v2 = st.columns(2)
@@ -241,7 +249,6 @@ if navigation == "🔥 GOLD INTELLIGENCE FUSION":
             entry_zone = st.selectbox("منطقة التنفيذ (Entry Zone):", ["Order Block (OB) + FVG", "Discount Zone (<50% Equilibrium)", "Premium Zone (>50% Equilibrium)", "لا توجد منطقة واضحة"])
             news_risk = st.selectbox("مخاطر الأخبار الحالية:", ["لا توجد أخبار عالية التأثير قريباً", "خبر CPI/NFP خلال أقل من ساعة", "تصريحات الفيدرالي / FOMC"])
 
-        # حساب درجة التوافق الفنية-الاقتصادية
         confluence_score = 50
         if "Bullish" in tech_structure: confluence_score += 20
         if "Previous Day Low" in liquidity_target or "Asia Lows" in liquidity_target: confluence_score += 15
@@ -305,4 +312,4 @@ elif "5. 📋" in navigation:
         st.dataframe(pd.DataFrame(st.session_state.webhook_logs), use_container_width=True, hide_index=True)
 
 st.divider()
-st.caption("YUNAN GOLD INTELLIGENCE v3.6 • STAGE 6 INTEGRATED - CONFLUENCE TRACKER")
+st.caption("YUNAN GOLD INTELLIGENCE v3.7 • ERROR-FREE STABLE STAGE 6")
