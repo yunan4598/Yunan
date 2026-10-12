@@ -1,7 +1,5 @@
 streamlit
 pandas
-yfinance
+numpy
 requests
-pytz
-python-dotenv
-cot_reports
+bcrypt
