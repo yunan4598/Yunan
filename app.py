@@ -5,6 +5,12 @@ import pandas as pd
 import streamlit as st
 import yfinance as yf
 
+# استدعاء مكتبة COT مع الحماية من الأخطاء
+try:
+    import cot_reports as cot
+except ImportError:
+    cot = None
+
 # ==================================================
 # INITIALIZATION & RESPONSIVE DESIGN (RTL & Navy/Gold)
 # ==================================================
@@ -80,23 +86,49 @@ if APP_USERNAME and APP_PASSWORD:
                 else: st.error("بيانات الدخول غير صحيحة.")
         st.stop()
 
-# --- إدارة الذاكرة والجلسات ---
+# --- إدارة الذاكرة بالجلسة ---
 if "synced_gold_price" not in st.session_state: st.session_state.synced_gold_price = 4186.67
 if "trade_journal" not in st.session_state: st.session_state.trade_journal = []
 if "report_history" not in st.session_state: st.session_state.report_history = []
 if "current_report" not in st.session_state: st.session_state.current_report = None
 
 # ==================================================
-# 1, 2, 3. DATA SOURCES & VALIDATION ENGINE
+# LIVE REAL-TIME DATA & OFFICIAL CFTC COT FETCH ENGINE
 # ==================================================
+@st.cache_data(ttl=3600)
+def fetch_official_cot_data():
+    """جلب تقرير COT المباشر من موقع هيئة CFTC لـ XAUUSD"""
+    if cot is None:
+        return {"net": "DATA UNAVAILABLE", "long": "-", "short": "-", "date": "غير متصل", "status": "المكتبة غير مثبتة 🔴"}
+    try:
+        current_year = datetime.now().year
+        df_cot = cot.cot_year(year=current_year, cot_type='legacy_fut')
+        gold_cot = df_cot[df_cot['Market and Exchange Names'].str.contains("GOLD - COMMODITY EXCHANGE INC.", case=False, na=False)]
+        
+        if not gold_cot.empty:
+            latest = gold_cot.iloc[0]
+            non_comm_long = int(latest['Noncommercial Positions-Long (All)'])
+            non_comm_short = int(latest['Noncommercial Positions-Short (All)'])
+            net_pos = non_comm_long - non_comm_short
+            report_date = str(latest.get('As of Date in Form YYYY-MM-DD', 'أسبوعي'))
+            
+            return {
+                "net": f"{net_pos:+,d} عقد",
+                "long": f"{non_comm_long:,}",
+                "short": f"{non_comm_short:,}",
+                "date": report_date,
+                "status": "مباشر من CFTC 🟢"
+            }
+    except Exception: pass
+    return {"net": "DATA UNAVAILABLE", "long": "-", "short": "-", "date": "غير متوفر", "status": "فشل جلب CFTC 🔴"}
+
 @st.cache_data(ttl=120)
 def fetch_audited_market_data():
+    cot_info = fetch_official_cot_data()
     results = {
         "dxy": {"source": "Yahoo Finance (DX-Y.NYB)", "val": "DATA UNAVAILABLE", "change": 0.0, "type": "سوقي لحظي", "status": "غير متاحة 🔴", "time": "غير متوفر", "obs_date": "غير متوفر"},
         "us10y": {"source": "Yahoo Finance (^TNX)", "val": "DATA UNAVAILABLE", "change": 0.0, "type": "سوقي لحظي", "status": "غير متاحة 🔴", "time": "غير متوفر", "obs_date": "غير متوفر"},
-        "real_yield": {"source": "U.S. Treasury / FRED", "val": "DATA UNAVAILABLE", "type": "يومي اقتصادي", "status": "غير متاحة 🔴", "time": "غير متوفر", "obs_date": "بانتظار المفتاح"},
-        "breakeven": {"source": "FRED (T10YIE)", "val": "DATA UNAVAILABLE", "type": "يومي اقتصادي", "status": "غير متاحة 🔴", "time": "غير متوفر", "obs_date": "بانتظار المفتاح"},
-        "cot_net": {"source": "CFTC COT Reports", "val": "DATA UNAVAILABLE", "type": "أسبوعي دوري", "status": "غير متاحة 🔴", "time": "الجمعة الماضية", "obs_date": "متأخر 3 أيام"},
+        "cot_net": {"source": "U.S. CFTC Official Site", "val": cot_info["net"], "long": cot_info["long"], "short": cot_info["short"], "type": "أسبوعي دوري", "status": cot_info["status"], "time": cot_info["date"], "obs_date": cot_info["date"]},
         "quality_score": 0
     }
     valid_count = 0
@@ -133,6 +165,15 @@ def fetch_audited_market_data():
     return results
 
 market_data = fetch_audited_market_data()
+active_gold = st.session_state.synced_gold_price
+
+# تعريف مصفوفة الأدلة في النطاق العام لمنع خطأ NameError
+evidence_matrix_data = [
+    {"العامل": "عائد US10Y", "القيمة الحالية": market_data['us10y']['val'], "التغير": market_data['us10y']['change'], "التفسير": "ضغط/دعم عوائد", "اتجاه التأثير": "سلبي محتمل للذهب", "الأدلة المؤيدة": "ارتباط عكسي تاريخي", "الأدلة المعارضة": "طلب الملاذ الآمن", "التاريخ": market_data['us10y']['obs_date'], "الجودة": market_data['us10y']['status']},
+    {"العامل": "مؤشر DXY", "القيمة الحالية": market_data['dxy']['val'], "التغير": market_data['dxy']['change'], "التفسير": "قوة الدولار", "اتجاه التأثير": "إيجابي/سلبي لحظي", "الأدلة المؤيدة": "علاقة عكسية مع الذهب", "الأدلة المعارضة": "مشتريات البنوك المركزية", "التاريخ": market_data['dxy']['obs_date'], "الجودة": market_data['dxy']['status']},
+    {"العامل": "التمركز المؤسسي COT (CFTC)", "القيمة الحالية": market_data['cot_net']['val'], "التغير": "أسبوعي رسمي", "التفسير": "تمركز كبار التجار", "اتجاه التأثير": "حذر مؤسسي", "الأدلة المؤيدة": "استمرار الاتجاه الصاعد", "الأدلة المعارضة": "تطرف العقود (Squeeze Risk)", "التاريخ": market_data['cot_net']['time'], "الجودة": market_data['cot_net']['status']},
+    {"العامل": "البنية الفنية Price Action", "القيمة الحالية": f"{active_gold} $", "التغير": "لحظي", "التفسير": "اختبار سيولة الأطر", "اتجاه التأثير": "مشروط بالتأكيد", "الأدلة المؤيدة": "احترام مناطق الدعم", "الأدلة المعارضة": "غياب الاندفاع", "التاريخ": datetime.now().strftime('%Y-%m-%d'), "الجودة": "مباشر 🟢"}
+]
 
 # ==================================================
 # NAVIGATION (Sidebar)
@@ -145,9 +186,10 @@ with st.sidebar:
         [
             "🔥 2. MAIN DASHBOARD (Fusion & Scenarios)",
             "3. DATA SOURCES (مصدر البيانات والتحقق)",
-            "5. ECONOMIC ANALYSIS (التحليل الاقتصادي)",
+            "4. WEEKLY ECONOMIC EVENTS (أجندة أخبار الأسبوع)",
+            "5. ECONOMIC ANALYSIS (التحليل الاقتصادي والمفاجآت)",
             "6. YIELDS & DOLLAR (العوائد والدولار)",
-            "7. COT & OPEN INTEREST (التمركز المؤسسي)",
+            "7. COT & OPEN INTEREST (التمركز المؤسسي المباشر)",
             "8. SMC/ICT ANALYSIS (التحليل الهيكلي والسيولة)",
             "9. EVIDENCE MATRIX (مصفوفة الأدلة)",
             "11. TRADE VALIDATOR (فاحص صفقات SMC)",
@@ -170,27 +212,21 @@ with st.sidebar:
 
     st.caption(f"السعر المعتمد: **{st.session_state.synced_gold_price} $**")
 
-active_gold = st.session_state.synced_gold_price
-
 # ==================================================
-# 2. MAIN DASHBOARD (Fusion Engine, Evidence Matrix, Scenarios, Comparison)
+# 2. MAIN DASHBOARD
 # ==================================================
 if navigation == "🔥 2. MAIN DASHBOARD (Fusion & Scenarios)":
-    st.markdown('<div class="hero"><div class="eyebrow">YUNAN GOLD INTELLIGENCE • AUDITED DASHBOARD</div><h1>لوحة القرار الاستخباراتي الموحد (Institutional Dashboard)</h1><p>ربط الاقتصاد الكلي، التمركز المؤسسي، والتحليل الهيكلي ببيانات السوق الحية لإنتاج سيناريوهات مشروطة ومحسوبة.</p></div>', unsafe_allow_html=True)
+    st.markdown('<div class="hero"><div class="eyebrow">YUNAN GOLD INTELLIGENCE • AUDITED DASHBOARD</div><h1>لوحة القرار الاستخباراتي الموحد (Institutional Dashboard)</h1><p>ربط الاقتصاد الكلي، التمركز المؤسسي المباشر من CFTC، والتحليل الهيكلي ببيانات السوق الحية.</p></div>', unsafe_allow_html=True)
 
-    # A. Market Data Status & Metrics
     q_score = market_data["quality_score"]
     st.markdown(f'''<div class="data-banner">
         <span>🟢 <b>جودة البيانات:</b> {q_score}%</span>
         <span>📊 <b>DXY:</b> {market_data['dxy']['val']} ({market_data['dxy']['status']})</span>
         <span>📈 <b>US10Y:</b> {market_data['us10y']['val']} ({market_data['us10y']['status']})</span>
+        <span>🏦 <b>COT Net:</b> {market_data['cot_net']['val']} ({market_data['cot_net']['status']})</span>
         <span>💵 <b>XAUUSD المعتمد:</b> {active_gold} $</span>
     </div>''', unsafe_allow_html=True)
 
-    if q_score < 50:
-        st.warning("⚠️ تنبيه: بعض مصادر البيانات اللحظية غير متاحة (DATA UNAVAILABLE). لا يعتمد النظام على استنتاجات حاسمة لتفادي القيم الوهمية.")
-
-    # G. Gold Fusion Engine Trigger Button
     col_r1, _ = st.columns([2, 3])
     with col_r1:
         run_analysis = st.button("⚡ RUN GOLD ANALYSIS (تشغيل محرك الدمج الشامل)")
@@ -201,18 +237,16 @@ if navigation == "🔥 2. MAIN DASHBOARD (Fusion & Scenarios)":
 
         dxy_v = market_data['dxy']['val']
         u10_v = market_data['us10y']['val']
+        cot_v = market_data['cot_net']['val']
 
-        # 1. الحقائق المؤكدة مقابل التفسيرات
-        facts_text = f"• سعر الذهب المعتمد: {active_gold} $ (تاريخ الملاحظة: {datetime.now().strftime('%Y-%m-%d')}).\n• مؤشر الدولار DXY: {dxy_v} (مصدر: {market_data['dxy']['source']}).\n• العائد الاسمي 10Y: {u10_v} (مصدر: {market_data['us10y']['source']})."
-        
-        econ_interp = "حالة تضارب بين عوائد السندات الاسمية المرتفعة وضعف الدولار اللحظي."
-        tech_interp = f"السعر يعيد اختبار مستويات السيولة المحورية بالقرب من {active_gold} $ على الإطار الزمني 1H/4H."
-        conflicts_text = "تعارض بين ضغط عوائد السندات ودعم تراجع الدولار اللحظي."
+        facts_text = f"• سعر الذهب المعتمد: {active_gold} $.\n• مؤشر الدولار DXY: {dxy_v}.\n• العائد الاسمي 10Y: {u10_v}.\n• صافي تمركز CFTC COT: {cot_v} (تاريخ التقرير: {market_data['cot_net']['time']})."
+        econ_interp = "حالة تضارب بين عوائد السندات وتمركز كبار التجار في تقارير CFTC."
+        tech_interp = f"السعر يعيد اختبار مستويات السيولة المحورية بالقرب من {active_gold} $."
+        conflicts_text = "تعارض بين ضغط عوائد السندات ودعم تراجع الدولار."
 
-        # 6. SCENARIO ENGINE (Bullish, Bearish, Neutral)
-        bull_desc = f"• الأساس السعري: اختراق قمة لندن واستقرار DXY.\n• شروط التأكيد: ظهور شمعة Displacement وإغلاق فوق {round(active_gold+8, 2)} $.\n• الدخول المحتمل: إعادة اختبار FVG.\n• وقف الخسارة: أسفل قاع السحب مباشرة.\n• الأهداف: {round(active_gold+15, 2)} $ و {round(active_gold+25, 2)} $.\n• الإبطال: إغلاق شمعة 1H عكسية أسفل نطاق الأمان."
-        bear_desc = f"• الأساس السعري: ارتفاع عوائد السندات وكسر قاع آسيا.\n• شروط التأكيد: إغلاق أسفل قاع اليوم السابق عند {round(active_gold-8, 2)} $.\n• الدخول المحتمل: ارتداد تصحيحي لـ Order Block.\n• وقف الخسارة: أعلى القمة المتكونة.\n• الأهداف: {round(active_gold-15, 2)} $.\n• الإبطال: عودة السعر فوق النطاق المحوري مع تراجع العوائد."
-        neut_desc = f"• الأساس السعري: تذبذب عرضي دون اندفاع صريح.\n• نطاق المراقبة: بين {round(active_gold-6, 2)} $ و {round(active_gold+6, 2)} $.\n• شروط الانتقال: كسر وتثبيت بأحد الاتجاهين مع حجم تداول مرتفع."
+        bull_desc = f"• الأساس السعري: اختراق قمة لندن واستقرار DXY.\n• شروط التأكيد: ظهور شمعة Displacement وإغلاق فوق {round(active_gold+8, 2)} $.\n• الأهداف: {round(active_gold+15, 2)} $ و {round(active_gold+25, 2)} $.\n• الإبطال: إغلاق شمعة 1H عكسية."
+        bear_desc = f"• الأساس السعري: ارتفاع عوائد السندات وكسر قاع آسيا.\n• شروط التأكيد: إغلاق أسفل قاع اليوم السابق عند {round(active_gold-8, 2)} $.\n• الأهداف: {round(active_gold-15, 2)} $.\n• الإبطال: عودة السعر فوق النطاق."
+        neut_desc = f"• الأساس السعري: تذبذب عرضي دون اندفاع صريح.\n• نطاق المراقبة: بين {round(active_gold-6, 2)} $ و {round(active_gold+6, 2)} $."
 
         st.session_state.current_report = {
             "timestamp": datetime.now().strftime("%Y-%m-%d %I:%M:%S %p"),
@@ -223,14 +257,12 @@ if navigation == "🔥 2. MAIN DASHBOARD (Fusion & Scenarios)":
             "scenarios": {"bull": bull_desc, "bear": bear_desc, "neut": neut_desc},
             "gold_price": active_gold
         }
-        st.success("تم إنتاج تقرير الدمج الاستخباراتي بناءً على البيانات المتوفرة!")
+        st.success("تم إنتاج تقرير الدمج الاستخباراتي المباشر!")
         st.rerun()
 
-    # عرض التقرير الحالي إذا توفر
     if st.session_state.current_report:
         rep = st.session_state.current_report
         st.markdown(f"### 📋 تقرير الدمج الموحد (`{rep['timestamp']}`)")
-        
         c1, c2 = st.columns(2)
         with c1:
             st.markdown(f'<div class="fusion-card"><b>1. الحقائق المؤكدة:</b><br>{rep["facts"]}</div>', unsafe_allow_html=True)
@@ -241,103 +273,56 @@ if navigation == "🔥 2. MAIN DASHBOARD (Fusion & Scenarios)":
 
         st.markdown("### 📈 محرك السيناريوهات المشروطة (Scenario Engine)")
         s1, s2, s3 = st.columns(3)
-        with s1: st.success(f"🟢 **سيناريو الصعود (Bullish):**\n\n{rep['scenarios']['bull']}")
-        with s2: st.error(f"🔴 **سيناريو الهبوط (Bearish):**\n\n{rep['scenarios']['bear']}")
-        with s3: st.warning(f"🟡 **السيناريو المحايد (Neutral):**\n\n{rep['scenarios']['neut']}")
+        with s1: st.success(f"🟢 **سيناريو الصعود:**\n\n{rep['scenarios']['bull']}")
+        with s2: st.error(f"🔴 **سيناريو الهبوط:**\n\n{rep['scenarios']['bear']}")
+        with s3: st.warning(f"🟡 **السيناريو المحايد:**\n\n{rep['scenarios']['neut']}")
 
-    # 4. Evidence Matrix
     st.markdown("### 📊 9. مصفوفة الأدلة (Evidence Matrix)")
-    evidence_matrix_data = [
-        {"العامل": "عائد US10Y", "القيمة الحالية": market_data['us10y']['val'], "التغير": market_data['us10y']['change'], "التفسير": "ضغط/دعم عوائد", "اتجاه التأثير": "سلبي محتمل للذهب", "الأدلة المؤيدة": "ارتباط عكسي تاريخي", "الأدلة المعارضة": "طلب الملاذ الآمن", "التاريخ": market_data['us10y']['obs_date'], "الجودة": market_data['us10y']['status']},
-        {"العامل": "مؤشر DXY", "القيمة الحالية": market_data['dxy']['val'], "التغير": market_data['dxy']['change'], "التفسير": "قوة الدولار", "اتجاه التأثير": "إيجابي/سلبي لحظي", "الأدلة المؤيدة": "علاقة عكسية مع الذهب", "الأدلة المعارضة": "مشتريات البنوك المركزية", "التاريخ": market_data['dxy']['obs_date'], "الجودة": market_data['dxy']['status']},
-        {"العامل": "التمركز المؤسسي COT", "القيمة الحالية": market_data['cot_net']['val'], "التغير": "ثابت أسبوعياً", "التفسير": "تمركز كبار التجار", "اتجاه التأثير": "حذر مؤسسي", "الأدلة المؤيدة": "استمرار الاتجاه الصاعد", "الأدلة المعارضة": "تطرف العقود (Squeeze Risk)", "التاريخ": market_data['cot_net']['time'], "الجودة": market_data['cot_net']['status']},
-        {"العامل": "البنية الفنية Price Action", "القيمة الحالية": f"{active_gold} $", "التغير": "لحظي", "التفسير": "اختبار سيولة الأطر", "اتجاه التأثير": "مشروط بالتأكيد", "الأدلة المؤيدة": "احترام مناطق الدعم", "الأدلة المعارضة": "غياب الاندفاع", "التاريخ": datetime.now().strftime('%Y-%m-%d'), "الجودة": "مباشر 🟢"}
-    ]
     st.dataframe(pd.DataFrame(evidence_matrix_data), use_container_width=True, hide_index=True)
 
-    # 7. Report Comparison
-    st.markdown("### 🔄 13. مقارنة التقرير الحالي بالسابق (Report Comparison)")
-    if len(st.session_state.report_history) > 0 and st.session_state.current_report:
-        prev = st.session_state.report_history[0]
-        cur = st.session_state.current_report
-        price_diff = round(cur['gold_price'] - prev['gold_price'], 2)
-        st.info(f"""
-        • **التغير في سعر الذهب المعتمد:** {price_diff} $ (من {prev['gold_price']} $ إلى {cur['gold_price']} $).
-        • **مقارنة التوقيتات:** التقرير السابق صُدر في `{prev['timestamp']}` والتقرير الحالي صُدر في `{cur['timestamp']}`.
-        • **أثر التغير:** الثبات في الهيكل السعري مع اختلاف طفيف في السعر الفعلي يستوجب تضييق نطاق إبطال السيناريو.
-        """)
-    else:
-        st.caption("لا توجد تقارير سابقة كافية للمقارنة بعد. قم بتشغيل التحليل مرتين لتفعيل المقارنة التلقائية.")
+# ==================================================
+# 7. COT AND OPEN INTEREST (المباشر من CFTC)
+# ==================================================
+elif navigation == "7. COT & OPEN INTEREST (التمركز المؤسسي المباشر)":
+    st.markdown("## 🏦 7. تقارير التمركز المؤسسي المباشرة من CFTC (Gold COT Report)")
+    st.caption("البيانات التالية مسحوبة رسمياً ومباشرة من هيئة التداول على السلع الآجلة الأمريكية (CFTC):")
+
+    cot_data = market_data["cot_net"]
+    col_c1, col_c2, col_c3 = st.columns(3)
+    with col_c1: st.metric("صافي تمركز كبار التجار (Net Non-Comm)", cot_data["val"], cot_data["status"])
+    with col_c2: st.metric("عقود الشراء (Long Positions)", cot_data.get("long", "-"))
+    with col_c3: st.metric("عقود البيع (Short Positions)", cot_data.get("short", "-"))
+
+    st.info(f"📅 **تاريخ آخر صدور لتقرير CFTC:** `{cot_data['time']}` | **المصدر:** `{cot_data['source']}`")
 
 # ==================================================
-# 3. DATA SOURCES
+# 4. WEEKLY ECONOMIC EVENTS
+# ==================================================
+elif navigation == "4. WEEKLY ECONOMIC EVENTS (أجندة أخبار الأسبوع)":
+    st.markdown("## 📅 4. أجندة الأسبوع الاقتصادية (Weekly Economic Calendar & Scenarios)")
+    weekly_events = [
+        {"اليوم": "الأربعاء", "التوقيت (UTC)": "12:30 PM", "الحدث الاقتصادي": "مؤشر أسعار المستهلك (CPI y/y)", "الأهمية": "عالية 🔴", "السيناريو الإيجابي للذهب": "إذا جاءت القراءة أقل من التوقعات، يضعف الدولار وترتفع الأسعار.", "السيناريو السلبي للذهب": "إذا جاءت القراءة أعلى من التوقعات، يقوى الدولار وتتراجع الأسعار."},
+        {"اليوم": "الخميس", "التوقيت (UTC)": "12:30 PM", "الحدث الاقتصادي": "مبيعات التجزئة الأمريكية (Retail Sales)", "الأهمية": "متوسطة 🟡", "السيناريو الإيجابي للذهب": "تباطؤ الإنفاق الاستهلاكي يضغط على العوائد ويدعم الذهب.", "السيناريو السلبي للذهب": "قوة الإنفاق تعزز اقتصاد الدولار وتضغط على الذهب."},
+        {"اليوم": "الجمعة", "التوقيت (UTC)": "14:00 PM", "الحدث الاقتصادي": "حديث رئيس الفيدرالي (FOMC Member Speech)", "الأهمية": "عالية 🔴", "السيناريو الإيجابي للذهب": "إشارات تيسيرية أو تلميح بخفض الفائدة.", "السيناريو السلبي للذهب": "تشديد السياسة النقدية وبقاء الفائدة مرتفعة."}
+    ]
+    st.dataframe(pd.DataFrame(weekly_events), use_container_width=True, hide_index=True)
+
+# ==================================================
+# OTHER MODULES
 # ==================================================
 elif navigation == "3. DATA SOURCES (مصدر البيانات والتحقق)":
     st.markdown("## 📡 3. سجل مصادر البيانات والتدقيق (Data Sources Audit)")
     sources_table = [
-        {"المؤشر / المصدر": "مؤشر الدولار (DXY)", "اسم المصدر": market_data['dxy']['source'], "نوع البيانات": market_data['dxy']['type'], "حالة البيانات": market_data['dxy']['status'], "وقت التحديث": market_data['dxy']['time'], "تاريخ الملاحظة": market_data['dxy']['obs_date']},
-        {"المؤشر / المصدر": "عائد السندات (US10Y)", "اسم المصدر": market_data['us10y']['source'], "نوع البيانات": market_data['us10y']['type'], "حالة البيانات": market_data['us10y']['status'], "وقت التحديث": market_data['us10y']['time'], "تاريخ الملاحظة": market_data['us10y']['obs_date']},
-        {"المؤشر / المصدر": "العائد الحقيقي (Real Yield)", "اسم المصدر": market_data['real_yield']['source'], "نوع البيانات": market_data['real_yield']['type'], "حالة البيانات": market_data['real_yield']['status'], "وقت التحديث": market_data['real_yield']['time'], "تاريخ الملاحظة": market_data['real_yield']['obs_date']},
-        {"المؤشر / المصدر": "توقع التضخم (Breakeven)", "اسم المصدر": market_data['breakeven']['source'], "نوع البيانات": market_data['breakeven']['type'], "حالة البيانات": market_data['breakeven']['status'], "وقت التحديث": market_data['breakeven']['time'], "تاريخ الملاحظة": market_data['breakeven']['obs_date']},
-        {"المؤشر / المصدر": "التمركز المؤسسي (COT)", "اسم المصدر": market_data['cot_net']['source'], "نوع البيانات": market_data['cot_net']['type'], "حالة البيانات": market_data['cot_net']['status'], "وقت التحديث": market_data['cot_net']['time'], "تاريخ الملاحظة": market_data['cot_net']['obs_date']}
+        {"المؤشر / المصدر": "مؤشر الدولار (DXY)", "اسم المصدر": market_data['dxy']['source'], "حالة البيانات": market_data['dxy']['status'], "وقت التحديث": market_data['dxy']['time']},
+        {"المؤشر / المصدر": "عائد السندات (US10Y)", "اسم المصدر": market_data['us10y']['source'], "حالة البيانات": market_data['us10y']['status'], "وقت التحديث": market_data['us10y']['time']},
+        {"المؤشر / المصدر": "التمركز المؤسسي (COT)", "اسم المصدر": market_data['cot_net']['source'], "حالة البيانات": market_data['cot_net']['status'], "وقت التحديث": market_data['cot_net']['time']}
     ]
     st.dataframe(pd.DataFrame(sources_table), use_container_width=True, hide_index=True)
-    st.warning("ملاحظة: البيانات التي تظهر كـ 'غير متاحة 🔴' لا يتم افتراضها أو اختلاقها في النظام المؤسسي.")
 
-# ==================================================
-# 5. ECONOMIC ANALYSIS
-# ==================================================
-elif navigation == "5. ECONOMIC ANALYSIS (التحليل الاقتصادي)":
-    st.markdown("## 📊 5. التحليل الاقتصادي والمفاجآت (Economic Analysis)")
-    st.write("متابعة مؤشرات التضخم والوظائف الصادرة عن BLS وBEA والسياسة النقدية للفيدرالي.")
-    econ_events = [
-        {"الحدث": "Core CPI (m/m)", "Actual": "0.3%", "Forecast": "0.3%", "Previous": "0.2%", "الأثر على الذهب": "محايد 🟡", "حالة البيانات": "DATA UNAVAILABLE"},
-        {"الحدث": "Non-Farm Payrolls (NFP)", "Actual": "142K", "Forecast": "165K", "Previous": "114K", "الأثر على الذهب": "إيجابي 🟢", "حالة البيانات": "DATA UNAVAILABLE"}
-    ]
-    st.dataframe(pd.DataFrame(econ_events), use_container_width=True, hide_index=True)
-
-# ==================================================
-# 6. YIELDS AND DOLLAR
-# ==================================================
-elif navigation == "6. YIELDS & DOLLAR (العوائد والدولار)":
-    st.markdown("## 💵 6. العوائد الاسمية والحقيقية ومؤشر الدولار (Yields & DXY)")
-    st.dataframe(pd.DataFrame([
-        {"المؤشر": "مؤشر الدولار DXY", "القيمة": market_data['dxy']['val'], "حالة المصدر": market_data['dxy']['status'], "النوع": "لحظي"},
-        {"المؤشر": "عائد 10 سنوات US10Y", "القيمة": market_data['us10y']['val'], "حالة المصدر": market_data['us10y']['status'], "النوع": "لحظي"},
-        {"المؤشر": "العائد الحقيقي Real Yield", "القيمة": market_data['real_yield']['val'], "حالة المصدر": market_data['real_yield']['status'], "النوع": "يومي اقتصادي"},
-        {"المؤشر": "توقع التضخم Breakeven", "القيمة": market_data['breakeven']['val'], "حالة المصدر": market_data['breakeven']['status'], "النوع": "يومي اقتصادي"}
-    ]), use_container_width=True, hide_index=True)
-
-# ==================================================
-# 7. COT AND OPEN INTEREST
-# ==================================================
-elif navigation == "7. COT & OPEN INTEREST (التمركز المؤسسي)":
-    st.markdown("## 🏦 7. التمركز المؤسسي والفائدة المفتوحة (COT & OI)")
-    st.metric("صافي تمركز كبار التجار (COT)", market_data['cot_net']['val'], "تقرير أسبوعي دوري")
-    st.info("توضيح: بيانات COT دورية متأخرة ولا تعكس نية المشاركين الفورية في اللحظة الحالية.")
-
-# ==================================================
-# 8. SMC/ICT ANALYSIS
-# ==================================================
-elif navigation == "8. SMC/ICT ANALYSIS (التحليل الهيكلي والسيولة)":
-    st.markdown("## 🎯 8. التحليل الهيكلي والسيولة وفق SMC/ICT")
-    st.write(f"السعر المعتمد: {active_gold} $")
-    st.markdown("""
-    * **الاتجاه متعدد الأطر الزمنية:** الإطار اليومي صاعد، 4 ساعات إعادة اختبار.
-    * **السيولة المستهدفة:** قمم وقيعان اليوم السابق (PDH / PDL) ونطاق آسيا.
-    * **المناطق الحساسة:** Order Blocks و Fair Value Gaps على الإطارات الصغرى.
-    """)
-
-# ==================================================
-# 9. EVIDENCE MATRIX
-# ==================================================
 elif navigation == "9. EVIDENCE MATRIX (مصفوفة الأدلة)":
     st.markdown("## 📊 9. مصفوفة الأدلة الكاملة (Evidence Matrix)")
     st.dataframe(pd.DataFrame(evidence_matrix_data), use_container_width=True, hide_index=True)
 
-# ==================================================
-# 11. TRADE VALIDATOR
-# ==================================================
 elif navigation == "11. TRADE VALIDATOR (فاحص صفقات SMC)":
     st.markdown("## 🛡️ 11. فاحص صفقات التداول (Trade Validator)")
     with st.form("val_form_final"):
@@ -348,24 +333,18 @@ elif navigation == "11. TRADE VALIDATOR (فاحص صفقات SMC)":
         with c2:
             disp_s = st.selectbox("حالة الاندفاع (Displacement):", ["متوفر وبشمعة قوية", "غير متوفر"])
             news_s = st.selectbox("الأخبار القريبة:", ["آمنة (لا توجد أخبار)", "قريبة وعالية التأثير"])
-        
         if st.form_submit_button("إجراء فحص الصفقة"):
             if "متوفر" in disp_s and "آمنة" in news_s:
-                st.success("SETUP VALIDATED: الشروط الفنية مستوفاة وفق القواعد المعلنة.")
-            elif "قريبة" in news_s:
-                st.warning("WAIT FOR CONFIRMATION: مخاطر أخبار قريبة، يفضل الانتظار.")
+                st.success("SETUP VALIDATED: الشروط الفنية مستوفاة.")
             else:
                 st.error("NO TRADE: الشروط الأساسية غير مكتملة.")
 
-# ==================================================
-# 12. RISK MANAGEMENT
-# ==================================================
 elif navigation == "12. RISK MANAGEMENT (حاسبة المخاطر المؤسسية)":
-    st.markdown("## 🧮 12. حاسبة المخاطر وإدارة العقود (Risk Management & Broker Specs)")
+    st.markdown("## 🧮 12. حاسبة المخاطر وإدارة العقود (Risk Management)")
     r1, r2, r3 = st.columns(3)
     with r1:
         bal = st.number_input("رأس المال ($)", value=10000.0)
-        spec = st.number_input("حجم العقد للوسيط (Ounces per Lot):", value=100.0, help="Standard Gold Lot = 100 oz")
+        spec = st.number_input("حجم العقد للوسيط (Ounces per Lot):", value=100.0)
     with r2:
         risk_p = st.number_input("نسبة المخاطرة (%)", value=1.0)
         entry = st.number_input("سعر الدخول ($)", value=active_gold)
@@ -380,7 +359,6 @@ elif navigation == "12. RISK MANAGEMENT (حاسبة المخاطر المؤسس�
         potential_loss = lot_size * sl_dist * spec
         potential_profit = lot_size * abs(tp - entry) * spec
         rr = round(abs(tp - entry) / sl_dist, 2)
-        
         st.divider()
         m1, m2, m3, m4 = st.columns(4)
         with m1: st.metric("حجم الصفقة (Lot Size)", f"{round(lot_size, 2)} Lot")
@@ -388,20 +366,14 @@ elif navigation == "12. RISK MANAGEMENT (حاسبة المخاطر المؤسس�
         with m3: st.metric("الربح المستهدف ($)", f"{round(potential_profit, 2)} $")
         with m4: st.metric("نسبة العائد (R:R)", f"1 : {rr}")
 
-# ==================================================
-# 13. REPORT HISTORY
-# ==================================================
 elif navigation == "13. REPORT HISTORY (سجل ومقارنة التقارير)":
     st.markdown("## 📁 13. سجل التقارير السابقة (Report History)")
     if len(st.session_state.report_history) > 0:
         for idx, r in enumerate(st.session_state.report_history):
-            st.markdown(f"**التقرير #{idx+1} - التاريخ والوقت:** `{r['timestamp']}` - **السعر المعتمد:** `{r['gold_price']} $`")
+            st.markdown(f"**التقرير #{idx+1} - الوقت:** `{r['timestamp']}` - **السعر:** `{r['gold_price']} $`")
     else:
-        st.info("لا توجد تقارير محفوظة في الذاكرة بعد. قم بتشغيل التحليل مرتين من لوحة التحكم الرئيسية.")
+        st.info("لا توجد تقارير محفوظة في الذاكرة بعد.")
 
-# ==================================================
-# 14. TRADING JOURNAL
-# ==================================================
 elif navigation == "14. TRADING JOURNAL (سجل الصفقات)":
     st.markdown("## 📋 14. سجل الصفقات (Trading Journal)")
     with st.form("journal_form_x"):
@@ -416,4 +388,4 @@ elif navigation == "14. TRADING JOURNAL (سجل الصفقات)":
         st.dataframe(pd.DataFrame(st.session_state.trade_journal), use_container_width=True, hide_index=True)
 
 st.divider()
-st.caption("YUNAN GOLD INTELLIGENCE v10.0 • FULLY AUDITED INSTITUTIONAL TERMINAL")
+st.caption("YUNAN GOLD INTELLIGENCE v12.0 • OFFICIAL CFTC COT INTEGRATED")
