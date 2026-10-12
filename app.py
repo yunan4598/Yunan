@@ -58,11 +58,7 @@ div[data-testid="stMetric"] [data-testid="stMetricValue"] { color: var(--gold)!i
 .status { display: inline-flex; align-items: center; gap: 7px; color: #c3cedb; font-size: 12px; padding: 7px 10px; border-radius: 8px; background: #0a0f17; border: 1px solid #1c2836; width: 100%; }
 .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); display: inline-block; box-shadow: 0 0 8px var(--green); }
 
-/* تنسيق أزرار التنقل الجانبية الراديو */
-.stRadio > label { color: var(--gold)!important; font-weight: 700; font-size: 13px; margin-bottom: 6px; }
-div[row-widget="stRadio"] label { color: #d0dbe8 !important; font-size: 13.5px; }
-
-.stButton button { border-radius: 10px; border: 1px solid #6b5530; background: linear-gradient(135deg, #d9b56d, #b3914a); color: #06090f; font-weight: 700; }
+.stButton button { border-radius: 10px; border: 1px solid #6b5530; background: linear-gradient(135deg, #d9b56d, #b3914a); color: #06090f; font-weight: 700; width: 100%; }
 .stButton button:hover { background: linear-gradient(135deg, #e6c37d, #c5a159); border-color: var(--gold); }
 footer {visibility: hidden;}
 </style>
@@ -109,27 +105,27 @@ def get_dxy_data():
 
 dxy_val = get_dxy_data()
 
-# --- القائمة الجانبية (Sidebar) المحدثة بالكامل ---
+# --- القائمة الجانبية المرتبة وفق تسلسل اتخاذ القرار المؤسسي ---
 with st.sidebar:
-    st.markdown('<div class="brand"><div class="brand-mark">◆</div><div><div class="brand-title">YUNAN GOLD</div><div class="brand-sub">INTELLIGENCE TERMINAL</div></div></div>', unsafe_allow_html=True)
+    st.markdown('<div class="brand"><div class="brand-mark">◆</div><div><div class="brand-title">YUNAN GOLD</div><div class="brand-sub">DECISION TERMINAL</div></div></div>', unsafe_allow_html=True)
     
-    st.markdown("### 🗂️ أقسام المنصة")
+    st.markdown("### 🗂️ تسلسل اتخاذ القرار")
     navigation = st.radio(
         "اختر القسم المطلوب:",
         [
-            "التقويم والارتباط",
-            "التمركز المؤسسي",
-            "محرك التحليل والمخاطر",
-            "جلسات التداول",
-            "سجل الفرص والمحاسبة"
+            "1. 🌐 التحليل الكلي والسيولة (Macro)",
+            "2. ⏰ الجلسات ومناطق السيولة (Killzones)",
+            "3. 📊 محرك التحليل والسيناريوهات (Analysis)",
+            "4. 🧮 إدارة المخاطر وحاسبة اللوت (Risk)",
+            "5. 📋 سجل الفرص والتوافق (Journal)"
         ],
         label_visibility="collapsed"
     )
 
     st.divider()
-    st.markdown("### ⚙️ مطابقة سعر الشارت")
-    manual_chart_price = st.text_input("سعر الذهب الفعلي من شارتك", value=str(st.session_state.synced_gold_price))
-    if st.button("تحديث فوري للسعر", use_container_width=True):
+    st.markdown("### ⚙️ مطابقة سعر الشارت الحية")
+    manual_chart_price = st.text_input("السعر الفعلي من شارتك", value=str(st.session_state.synced_gold_price))
+    if st.button("تحديث فوري للسعر"):
         try:
             st.session_state.synced_gold_price = float(manual_chart_price)
             st.success("تمت مطابقة السعر بنجاح!")
@@ -141,7 +137,7 @@ with st.sidebar:
     
     st.divider()
     timezone_name = st.selectbox("المنطقة الزمنية", ["America/Caracas", "America/New_York", "UTC"], index=0)
-    if st.button("تسجيل الخروج", use_container_width=True):
+    if st.button("تسجيل الخروج"):
         st.session_state.authenticated = False
         st.rerun()
 
@@ -149,42 +145,57 @@ tz = pytz.timezone(timezone_name)
 now = datetime.now(tz)
 active_gold = st.session_state.synced_gold_price
 
-st.markdown(f'''<div class="hero"><div class="eyebrow">INSTITUTIONAL GRADE • XAUUSD INTELLIGENCE</div><h1>مركز استخبارات الذهب المتقدم</h1><p>لوحة تحليل قرار تكتيكية متوافقة تماماً مع شارتك الحية ومنهجية الأموال الذكية (SMC).</p></div>''', unsafe_allow_html=True)
+st.markdown(f'''<div class="hero"><div class="eyebrow">INSTITUTIONAL GRADE • XAUUSD INTELLIGENCE</div><h1>مركز استخبارات الذهب المتقدم</h1><p>لوحة قرار تكتيكية مصممة لفلترة السيولة وتطبيق منهجية الأموال الذكية بدقة مطابقة لشارتك الحية.</p></div>''', unsafe_allow_html=True)
 st.markdown(f'<div class="section-head"><h3>نظرة عامة للسوق المباشر</h3><span>وقت اللوحة: {now.strftime("%Y-%m-%d • %I:%M %p")}</span></div>', unsafe_allow_html=True)
 
 m1, m2, m3, m4 = st.columns(4)
-with m1: st.metric("سعر الشارت المُعتمد", f'{active_gold} $', "متطابق مع منصتك")
+with m1: st.metric("سعر الشارت المُعتمد", f'{active_gold} $', "مطابق لمنصتك")
 with m2: st.metric("مؤشر الدولار DXY", f'{dxy_val}', "حي 🟢")
 with m3: st.metric("العائد الحقيقي (10Y)", "1.82%", "-0.03%")
 with m4: st.metric("درجة التوافق المؤسسي", "92% 🟢", "ممتاز")
 
 st.divider()
 
-# --- عرض محتوى القسم المختار من القائمة الجانبية ---
-if navigation == "التقويم والارتباط":
-    st.markdown("### 📅 التقويم والارتباط الاقتصادي")
+# --- محتوى الأقسام بحسب التسلسل الهرمي الجديد ---
+if "1. 🌐" in navigation:
+    st.markdown("### 🌐 التحليل الكلي والارتباط (Macro & Liquidity)")
     st.write(f"السعر الفعلي الحالي المعتمد في اللوحة: **{active_gold} $** (مطابق تماماً لما تراه على شارتك).")
-    st.info("مؤشر الارتباط العكسي بين الذهب ومؤشر الدولار DXY يعمل بكفاءة تامة لتحديد مصائد السيولة.")
-
-elif navigation == "التمركز المؤسسي":
-    st.markdown("### 🏛️ التمركز المؤسسي (CFTC COT)")
+    st.info("مؤشر الارتباط العكسي بين الذهب ومؤشر الدولار DXY يعمل بكفاءة تامة لتحديد مصائد السيولة واتجاه الأموال الذكية.")
+    
+    st.markdown("#### التمركز المؤسسي (CFTC COT Report)")
     cot_df = pd.DataFrame([
         {"الفئة المؤسسية": "Non-Commercials (الأموال الذكية)", "عقود الشراء": 285400, "عقود البيع": 62100, "صافي المراكز": "+223,300 🟢"},
         {"الفئة المؤسسية": "Commercials (المؤسسات المالية)", "عقود الشراء": 95200, "عقود البيع": 334500, "صافي المراكز": "-239,300 🔴"}
     ])
     st.dataframe(cot_df, use_container_width=True, hide_index=True)
 
-elif navigation == "محرك التحليل والمخاطر":
-    st.markdown("### 📊 محرك التحليل والسيناريوهات")
-    st.info(f"السعر الحالي عند {active_gold} يختبر مناطق سيولة هامة ومناطق استهداف القيعان وفق هيكل السوق (Market Structure).")
-
-elif navigation == "جلسات التداول":
-    st.markdown("### ⏰ جلسات التداول والسيولة")
+elif "2. ⏰" in navigation:
+    st.markdown("### ⏰ الجلسات ومناطق السيولة اليومية (Killzones)")
     st.write(f"المنطقة الزمنية الحالية المعتمدة: **{timezone_name}**")
-    st.success("تتم مراقبة أوقاتKillzones (ساعات سيولة لندن ونيويورك) بدقة تامة بناءً على توقيتك المحلي.")
+    st.success("تتم مراقبة أوقات Killzones (ساعات سيولة لندن ونيويورك) بدقة تامة بناءً على توقيتك المحلي.")
+    
+    col_s1, col_s2 = st.columns(2)
+    with col_s1:
+        st.markdown("#### مستويات السيولة المستهدفة")
+        st.markdown("- **Asia High / Low:** مستويات السيولة الاسيوية المرصودة.\n- **Previous Day High/Low:** قمم وقيعان اليوم السابق كمحطات رئيسية لسحب السيولة.")
+    with col_s2:
+        st.markdown("#### حالة التوقيت الحالي")
+        st.info("النظام جاهز لرصد تفاعل السعر عند إعادة اختبار مناطق الـ Order Blocks مع افتتاح جلسة نيويورك.")
 
-elif navigation == "سجل الفرص والمحاسبة":
-    st.markdown("### 🧮 حاسبة حجم العقود وسجل الفرص الفوري")
+elif "3. 📊" in navigation:
+    st.markdown("### 📊 محرك التحليل والسيناريوهات (Analysis Engine)")
+    st.info(f"السعر الحالي عند {active_gold} يختبر مناطق سيولة هامة ومناطق استهداف القيعان وفق هيكل السوق (Market Structure).")
+    
+    col_sc1, col_sc2 = st.columns(2)
+    with col_sc1:
+        st.markdown("#### 🟢 السيناريو الأساسي (الصاعد)")
+        st.write("الارتكاز فوق الدعم الحالي واستهداف مناطق السيولة العلوية بشرط ثبات الزخم وعدم كسر الهيكل الداخلي.")
+    with col_sc2:
+        st.markdown("#### 🔴 السيناريو البديل / الإبطال")
+        st.write("استمرار كسر الهيكل بشمعة تأكيد قوية يلغي التحليل الصاعد ويحول التركيز نحو إعادة الاختبار البيعي.")
+
+elif "4. 🧮" in navigation:
+    st.markdown("### 🧮 إدارة المخاطر وحاسبة حجم العقود (Risk & Position Calculator)")
     col_r1, col_r2, col_r3 = st.columns(3)
     with col_r1: balance = st.number_input("رأس المال ($)", value=10000)
     with col_r2: risk_pct = st.number_input("نسبة المخاطرة (%)", value=1.0)
@@ -194,8 +205,8 @@ elif navigation == "سجل الفرص والمحاسبة":
     lot_size = round(risk_amount / (sl_pips * 10), 2) if sl_pips > 0 else 0.0
     st.success(f"💡 **حجم اللوت المناسب:** `{lot_size} Lot` | **مبلغ المخاطرة المرصود:** `{risk_amount} $`")
 
-    st.divider()
-    st.markdown("#### 📋 سجل الفرص وتوثيق الصفقات")
+elif "5. 📋" in navigation:
+    st.markdown("### 📋 سجل الفرص ومؤشر التوافق المؤسسي (Trade Journal)")
     with st.form("manual_entry_form"):
         sig = st.selectbox("نوع الإشارة", ["Sweep Asia Lows", "BOS Bullish", "Order Block Retest"])
         price_val = st.text_input("السعر عند الإشارة", value=str(active_gold))
@@ -213,4 +224,4 @@ elif navigation == "سجل الفرص والمحاسبة":
         st.dataframe(pd.DataFrame(st.session_state.webhook_logs), use_container_width=True, hide_index=True)
 
 st.divider()
-st.caption("YUNAN GOLD INTELLIGENCE v2.4 • INSTITUTIONAL SIDEBAR NAVIGATION & DARK/GOLD/GREEN THEME")
+st.caption("YUNAN GOLD INTELLIGENCE v2.5 • TOP-DOWN INSTITUTIONAL DECISION TERMINAL")
