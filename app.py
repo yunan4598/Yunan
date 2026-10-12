@@ -1,84 +1,165 @@
 import os
 from datetime import datetime
-import pytz
 import pandas as pd
 import streamlit as st
 import yfinance as yf
 
 # ==================================================
-# 1. INITIALIZATION & RESPONSIVE DESIGN (RTL & Navy/Gold)
+# 1. INITIALIZATION & HIGH-CONTRAST DESIGN
 # ==================================================
-APP_NAME = "YUNAN GOLD INTELLIGENCE"
+APP_NAME = "Aho𓂀 GOLD INTELLIGENCE"
 st.set_page_config(page_title=APP_NAME, page_icon="◆", layout="wide", initial_sidebar_state="expanded")
 
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap');
-:root { 
-    --bg: #06090f; 
-    --panel: #0d131d; 
-    --line: #1e2c3d; 
-    --gold: #d9b56d; 
-    --green: #00e676; 
-    --red: #ff5252;
-    --yellow: #ffeb3b;
-    --muted: #8b9bb4; 
-    --text: #eef2f7; 
-}
-html, body, [class*="css"] { font-family:'IBM Plex Sans Arabic','Inter',sans-serif; direction: rtl; text-align: right; }
-.stApp { background: radial-gradient(circle at 50% 0%, #111b29 0%, var(--bg) 60%); color: var(--text); }
-.block-container { padding-top: 2rem !important; padding-bottom: 2rem !important; max-width: 1450px; }
 
-@media (max-width: 768px) {
-    .block-container { padding-left: 0.8rem !important; padding-right: 0.8rem !important; padding-top: 1rem !important; }
-    .hero { padding: 15px !important; }
-    .hero h1 { font-size: 18px !important; }
+html, body, [data-testid="stAppViewContainer"], .stApp { 
+    background-color: #0b0f19 !important; 
+    color: #ffffff !important; 
+    font-family: 'IBM Plex Sans Arabic', 'Inter', sans-serif !important; 
+    direction: rtl; 
+    text-align: right; 
 }
 
-[data-testid="stSidebar"] { background: #070b12; border-left: 1px solid var(--line); padding-top: 15px; }
-[data-testid="stSidebar"] * { color: var(--text); text-align: right; }
+.block-container { 
+    padding-top: 1.5rem !important; 
+    padding-bottom: 2rem !important; 
+    max-width: 1450px; 
+}
 
-.brand { display: flex; align-items: center; gap: 12px; padding: 4px 0 16px; border-bottom: 1px solid var(--line); margin-bottom: 15px; }
-.brand-mark { width: 42px; height: 42px; border: 1px solid #7a643b; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--gold); font-size: 21px; background: linear-gradient(145deg, #221c13, #0d121a); }
-.brand-title { font-family: Inter, sans-serif; letter-spacing: 1.2px; font-weight: 800; font-size: 16px; color: #f4f0e7; }
-.brand-sub { color: var(--muted); font-size: 11px; margin-top: 2px; }
+[data-testid="stSidebar"] { 
+    background-color: #080c14 !important; 
+    border-left: 1px solid #2a3a4e !important; 
+}
 
-.hero { border: 1px solid #233142; border-radius: 16px; padding: 20px 24px; background: linear-gradient(135deg, rgba(17,25,38,0.95), rgba(8,12,18,0.95)); margin-bottom: 18px; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
-.eyebrow { color: var(--gold); letter-spacing: 2px; font-size: 11px; font-weight: 700; font-family: Inter, sans-serif; }
-.hero h1 { margin: 6px 0 6px; font-size: 22px; color: #f7f5ef; font-weight: 700; }
-.hero p { margin: 0; color: #9fb0c6; max-width: 820px; line-height: 1.6; font-size: 13px; }
+[data-testid="stSidebar"] * { 
+    color: #ffffff !important; 
+    text-align: right; 
+}
 
-.data-banner { background: #0b111a; border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; margin-bottom: 15px; font-size: 12.5px; color: var(--muted); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
-.fusion-card { background: #0b111a; border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+.brand { 
+    display: flex; 
+    align-items: center; 
+    gap: 12px; 
+    padding: 8px 0 16px; 
+    border-bottom: 1px solid #2a3a4e; 
+    margin-bottom: 15px; 
+}
 
-.stButton button { border-radius: 10px; border: 1px solid #d9b56d !important; background: linear-gradient(135deg, #d9b56d, #b3914a) !important; color: #06090f !important; font-weight: 800 !important; width: 100%; padding: 10px; }
-.stButton button:hover { background: linear-gradient(135deg, #e6c37d, #c5a159) !important; color: #000000 !important; }
+.brand-mark { 
+    width: 44px; 
+    height: 44px; 
+    border: 1px solid #f5c86b; 
+    border-radius: 12px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    color: #f5c86b; 
+    font-size: 22px; 
+    background: #131b26; 
+}
+
+.brand-title { 
+    font-weight: 800; 
+    font-size: 17px; 
+    color: #ffffff !important; 
+}
+
+.brand-sub { 
+    color: #f5c86b !important; 
+    font-size: 11px; 
+}
+
+.fusion-card { 
+    background-color: #131b26 !important; 
+    border: 1px solid #2a3a4e !important; 
+    border-radius: 12px; 
+    padding: 18px; 
+    margin-bottom: 15px; 
+    color: #ffffff !important;
+}
+
+.fusion-card h3 {
+    color: #f5c86b !important;
+    font-size: 18px !important;
+    margin-top: 0 !important;
+}
+
+.fusion-card li, .fusion-card p, .fusion-card div {
+    color: #e2e8f0 !important;
+    font-size: 14px !important;
+    line-height: 1.7 !important;
+}
+
+[data-testid="stMetricValue"] {
+    color: #ffffff !important;
+    font-size: 26px !important;
+    font-weight: 800 !important;
+}
+
+[data-testid="stMetricLabel"] {
+    color: #f5c86b !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+}
+
+.hero { 
+    border: 1px solid #2a3a4e; 
+    border-radius: 16px; 
+    padding: 20px 24px; 
+    background: linear-gradient(135deg, #131b26, #0e141d); 
+    margin-bottom: 18px; 
+}
+
+.eyebrow { 
+    color: #f5c86b; 
+    letter-spacing: 2px; 
+    font-size: 12px; 
+    font-weight: 700; 
+}
+
+.hero h1 { 
+    margin: 6px 0 6px; 
+    font-size: 22px; 
+    color: #ffffff !important; 
+    font-weight: 700; 
+}
+
+.hero p { 
+    margin: 0; 
+    color: #cbd5e1 !important; 
+    line-height: 1.6; 
+    font-size: 13.5px; 
+}
+
+.data-banner { 
+    background-color: #131b26 !important; 
+    border: 1px solid #2a3a4e !important; 
+    border-radius: 10px; 
+    padding: 12px 16px; 
+    margin-bottom: 18px; 
+    font-size: 13px; 
+    color: #ffffff !important; 
+    display: flex; 
+    justify-content: space-between; 
+    flex-wrap: wrap; 
+    gap: 10px; 
+}
+
+.stButton button { 
+    border-radius: 10px; 
+    border: 1px solid #f5c86b !important; 
+    background: linear-gradient(135deg, #f5c86b, #c59b40) !important; 
+    color: #000000 !important; 
+    font-weight: 800 !important; 
+    width: 100%; 
+    padding: 10px; 
+}
+
 footer {visibility: hidden;}
 </style>
 """, unsafe_allow_html=True)
-
-# --- المصادقة والأمان ---
-def get_secret(name):
-    try: return str(st.secrets.get(name, ""))
-    except Exception: return os.getenv(name, "")
-
-APP_USERNAME = get_secret("APP_USERNAME")
-APP_PASSWORD = get_secret("APP_PASSWORD")
-
-if APP_USERNAME and APP_PASSWORD:
-    if "authenticated" not in st.session_state: st.session_state.authenticated = False
-    if not st.session_state.authenticated:
-        st.markdown('<div class="hero"><div class="eyebrow">YUNAN GOLD INTELLIGENCE</div><h1>تسجيل الدخول المؤسسي الآمن</h1></div>', unsafe_allow_html=True)
-        with st.form("login"):
-            u = st.text_input("اسم المستخدم")
-            p = st.text_input("كلمة المرور", type="password")
-            if st.form_submit_button("دخول"):
-                import hmac
-                if hmac.compare_digest(u.encode(), APP_USERNAME.encode()) and hmac.compare_digest(p.encode(), APP_PASSWORD.encode()):
-                    st.session_state.authenticated = True
-                    st.rerun()
-                else: st.error("بيانات الدخول غير صحيحة.")
-        st.stop()
 
 # --- إدارة الذاكرة والجلسات ---
 if "synced_gold_price" not in st.session_state: st.session_state.synced_gold_price = 4186.67
@@ -147,7 +228,7 @@ evidence_matrix_data = [
 # NAVIGATION (Sidebar)
 # ==================================================
 with st.sidebar:
-    st.markdown('<div class="brand"><div class="brand-mark">◆</div><div><div class="brand-title">YUNAN GOLD</div><div class="brand-sub">INSTITUTIONAL TERMINAL</div></div></div>', unsafe_allow_html=True)
+    st.markdown('<div class="brand"><div class="brand-mark">𓁹</div><div><div class="brand-title">Aho𓂀 GOLD</div><div class="brand-sub">INSTITUTIONAL TERMINAL</div></div></div>', unsafe_allow_html=True)
     
     navigation = st.radio(
         "القائمة الرئيسية",
@@ -175,7 +256,6 @@ with st.sidebar:
         try:
             st.session_state.synced_gold_price = float(manual_p)
             st.success("تم التحديث")
-            st.rerun()
         except ValueError: st.error("رقم غير صحيح")
 
     st.caption(f"السعر المعتمد: **{st.session_state.synced_gold_price} $**")
@@ -184,7 +264,7 @@ with st.sidebar:
 # 2. MAIN DASHBOARD
 # ==================================================
 if navigation == "🔥 2. MAIN DASHBOARD (Fusion & Scenarios)":
-    st.markdown('<div class="hero"><div class="eyebrow">YUNAN GOLD INTELLIGENCE • AUDITED DASHBOARD</div><h1>لوحة القرار الاستخباراتي الموحد (Institutional Dashboard)</h1><p>ربط الاقتصاد الكلي، التمركز المؤسسي المعتمد من CFTC، والتحليل الهيكلي ببيانات السوق الحية.</p></div>', unsafe_allow_html=True)
+    st.markdown('<div class="hero"><div class="eyebrow">Aho𓂀 GOLD INTELLIGENCE • AUDITED DASHBOARD</div><h1>لوحة القرار الاستخباراتي الموحد (Institutional Dashboard)</h1><p>ربط الاقتصاد الكلي، التمركز المؤسسي المعتمد من CFTC، والتحليل الهيكلي ببيانات السوق الحية.</p></div>', unsafe_allow_html=True)
 
     q_score = market_data["quality_score"]
     st.markdown(f'''<div class="data-banner">
@@ -226,7 +306,6 @@ if navigation == "🔥 2. MAIN DASHBOARD (Fusion & Scenarios)":
             "gold_price": active_gold
         }
         st.success("تم إنتاج تقرير الدمج الاستخباراتي المباشر!")
-        st.rerun()
 
     if st.session_state.current_report:
         rep = st.session_state.current_report
@@ -249,7 +328,27 @@ if navigation == "🔥 2. MAIN DASHBOARD (Fusion & Scenarios)":
     st.dataframe(pd.DataFrame(evidence_matrix_data), use_container_width=True, hide_index=True)
 
 # ==================================================
-# 8. SMC/ICT ANALYSIS (التحليل الهيكلي والسيولة)
+# 7. COT AND OPEN INTEREST
+# ==================================================
+elif navigation == "7. COT & OPEN INTEREST (التمركز المؤسسي الرسمي)":
+    st.markdown("## 🏦 7. تقارير التمركز المؤسسي لـ CFTC (Gold COT Report)")
+    st.caption("البيانات التالية مسحوبة ومعتمدة من هيئة التداول على السلع الآجلة الأمريكية (CFTC):")
+
+    cot_data = market_data["cot_net"]
+    col_c1, col_c2, col_c3 = st.columns(3)
+    with col_c1: st.metric("صافي تمركز كبار التجار (Net Non-Comm)", cot_data["val"], cot_data["status"])
+    with col_c2: st.metric("عقود الشراء (Long Positions)", cot_data.get("long", "-"))
+    with col_c3: st.metric("عقود البيع (Short Positions)", cot_data.get("short", "-"))
+
+    st.markdown(f"""
+    <div class="fusion-card">
+        📅 <b>تاريخ آخر صدور لتقرير CFTC:</b> {cot_data['time']}<br>
+        🏛️ <b>المصدر الرسمي:</b> {cot_data['source']}
+    </div>
+    """, unsafe_allow_html=True)
+
+# ==================================================
+# 8. SMC/ICT ANALYSIS
 # ==================================================
 elif navigation == "8. SMC/ICT ANALYSIS (التحليل الهيكلي والسيولة)":
     st.markdown("## 🎯 8. التحليل الهيكلي والسيولة وفق SMC/ICT (Structure & Liquidity Engine)")
@@ -303,7 +402,7 @@ elif navigation == "8. SMC/ICT ANALYSIS (التحليل الهيكلي والس�
         """, unsafe_allow_html=True)
 
 # ==================================================
-# 5. ECONOMIC ANALYSIS (حاسبة مفاجآت الأخبار)
+# 5. ECONOMIC ANALYSIS
 # ==================================================
 elif navigation == "5. ECONOMIC ANALYSIS (محلل مفاجآت الأخبار)":
     st.markdown("## 📊 5. محرك تحليل المفاجآت الاقتصادية (Economic Surprise Engine)")
@@ -329,7 +428,7 @@ elif navigation == "5. ECONOMIC ANALYSIS (محلل مفاجآت الأخبار)"
                 st.warning("🟡 **النتيجة مطابقة للتوقعات بالضبط:** تأثير محايد مع تذبذب اعتيادي في النطاق.")
 
 # ==================================================
-# 6. YIELDS & DOLLAR (العوائد والدولار)
+# 6. YIELDS & DOLLAR
 # ==================================================
 elif navigation == "6. YIELDS & DOLLAR (تحليل العوائد والدولار)":
     st.markdown("## 💵 6. شاشة تحليل الارتباط (Yields & DXY Intermarket Analysis)")
@@ -344,26 +443,11 @@ elif navigation == "6. YIELDS & DOLLAR (تحليل العوائد والدولا
     <div class="fusion-card">
     <h3>🔍 تقييم الارتباط والضغط المؤسسي الحالي:</h3>
     <ul>
-        <li><b>العلاقة العكسية مع الذهب:</b> ارتفاع العوائد الحقيقية (Real Yields) يعتبر العدو الأول للذهب؛ لأنه يرفع تكلفة الفرصة البديلة للاحتفاظ بالسبائك التي لا تدفع فائذة.</li>
+        <li><b>العلاقة العكسية مع الذهب:</b> ارتفاع العوائد الحقيقية (Real Yields) يعتبر العدو الأول للذهب؛ لأنه يرفع تكلفة الفرصة البديلة للاحتفاظ بالسبائك التي لا تدفع فائدة.</li>
         <li><b>حالة السوق الحالية:</b> تراجع مؤشر DXY مع استقرار العوائد يمنح الذهب مساحة حرّة للتذبذب الصاعد.</li>
     </ul>
     </div>
     """, unsafe_allow_html=True)
-
-# ==================================================
-# 7. COT AND OPEN INTEREST
-# ==================================================
-elif navigation == "7. COT & OPEN INTEREST (التمركز المؤسسي الرسمي)":
-    st.markdown("## 🏦 7. تقارير التمركز المؤسسي لـ CFTC (Gold COT Report)")
-    st.caption("البيانات التالية مسحوبة ومعتمدة من هيئة التداول على السلع الآجلة الأمريكية (CFTC):")
-
-    cot_data = market_data["cot_net"]
-    col_c1, col_c2, col_c3 = st.columns(3)
-    with col_c1: st.metric("صافي تمركز كبار التجار (Net Non-Comm)", cot_data["val"], cot_data["status"])
-    with col_c2: st.metric("عقود الشراء (Long Positions)", cot_data.get("long", "-"))
-    with col_c3: st.metric("عقود البيع (Short Positions)", cot_data.get("short", "-"))
-
-    st.info(f"📅 **تاريخ آخر صدور لتقرير CFTC:** `{cot_data['time']}` | **المصدر:** `{cot_data['source']}`")
 
 # ==================================================
 # 4. WEEKLY ECONOMIC EVENTS
@@ -458,4 +542,4 @@ elif navigation == "14. TRADING JOURNAL (سجل الصفقات)":
         st.dataframe(pd.DataFrame(st.session_state.trade_journal), use_container_width=True, hide_index=True)
 
 st.divider()
-st.caption("YUNAN GOLD INTELLIGENCE v16.0 • FULLY INTEGRATED & OPERATIONAL")
+st.caption("Aho𓂀 GOLD INTELLIGENCE v21.0 • STABLE SESSION")
