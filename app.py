@@ -28,46 +28,32 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# ================================================================
-# SESSION — THEME INIT (before CSS)
-# ================================================================
 if "theme" not in st.session_state:
-    st.session_state.theme = "light"   # light | dark
+    st.session_state.theme = "light"
 
 # ================================================================
-# THEME CSS GENERATOR
+# THEME CSS
 # ================================================================
 def build_theme_css(theme: str) -> str:
     if theme == "light":
         p = {
-            "bg_main":       "#f4f1ea",
-            "bg_card":       "#fdfbf6",
-            "bg_soft":       "#ede8dd",
-            "bg_input":      "#fdfbf6",
-            "border":        "#e0d9c8",
-            "border_str":    "#cfc6b0",
-            "emerald_deep":  "#0d4a35",
-            "emerald_mid":   "#1a6b4a",
-            "emerald_light": "#2d8b62",
-            "emerald_soft":  "#e6f2eb",
-            "gold":          "#b8935a",
-            "gold_light":    "#d4af7a",
-            "gold_dim":      "#8a6e40",
-            "gold_soft":     "#f5ecd9",
-            "text":          "#1e2620",
-            "text_soft":     "#4d5548",
-            "text_dim":      "#7a8279",
-            "green":         "#16a34a",
-            "red":           "#dc2626",
-            "amber":         "#d97706",
+            "bg_main":       "#f4f1ea", "bg_card":       "#fdfbf6",
+            "bg_soft":       "#ede8dd", "bg_input":      "#fdfbf6",
+            "border":        "#e0d9c8", "border_str":    "#cfc6b0",
+            "emerald_deep":  "#0d4a35", "emerald_mid":   "#1a6b4a",
+            "emerald_light": "#2d8b62", "emerald_soft":  "#e6f2eb",
+            "gold":          "#b8935a", "gold_light":    "#d4af7a",
+            "gold_dim":      "#8a6e40", "gold_soft":     "#f5ecd9",
+            "text":          "#1e2620", "text_soft":     "#4d5548",
+            "text_dim":      "#7a8279", "green":         "#16a34a",
+            "red":           "#dc2626", "amber":         "#d97706",
             "shadow":        "0 1px 3px rgba(13,74,53,.06), 0 4px 12px rgba(13,74,53,.05)",
             "shadow_hover":  "0 2px 6px rgba(13,74,53,.08), 0 8px 22px rgba(184,147,90,.15)",
             "btn_text":      "#fdfbf6",
             "btn_bg":        "linear-gradient(135deg, #0d4a35, #1a6b4a)",
             "btn_bg_hover":  "linear-gradient(135deg, #1a6b4a, #2d8b62)",
             "sidebar_bg":    "linear-gradient(180deg, #0d4a35 0%, #0a3a29 100%)",
-            "sidebar_text":  "#e8e4dc",
-            "sidebar_muted": "#b8c4bc",
+            "sidebar_text":  "#e8e4dc", "sidebar_muted": "#b8c4bc",
             "sidebar_dim":   "#7a8a7f",
             "hero_bg":       "linear-gradient(135deg, #fdfbf6 0%, #f8f5ed 100%)",
             "ambient":       ("radial-gradient(ellipse at 10% 0%, rgba(13,74,53,0.05) 0%, transparent 50%),"
@@ -82,36 +68,25 @@ def build_theme_css(theme: str) -> str:
             "info_bg":       "linear-gradient(135deg, rgba(13,74,53,0.05), rgba(13,74,53,0.01))",
             "info_text":     "#0d4a35",
         }
-    else:  # dark — deep blue-gray, NOT black
+    else:
         p = {
-            "bg_main":       "#1a1f2e",
-            "bg_card":       "#232937",
-            "bg_soft":       "#2b3140",
-            "bg_input":      "#232937",
-            "border":        "#333b4c",
-            "border_str":    "#414a5c",
-            "emerald_deep":  "#4ade80",
-            "emerald_mid":   "#2ecc71",
-            "emerald_light": "#6ee7a3",
-            "emerald_soft":  "#1e3a2c",
-            "gold":          "#e8c98a",
-            "gold_light":    "#f0d49a",
-            "gold_dim":      "#b39a5f",
-            "gold_soft":     "#2e2a20",
-            "text":          "#ebe9e3",
-            "text_soft":     "#b8c0cc",
-            "text_dim":      "#8896a8",
-            "green":         "#4ade80",
-            "red":           "#f87171",
-            "amber":         "#fbbf24",
+            "bg_main":       "#1a1f2e", "bg_card":       "#232937",
+            "bg_soft":       "#2b3140", "bg_input":      "#232937",
+            "border":        "#333b4c", "border_str":    "#414a5c",
+            "emerald_deep":  "#4ade80", "emerald_mid":   "#2ecc71",
+            "emerald_light": "#6ee7a3", "emerald_soft":  "#1e3a2c",
+            "gold":          "#e8c98a", "gold_light":    "#f0d49a",
+            "gold_dim":      "#b39a5f", "gold_soft":     "#2e2a20",
+            "text":          "#ebe9e3", "text_soft":     "#b8c0cc",
+            "text_dim":      "#8896a8", "green":         "#4ade80",
+            "red":           "#f87171", "amber":         "#fbbf24",
             "shadow":        "0 2px 12px rgba(0,0,0,.25)",
             "shadow_hover":  "0 4px 20px rgba(232,201,138,.15)",
             "btn_text":      "#0d1420",
             "btn_bg":        "linear-gradient(135deg, #e8c98a, #c9a961)",
             "btn_bg_hover":  "linear-gradient(135deg, #f0d49a, #d9b972)",
             "sidebar_bg":    "linear-gradient(180deg, #131824 0%, #0f131e 100%)",
-            "sidebar_text":  "#e8e4dc",
-            "sidebar_muted": "#a8b2c0",
+            "sidebar_text":  "#e8e4dc", "sidebar_muted": "#a8b2c0",
             "sidebar_dim":   "#7a8598",
             "hero_bg":       "linear-gradient(135deg, rgba(35,41,55,0.95), rgba(26,31,46,0.85))",
             "ambient":       ("radial-gradient(ellipse at 10% 0%, rgba(46,204,113,0.05) 0%, transparent 50%),"
@@ -130,410 +105,102 @@ def build_theme_css(theme: str) -> str:
     return f"""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap');
-
 :root {{
-    --bg-main:       {p['bg_main']};
-    --bg-card:       {p['bg_card']};
-    --bg-soft:       {p['bg_soft']};
-    --bg-input:      {p['bg_input']};
-    --border:        {p['border']};
-    --border-str:    {p['border_str']};
-    --emerald-deep:  {p['emerald_deep']};
-    --emerald-mid:   {p['emerald_mid']};
-    --emerald-light: {p['emerald_light']};
-    --emerald-soft:  {p['emerald_soft']};
-    --gold:          {p['gold']};
-    --gold-light:    {p['gold_light']};
-    --gold-dim:      {p['gold_dim']};
-    --gold-soft:     {p['gold_soft']};
-    --text:          {p['text']};
-    --text-soft:     {p['text_soft']};
-    --text-dim:      {p['text_dim']};
-    --green:         {p['green']};
-    --red:           {p['red']};
-    --amber:         {p['amber']};
-    --shadow:        {p['shadow']};
-    --shadow-hover:  {p['shadow_hover']};
-    --btn-text:      {p['btn_text']};
-    --font-base: 'IBM Plex Sans Arabic', 'Inter', sans-serif;
-    --font-num:  'Inter', 'IBM Plex Sans Arabic', sans-serif;
+    --bg-main:{p['bg_main']}; --bg-card:{p['bg_card']};
+    --bg-soft:{p['bg_soft']}; --bg-input:{p['bg_input']};
+    --border:{p['border']}; --border-str:{p['border_str']};
+    --emerald-deep:{p['emerald_deep']}; --emerald-mid:{p['emerald_mid']};
+    --emerald-light:{p['emerald_light']}; --emerald-soft:{p['emerald_soft']};
+    --gold:{p['gold']}; --gold-light:{p['gold_light']};
+    --gold-dim:{p['gold_dim']}; --gold-soft:{p['gold_soft']};
+    --text:{p['text']}; --text-soft:{p['text_soft']}; --text-dim:{p['text_dim']};
+    --green:{p['green']}; --red:{p['red']}; --amber:{p['amber']};
+    --shadow:{p['shadow']}; --shadow-hover:{p['shadow_hover']};
+    --btn-text:{p['btn_text']};
+    --font-base:'IBM Plex Sans Arabic','Inter',sans-serif;
+    --font-num:'Inter','IBM Plex Sans Arabic',sans-serif;
 }}
-
-html, body, [class*="css"] {{
-    font-family: var(--font-base);
-    direction: rtl; text-align: right;
-    color: var(--text);
+html, body, [class*="css"] {{ font-family:var(--font-base); direction:rtl; text-align:right; color:var(--text); }}
+.stApp {{ background:{p['ambient']}; color:var(--text); overflow-x:hidden !important; }}
+.block-container {{ padding-top:1.3rem!important; padding-bottom:2.5rem!important; max-width:1550px; width:100%!important; }}
+[data-testid="stSidebar"] {{ background:{p['sidebar_bg']}; border-left:none!important; padding-top:14px; }}
+[data-testid="stSidebar"] * {{ text-align:right; color:{p['sidebar_text']}; }}
+[data-testid="stSidebar"] .stRadio label {{ color:{p['sidebar_muted']}!important; }}
+[data-testid="stSidebar"] hr {{ border-color:rgba(201,169,110,0.15)!important; }}
+[data-testid="stSidebar"] .stCaption, [data-testid="stSidebar"] [data-testid="stCaptionContainer"] {{ color:{p['sidebar_dim']}!important; }}
+[data-testid="stSidebar"] h1,[data-testid="stSidebar"] h2,[data-testid="stSidebar"] h3,[data-testid="stSidebar"] h4 {{ color:var(--gold-light)!important; }}
+[data-testid="stSidebar"] > div:first-child {{ height:auto!important; min-height:100vh!important; overflow-y:auto!important; }}
+[data-testid="stSidebarNav"] a {{ color:{p['sidebar_muted']}!important; border-radius:8px!important; padding:8px 10px!important; transition:all .15s ease; font-size:13.5px; margin:2px 0; }}
+[data-testid="stSidebarNav"] a:hover {{ background:rgba(201,169,110,0.12)!important; color:var(--gold-light)!important; }}
+[data-testid="stSidebarNav"] a[aria-current="page"] {{ background:linear-gradient(90deg,rgba(201,169,110,0.20),rgba(201,169,110,0.05))!important; color:var(--gold-light)!important; font-weight:700!important; border-right:3px solid var(--gold)!important; }}
+[data-testid="stSidebarNav"] svg {{ color:var(--gold)!important; width:18px!important; height:18px!important; }}
+.brand {{ display:flex; align-items:center; gap:12px; padding:6px 4px 16px; border-bottom:1px solid rgba(201,169,110,0.2); margin-bottom:12px; }}
+.brand-mark {{ width:46px; height:46px; border:1.5px solid var(--gold); border-radius:12px; display:flex; align-items:center; justify-content:center; color:var(--gold); font-size:24px; font-weight:700; background:rgba(201,169,110,0.08); box-shadow:0 0 22px rgba(201,169,110,0.2); font-family:'Segoe UI Historic',sans-serif; }}
+.brand-title {{ font-family:var(--font-num); letter-spacing:1.4px; font-weight:800; font-size:18px; color:var(--gold-light); text-shadow:0 0 20px rgba(201,169,110,0.3); }}
+.brand-sub {{ color:{p['sidebar_dim']}; font-size:10.5px; margin-top:3px; letter-spacing:1.2px; }}
+.hero {{ border:1px solid var(--border); border-radius:16px; padding:22px 26px; background:{p['hero_bg']}; margin-bottom:18px; box-shadow:var(--shadow); border-right:4px solid var(--gold); position:relative; overflow:hidden; }}
+.hero::before {{ content:""; position:absolute; top:-50%; right:-10%; width:200px; height:200px; background:radial-gradient(circle,rgba(46,204,113,0.06),transparent 70%); pointer-events:none; }}
+.eyebrow {{ color:var(--emerald-mid); letter-spacing:1.8px; font-size:11.5px; font-weight:700; font-family:var(--font-num); }}
+.hero h1 {{ margin:8px 0; font-size:26px; color:var(--emerald-deep); font-weight:700; }}
+.hero p {{ margin:0; color:var(--text-soft); line-height:1.75; font-size:13.5px; }}
+[data-testid="stMetric"] {{ background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:15px 17px; box-shadow:var(--shadow); transition:all .2s ease; }}
+[data-testid="stMetric"]:hover {{ border-color:var(--gold); box-shadow:var(--shadow-hover); transform:translateY(-1px); }}
+[data-testid="stMetricLabel"] {{ color:var(--text-soft)!important; font-size:12.5px!important; font-weight:500!important; }}
+[data-testid="stMetricValue"] {{ color:var(--emerald-deep)!important; font-size:24px!important; font-weight:700!important; font-family:var(--font-num); letter-spacing:.3px; white-space:nowrap!important; overflow:visible!important; text-overflow:unset!important; font-variant-numeric:tabular-nums!important; }}
+[data-testid="stMetricValue"] > div, [data-testid="stMetricValue"] > div > div {{ white-space:nowrap!important; overflow:visible!important; }}
+[data-testid="stMetricDelta"] {{ font-size:12px!important; font-weight:600!important; }}
+.fusion-card {{ background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:18px; margin-bottom:12px; box-shadow:var(--shadow); border-top:3px solid var(--gold); }}
+.fusion-card h4 {{ color:var(--emerald-deep); margin:0 0 10px; font-size:14.5px; font-weight:700; }}
+.fusion-card p {{ color:var(--text-soft); font-size:13px; line-height:1.85; }}
+.signal-bull {{ border:1px solid rgba(46,204,113,0.4); background:{p['bull_bg']}; border-radius:12px; padding:16px 18px; margin:10px 0; border-right:5px solid var(--green); }}
+.signal-bear {{ border:1px solid rgba(231,76,60,0.4); background:{p['bear_bg']}; border-radius:12px; padding:16px 18px; margin:10px 0; border-right:5px solid var(--red); }}
+.signal-neutral {{ border:1px solid rgba(243,156,18,0.4); background:{p['neutral_bg']}; border-radius:12px; padding:16px 18px; margin:10px 0; border-right:5px solid var(--amber); }}
+.signal-no-trade {{ border:1px solid var(--border); background:{p['no_trade_bg']}; border-radius:12px; padding:16px 18px; margin:10px 0; border-right:5px solid var(--text-dim); }}
+.signal-bull h3,.signal-bear h3,.signal-neutral h3,.signal-no-trade h3 {{ color:var(--emerald-deep)!important; margin:0 0 6px; font-size:16px; font-weight:700; }}
+.warning-box {{ border:1px solid rgba(243,156,18,0.4); background:{p['warning_bg']}; border-radius:10px; padding:13px 16px; margin:10px 0; color:{p['warning_text']}; font-size:13px; line-height:1.7; border-right:4px solid var(--amber); }}
+.info-box {{ border:1px solid rgba(13,74,53,0.25); background:{p['info_bg']}; border-radius:10px; padding:13px 16px; margin:10px 0; color:{p['info_text']}; font-size:13px; line-height:1.7; border-right:4px solid var(--emerald-mid); }}
+.stButton button {{ border-radius:10px; border:1.5px solid var(--gold)!important; background:{p['btn_bg']}!important; color:{p['btn_text']}!important; font-weight:700!important; width:100%; padding:10px; transition:all .2s ease; box-shadow:0 2px 10px rgba(13,74,53,0.18); }}
+.stButton button:hover {{ background:{p['btn_bg_hover']}!important; box-shadow:0 4px 18px rgba(46,204,113,0.28); transform:translateY(-1px); border-color:var(--gold-light)!important; }}
+.stDownloadButton button {{ border-radius:10px; border:1.5px solid var(--border-str)!important; background:var(--bg-card)!important; color:var(--emerald-deep)!important; font-weight:600!important; }}
+.stDownloadButton button:hover {{ border-color:var(--green)!important; background:var(--emerald-soft)!important; }}
+.stTextInput input,.stNumberInput input,.stSelectbox div[data-baseweb="select"] > div,.stTextArea textarea {{ background:var(--bg-input)!important; border:1px solid var(--border-str)!important; color:var(--text)!important; border-radius:8px!important; }}
+.stTextInput input:focus,.stNumberInput input:focus,.stTextArea textarea:focus {{ border-color:var(--emerald-mid)!important; box-shadow:0 0 0 3px rgba(46,204,113,0.15)!important; }}
+.stRadio > div {{ gap:6px; }}
+.stRadio label {{ padding:8px 12px!important; border-radius:8px; transition:background .15s; color:var(--text-soft); }}
+.stRadio label:hover {{ background:rgba(46,204,113,0.08); }}
+[data-testid="stDataFrame"] {{ border:1px solid var(--border); border-radius:10px; overflow:hidden; background:var(--bg-card); }}
+.streamlit-expanderHeader, details > summary {{ background:var(--bg-card)!important; border-radius:10px!important; color:var(--emerald-deep)!important; font-weight:600!important; border:1px solid var(--border)!important; }}
+h1,h2,h3,h4,h5 {{ color:var(--emerald-deep)!important; }}
+h2 {{ font-size:21px!important; font-weight:700!important; }}
+h3 {{ font-size:17px!important; font-weight:600!important; }}
+.stCaption,[data-testid="stCaptionContainer"] {{ color:var(--text-dim)!important; font-size:11.5px!important; }}
+[data-testid="stMarkdownContainer"] p,[data-testid="stMarkdownContainer"] li {{ color:var(--text-soft); }}
+hr {{ border-color:var(--border)!important; margin:1.2rem 0!important; }}
+.stAlert {{ border-radius:10px!important; border:1px solid var(--border)!important; }}
+.stTabs [data-baseweb="tab-list"] {{ gap:4px; background:transparent; border-bottom:1px solid var(--border); }}
+.stTabs [data-baseweb="tab"] {{ background:transparent!important; color:var(--text-soft)!important; font-weight:500; border-radius:8px 8px 0 0; }}
+.stTabs [aria-selected="true"] {{ color:var(--gold-dim)!important; border-bottom:2px solid var(--gold)!important; }}
+footer {{ visibility:hidden; }}
+@media (max-width:768px) {{
+    .block-container {{ padding-left:.8rem!important; padding-right:.8rem!important; padding-top:1rem!important; max-width:100%!important; }}
+    .hero {{ padding:18px; }}
+    .hero h1 {{ font-size:20px; }}
+    [data-testid="stMetricValue"] {{ font-size:20px!important; }}
+    [data-testid="stMetricLabel"] {{ font-size:11px!important; }}
+    [data-testid="stMetric"] {{ padding:12px 13px; }}
+    .brand-mark {{ width:40px; height:40px; font-size:20px; }}
+    .brand-title {{ font-size:15px; }}
+    [data-testid="stSidebar"] {{ border-left:none!important; box-shadow:none!important; border-right:none!important; }}
+    [data-testid="stSidebar"][aria-expanded="false"] {{ margin-left:calc(-1 * min(21rem,80vw))!important; }}
+    section[data-testid="stSidebar"] > div {{ border:none!important; }}
+    .stApp, section.main, .main {{ overflow-x:hidden!important; }}
 }}
-
-.stApp {{
-    background: {p['ambient']};
-    color: var(--text);
-    overflow-x: hidden !important;
-}}
-
-.block-container {{
-    padding-top: 1.3rem !important;
-    padding-bottom: 2.5rem !important;
-    max-width: 1550px;
-    width: 100% !important;
-}}
-
-/* ============== SIDEBAR ============== */
-[data-testid="stSidebar"] {{
-    background: {p['sidebar_bg']};
-    border-left: none !important;
-    padding-top: 14px;
-}}
-[data-testid="stSidebar"] * {{ text-align: right; color: {p['sidebar_text']}; }}
-[data-testid="stSidebar"] .stRadio label {{ color: {p['sidebar_muted']} !important; }}
-[data-testid="stSidebar"] hr {{ border-color: rgba(201,169,110,0.15) !important; }}
-[data-testid="stSidebar"] .stCaption,
-[data-testid="stSidebar"] [data-testid="stCaptionContainer"] {{
-    color: {p['sidebar_dim']} !important;
-}}
-[data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2,
-[data-testid="stSidebar"] h3, [data-testid="stSidebar"] h4 {{
-    color: var(--gold-light) !important;
-}}
-[data-testid="stSidebar"] > div:first-child {{
-    height: auto !important;
-    min-height: 100vh !important;
-    overflow-y: auto !important;
-}}
-
-/* Navigation links */
-[data-testid="stSidebarNav"] {{ padding: 6px 0; }}
-[data-testid="stSidebarNav"] ul {{ padding: 0; }}
-[data-testid="stSidebarNav"] a {{
-    color: {p['sidebar_muted']} !important;
-    border-radius: 8px !important;
-    padding: 8px 10px !important;
-    transition: all .15s ease;
-    font-size: 13.5px;
-    margin: 2px 0;
-}}
-[data-testid="stSidebarNav"] a:hover {{
-    background: rgba(201,169,110,0.12) !important;
-    color: var(--gold-light) !important;
-}}
-[data-testid="stSidebarNav"] a[aria-current="page"] {{
-    background: linear-gradient(90deg, rgba(201,169,110,0.20), rgba(201,169,110,0.05)) !important;
-    color: var(--gold-light) !important;
-    font-weight: 700 !important;
-    border-right: 3px solid var(--gold) !important;
-}}
-[data-testid="stSidebarNav"] svg {{
-    color: var(--gold) !important;
-    width: 18px !important; height: 18px !important;
-}}
-
-/* ============== BRAND ============== */
-.brand {{
-    display: flex; align-items: center; gap: 12px;
-    padding: 6px 4px 16px;
-    border-bottom: 1px solid rgba(201,169,110,0.2);
-    margin-bottom: 12px;
-}}
-.brand-mark {{
-    width: 46px; height: 46px;
-    border: 1.5px solid var(--gold);
-    border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    color: var(--gold); font-size: 24px; font-weight: 700;
-    background: rgba(201,169,110,0.08);
-    box-shadow: 0 0 22px rgba(201,169,110,0.2);
-    font-family: 'Segoe UI Historic', 'Noto Sans Egyptian Hieroglyphs', Inter, sans-serif;
-}}
-.brand-title {{
-    font-family: var(--font-num); letter-spacing: 1.4px;
-    font-weight: 800; font-size: 18px; color: var(--gold-light);
-    text-shadow: 0 0 20px rgba(201,169,110,0.3);
-}}
-.brand-sub {{
-    color: {p['sidebar_dim']}; font-size: 10.5px;
-    margin-top: 3px; letter-spacing: 1.2px;
-}}
-
-/* ============== HERO ============== */
-.hero {{
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 22px 26px;
-    background: {p['hero_bg']};
-    margin-bottom: 18px;
-    box-shadow: var(--shadow);
-    border-right: 4px solid var(--gold);
-    position: relative;
-    overflow: hidden;
-}}
-.hero::before {{
-    content: "";
-    position: absolute;
-    top: -50%; right: -10%;
-    width: 200px; height: 200px;
-    background: radial-gradient(circle, rgba(46,204,113,0.06), transparent 70%);
-    pointer-events: none;
-}}
-.eyebrow {{
-    color: var(--emerald-mid); letter-spacing: 1.8px;
-    font-size: 11.5px; font-weight: 700;
-    font-family: var(--font-num);
-}}
-.hero h1 {{
-    margin: 8px 0; font-size: 26px;
-    color: var(--emerald-deep); font-weight: 700;
-}}
-.hero p {{
-    margin: 0; color: var(--text-soft);
-    line-height: 1.75; font-size: 13.5px;
-}}
-
-/* ============== METRICS ============== */
-[data-testid="stMetric"] {{
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 15px 17px;
-    box-shadow: var(--shadow);
-    transition: all .2s ease;
-}}
-[data-testid="stMetric"]:hover {{
-    border-color: var(--gold);
-    box-shadow: var(--shadow-hover);
-    transform: translateY(-1px);
-}}
-[data-testid="stMetricLabel"] {{
-    color: var(--text-soft) !important;
-    font-size: 12.5px !important; font-weight: 500 !important;
-}}
-[data-testid="stMetricValue"] {{
-    color: var(--emerald-deep) !important;
-    font-size: 24px !important; font-weight: 700 !important;
-    font-family: var(--font-num);
-    letter-spacing: .3px;
-    white-space: nowrap !important;
-    overflow: visible !important;
-    text-overflow: unset !important;
-    font-variant-numeric: tabular-nums !important;
-}}
-[data-testid="stMetricValue"] > div,
-[data-testid="stMetricValue"] > div > div {{
-    white-space: nowrap !important;
-    overflow: visible !important;
-    text-overflow: clip !important;
-}}
-[data-testid="stMetricDelta"] {{ font-size: 12px !important; font-weight: 600 !important; }}
-
-/* ============== CARDS ============== */
-.fusion-card {{
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 12px; padding: 18px;
-    margin-bottom: 12px;
-    box-shadow: var(--shadow);
-    border-top: 3px solid var(--gold);
-}}
-.fusion-card h4 {{
-    color: var(--emerald-deep);
-    margin: 0 0 10px; font-size: 14.5px; font-weight: 700;
-}}
-.fusion-card p {{
-    color: var(--text-soft); font-size: 13px; line-height: 1.85;
-}}
-
-/* ============== SIGNAL CARDS ============== */
-.signal-bull {{
-    border: 1px solid rgba(46,204,113,0.4);
-    background: {p['bull_bg']};
-    border-radius: 12px; padding: 16px 18px; margin: 10px 0;
-    border-right: 5px solid var(--green);
-}}
-.signal-bear {{
-    border: 1px solid rgba(231,76,60,0.4);
-    background: {p['bear_bg']};
-    border-radius: 12px; padding: 16px 18px; margin: 10px 0;
-    border-right: 5px solid var(--red);
-}}
-.signal-neutral {{
-    border: 1px solid rgba(243,156,18,0.4);
-    background: {p['neutral_bg']};
-    border-radius: 12px; padding: 16px 18px; margin: 10px 0;
-    border-right: 5px solid var(--amber);
-}}
-.signal-no-trade {{
-    border: 1px solid var(--border);
-    background: {p['no_trade_bg']};
-    border-radius: 12px; padding: 16px 18px; margin: 10px 0;
-    border-right: 5px solid var(--text-dim);
-}}
-.signal-bull h3, .signal-bear h3, .signal-neutral h3, .signal-no-trade h3 {{
-    color: var(--emerald-deep) !important;
-    margin: 0 0 6px; font-size: 16px; font-weight: 700;
-}}
-
-/* ============== BOXES ============== */
-.warning-box {{
-    border: 1px solid rgba(243,156,18,0.4);
-    background: {p['warning_bg']};
-    border-radius: 10px; padding: 13px 16px;
-    margin: 10px 0; color: {p['warning_text']};
-    font-size: 13px; line-height: 1.7;
-    border-right: 4px solid var(--amber);
-}}
-.info-box {{
-    border: 1px solid rgba(13,74,53,0.25);
-    background: {p['info_bg']};
-    border-radius: 10px; padding: 13px 16px;
-    margin: 10px 0; color: {p['info_text']};
-    font-size: 13px; line-height: 1.7;
-    border-right: 4px solid var(--emerald-mid);
-}}
-
-/* ============== BUTTONS ============== */
-.stButton button {{
-    border-radius: 10px;
-    border: 1.5px solid var(--gold) !important;
-    background: {p['btn_bg']} !important;
-    color: {p['btn_text']} !important;
-    font-weight: 700 !important;
-    width: 100%; padding: 10px;
-    transition: all .2s ease;
-    box-shadow: 0 2px 10px rgba(13,74,53,0.18);
-}}
-.stButton button:hover {{
-    background: {p['btn_bg_hover']} !important;
-    box-shadow: 0 4px 18px rgba(46,204,113,0.28);
-    transform: translateY(-1px);
-    border-color: var(--gold-light) !important;
-}}
-.stDownloadButton button {{
-    border-radius: 10px;
-    border: 1.5px solid var(--border-str) !important;
-    background: var(--bg-card) !important;
-    color: var(--emerald-deep) !important;
-    font-weight: 600 !important;
-}}
-.stDownloadButton button:hover {{
-    border-color: var(--green) !important;
-    background: var(--emerald-soft) !important;
-}}
-
-/* ============== INPUTS ============== */
-.stTextInput input, .stNumberInput input,
-.stSelectbox div[data-baseweb="select"] > div,
-.stTextArea textarea {{
-    background: var(--bg-input) !important;
-    border: 1px solid var(--border-str) !important;
-    color: var(--text) !important;
-    border-radius: 8px !important;
-}}
-.stTextInput input:focus, .stNumberInput input:focus,
-.stTextArea textarea:focus,
-.stSelectbox div[data-baseweb="select"] > div:focus-within {{
-    border-color: var(--emerald-mid) !important;
-    box-shadow: 0 0 0 3px rgba(46,204,113,0.15) !important;
-}}
-
-.stRadio > div {{ gap: 6px; }}
-.stRadio label {{
-    padding: 8px 12px !important;
-    border-radius: 8px;
-    transition: background .15s;
-    color: var(--text-soft);
-}}
-.stRadio label:hover {{ background: rgba(46,204,113,0.08); }}
-
-[data-testid="stDataFrame"] {{
-    border: 1px solid var(--border);
-    border-radius: 10px; overflow: hidden;
-    background: var(--bg-card);
-}}
-
-.streamlit-expanderHeader, details > summary {{
-    background: var(--bg-card) !important;
-    border-radius: 10px !important;
-    color: var(--emerald-deep) !important;
-    font-weight: 600 !important;
-    border: 1px solid var(--border) !important;
-}}
-
-h1, h2, h3, h4, h5 {{ color: var(--emerald-deep) !important; }}
-h2 {{ font-size: 21px !important; font-weight: 700 !important; }}
-h3 {{ font-size: 17px !important; font-weight: 600 !important; }}
-
-.stCaption, [data-testid="stCaptionContainer"] {{
-    color: var(--text-dim) !important;
-    font-size: 11.5px !important;
-}}
-[data-testid="stMarkdownContainer"] p,
-[data-testid="stMarkdownContainer"] li {{
-    color: var(--text-soft);
-}}
-hr {{ border-color: var(--border) !important; margin: 1.2rem 0 !important; }}
-.stAlert {{ border-radius: 10px !important; border: 1px solid var(--border) !important; }}
-
-.stTabs [data-baseweb="tab-list"] {{
-    gap: 4px; background: transparent;
-    border-bottom: 1px solid var(--border);
-}}
-.stTabs [data-baseweb="tab"] {{
-    background: transparent !important;
-    color: var(--text-soft) !important;
-    font-weight: 500; border-radius: 8px 8px 0 0;
-}}
-.stTabs [aria-selected="true"] {{
-    color: var(--gold-dim) !important;
-    border-bottom: 2px solid var(--gold) !important;
-}}
-
-footer {{ visibility: hidden; }}
-
-/* ============== MOBILE — CRITICAL FIXES ============== */
-/* The "middle line" bug was caused by the sidebar's border-left showing
-   on mobile when sidebar is collapsed. Fixed by removing border entirely
-   and ensuring the sidebar goes fully off-screen when collapsed. */
-@media (max-width: 768px) {{
-    .block-container {{
-        padding-left: .8rem !important;
-        padding-right: .8rem !important;
-        padding-top: 1rem !important;
-        max-width: 100% !important;
-    }}
-    .hero {{ padding: 18px; }}
-    .hero h1 {{ font-size: 20px; }}
-    [data-testid="stMetricValue"] {{ font-size: 20px !important; }}
-    [data-testid="stMetricLabel"] {{ font-size: 11px !important; }}
-    [data-testid="stMetric"] {{ padding: 12px 13px; }}
-    .brand-mark {{ width: 40px; height: 40px; font-size: 20px; }}
-    .brand-title {{ font-size: 15px; }}
-
-    /* CRITICAL: kill the middle-line artifact */
-    [data-testid="stSidebar"] {{
-        border-left: none !important;
-        box-shadow: none !important;
-        border-right: none !important;
-    }}
-    [data-testid="stSidebar"][aria-expanded="false"] {{
-        margin-left: calc(-1 * min(21rem, 80vw)) !important;
-    }}
-    section[data-testid="stSidebar"] > div {{
-        border: none !important;
-    }}
-    .stApp, section.main, .main {{
-        overflow-x: hidden !important;
-    }}
-    /* Make sure content uses full width */
-    div[data-testid="stVerticalBlock"] > div:has(.hero) {{
-        width: 100% !important;
-    }}
-}}
-
-@media (max-width: 480px) {{
-    [data-testid="stMetricValue"] {{ font-size: 17px !important; letter-spacing: 0 !important; }}
-    [data-testid="stMetricLabel"] {{ font-size: 10.5px !important; }}
-    .hero h1 {{ font-size: 18px; }}
-    .fusion-card {{ padding: 14px; }}
-    .signal-bull, .signal-bear, .signal-neutral, .signal-no-trade {{ padding: 14px; }}
+@media (max-width:480px) {{
+    [data-testid="stMetricValue"] {{ font-size:17px!important; letter-spacing:0!important; }}
+    [data-testid="stMetricLabel"] {{ font-size:10.5px!important; }}
+    .hero h1 {{ font-size:18px; }}
+    .fusion-card {{ padding:14px; }}
+    .signal-bull,.signal-bear,.signal-neutral,.signal-no-trade {{ padding:14px; }}
 }}
 </style>
 """
@@ -554,8 +221,7 @@ def now_utc_text() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
 
 def local_now_text() -> str:
-    return datetime.now(ZoneInfo("America/New_York")).strftime(
-        "%Y-%m-%d %I:%M:%S %p ET")
+    return datetime.now(ZoneInfo("America/New_York")).strftime("%Y-%m-%d %I:%M:%S %p ET")
 
 def request_get(url: str, **kw) -> requests.Response:
     h = kw.pop("headers", {})
@@ -584,22 +250,15 @@ def safe_float(v: Any) -> Optional[float]:
     except (TypeError, ValueError): return None
 
 def display_status(s: str) -> str:
-    return {
-        "CONNECTED": "🟢 CONNECTED", "STALE": "🟠 STALE",
-        "RATE LIMITED": "🟠 RATE LIMITED", "AUTH ERROR": "🔴 AUTH ERROR",
-        "TIMEOUT": "🟠 TIMEOUT", "NO DATA": "🔴 NO DATA",
-        "NOT TESTED": "⚪ NOT TESTED", "UNAVAILABLE": "🔴 UNAVAILABLE",
-    }.get(s, s)
+    return {"CONNECTED":"🟢 CONNECTED","STALE":"🟠 STALE","RATE LIMITED":"🟠 RATE LIMITED",
+            "AUTH ERROR":"🔴 AUTH ERROR","TIMEOUT":"🟠 TIMEOUT","NO DATA":"🔴 NO DATA",
+            "NOT TESTED":"⚪ NOT TESTED","UNAVAILABLE":"🔴 UNAVAILABLE"}.get(s, s)
 
 def render_hero(title: str, subtitle: str = "") -> None:
     sub = (f'<p>{subtitle}</p>' if subtitle
            else '<p>منصة قرار موحدة لتحليل الذهب — بيانات رسمية، تحقق متقاطع، وقرار قابل للتتبع.</p>')
-    st.markdown(
-        f'<div class="hero">'
-        f'<div class="eyebrow">Aho𓂀  •  GOLD INTELLIGENCE</div>'
-        f'<h1>{title}</h1>{sub}</div>',
-        unsafe_allow_html=True,
-    )
+    st.markdown(f'<div class="hero"><div class="eyebrow">Aho𓂀  •  GOLD INTELLIGENCE</div>'
+                f'<h1>{title}</h1>{sub}</div>', unsafe_allow_html=True)
 
 def render_info_box(text: str) -> None:
     st.markdown(f'<div class="info-box">{text}</div>', unsafe_allow_html=True)
@@ -622,8 +281,7 @@ def assess_freshness(obs_date: Any, profile: str) -> dict[str, Any]:
     cfg = FRESHNESS_PROFILES[profile]
     d = pd.to_datetime(obs_date, utc=True, errors="coerce")
     if pd.isna(d):
-        return {"age": None, "usable": False,
-                "detail": "تاريخ غير صالح.", "profile": profile}
+        return {"age": None, "usable": False, "detail": "تاريخ غير صالح.", "profile": profile}
     delta = pd.Timestamp.now(tz="UTC") - d
     if "max_age_hours" in cfg:
         age = delta.total_seconds() / 3600
@@ -661,7 +319,7 @@ def _verify_credentials(user: str, pw: str) -> Optional[dict]:
     return None
 
 # ================================================================
-# AUDIT LOG
+# AUDIT
 # ================================================================
 if "audit_log" not in st.session_state:
     st.session_state.audit_log = []
@@ -670,12 +328,10 @@ def log_action(category: str, action: str, old_value: Any = None,
                new_value: Any = None, reason: str = "") -> None:
     usr = st.session_state.get("user") or {}
     st.session_state.audit_log.append({
-        "time": now_utc_text(),
-        "user": usr.get("username", "—"),
-        "role": usr.get("role", "—"),
-        "category": category, "action": action,
-        "old_value": old_value, "new_value": new_value, "reason": reason,
-    })
+        "time": now_utc_text(), "user": usr.get("username", "—"),
+        "role": usr.get("role", "—"), "category": category,
+        "action": action, "old_value": old_value,
+        "new_value": new_value, "reason": reason})
 
 # ================================================================
 # NOTIFICATIONS
@@ -720,8 +376,8 @@ def check_page_access(name: str, url: str) -> dict[str, Any]:
                 "detail": f"فحص وصول (HTTP {r.status_code}).",
                 "access_only": True, "tested_at": now_utc_text()}
     except Exception as exc:
-        return {"status": classify_exception(exc), "source": name,
-                "url": url, "detail": f"خطأ: {type(exc).__name__}.",
+        return {"status": classify_exception(exc), "source": name, "url": url,
+                "detail": f"خطأ: {type(exc).__name__}.",
                 "access_only": True, "tested_at": now_utc_text()}
 
 def page_access_only_check():
@@ -739,19 +395,15 @@ def page_access_only_check():
     rows = []
     for name, url in OFFICIAL_SOURCES:
         res = check_page_access(name, url)
-        rows.append({
-            "المصدر": name,
-            "الحالة": display_status(res.get("status", "NO DATA")),
-            "نوع الفحص": "🟡 وصول فقط — لا يثبت استخراج أرقام",
-            "وقت الفحص": res.get("tested_at", "—"),
-            "التفصيل": res.get("detail", "—"),
-            "الرابط": res.get("url", ""),
-        })
+        rows.append({"المصدر": name,
+                     "الحالة": display_status(res.get("status", "NO DATA")),
+                     "نوع الفحص": "🟡 وصول فقط — لا يثبت استخراج أرقام",
+                     "وقت الفحص": res.get("tested_at", "—"),
+                     "التفصيل": res.get("detail", "—"),
+                     "الرابط": res.get("url", "")})
     st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
-    render_info_box(
-        "⚠️ <b>ملاحظة مهمة:</b> نجاح الاتصال بالمصدر <b>لا يعني</b> أن الأرقام "
-        "المستخرجة صحيحة. هذا الفحص يساعد على التمييز بين 'متاح' و'مستخرج فعليًا'."
-    )
+    render_info_box("⚠️ <b>ملاحظة مهمة:</b> نجاح الاتصال بالمصدر <b>لا يعني</b> "
+                    "أن الأرقام المستخرجة صحيحة.")
 
 # ================================================================
 # YAHOO FINANCE
@@ -848,51 +500,42 @@ def compute_indicators(df: pd.DataFrame) -> dict[str, Any]:
     high = df["high"].astype(float)
     low = df["low"].astype(float)
     log_ret = np.log(close / close.shift()).dropna()
-
     def atr(period):
         tr = pd.concat([high - low, (high - close.shift()).abs(),
                         (low - close.shift()).abs()], axis=1).max(axis=1)
         return float(tr.rolling(period).mean().iloc[-1])
-
     sma20 = close.rolling(20).mean(); std20 = close.rolling(20).std()
     sma50 = float(close.rolling(50).mean().iloc[-1]) if len(df) >= 50 else None
     trend = "UP" if sma50 and sma20.iloc[-1] > sma50 else "DOWN" if sma50 else "FLAT"
-
     highs, lows = high.values, low.values
     sh, sl = [], []
     for i in range(2, len(df) - 2):
         if highs[i] == max(highs[i-2:i+3]): sh.append(highs[i])
         if lows[i] == min(lows[i-2:i+3]): sl.append(lows[i])
-
     def cluster(levels, tol=0.5):
         if not levels: return []
         levels = sorted(levels); groups = [[levels[0]]]
         for lv in levels[1:]:
             if abs(lv - groups[-1][-1]) / groups[-1][-1] * 100 < tol:
                 groups[-1].append(lv)
-            else:
-                groups.append([lv])
+            else: groups.append([lv])
         return [round(sum(g)/len(g), 2) for g in groups if len(g) >= 2]
-
-    return {
-        "status": "OK", "atr14": round(atr(14), 2), "atr7": round(atr(7), 2),
-        "vol20": round(float(log_ret.tail(20).std() * np.sqrt(252) * 100), 2),
-        "vol60": round(float(log_ret.tail(60).std() * np.sqrt(252) * 100), 2),
-        "bb_upper": round(float((sma20 + 2*std20).iloc[-1]), 2),
-        "bb_mid": round(float(sma20.iloc[-1]), 2),
-        "bb_lower": round(float((sma20 - 2*std20).iloc[-1]), 2),
-        "year_high": round(float(high.tail(252).max()), 2) if len(df) >= 252 else round(float(high.max()), 2),
-        "year_low": round(float(low.tail(252).min()), 2) if len(df) >= 252 else round(float(low.min()), 2),
-        "supports": cluster(sl)[:3], "resistances": cluster(sh)[-3:],
-        "trend": trend, "bars": len(df),
-    }
+    return {"status": "OK", "atr14": round(atr(14), 2), "atr7": round(atr(7), 2),
+            "vol20": round(float(log_ret.tail(20).std() * np.sqrt(252) * 100), 2),
+            "vol60": round(float(log_ret.tail(60).std() * np.sqrt(252) * 100), 2),
+            "bb_upper": round(float((sma20 + 2*std20).iloc[-1]), 2),
+            "bb_mid": round(float(sma20.iloc[-1]), 2),
+            "bb_lower": round(float((sma20 - 2*std20).iloc[-1]), 2),
+            "year_high": round(float(high.tail(252).max()), 2) if len(df) >= 252 else round(float(high.max()), 2),
+            "year_low": round(float(low.tail(252).min()), 2) if len(df) >= 252 else round(float(low.min()), 2),
+            "supports": cluster(sl)[:3], "resistances": cluster(sh)[-3:],
+            "trend": trend, "bars": len(df)}
 
 # ================================================================
 # SMC/ICT
 # ================================================================
 def detect_swings(df, left=2, right=2):
-    if df is None or len(df) < left + right + 1:
-        return {"highs": [], "lows": []}
+    if df is None or len(df) < left + right + 1: return {"highs": [], "lows": []}
     h, l = df["high"].values, df["low"].values
     sh, sl = [], []
     for i in range(left, len(df) - right):
@@ -906,10 +549,8 @@ def detect_bos_choch(df, swings):
     if len(swings["highs"]) >= 2 and len(swings["lows"]) >= 2:
         ph = swings["highs"][-2]; pl = swings["lows"][-2]
         lc = float(df["close"].iloc[-1])
-        if lc > ph[1]:
-            out["last_bos"] = ("BULLISH", ph[1]); out["structure"] = "BULLISH_BOS"
-        elif lc < pl[1]:
-            out["last_bos"] = ("BEARISH", pl[1]); out["structure"] = "BEARISH_BOS"
+        if lc > ph[1]: out["last_bos"] = ("BULLISH", ph[1]); out["structure"] = "BULLISH_BOS"
+        elif lc < pl[1]: out["last_bos"] = ("BEARISH", pl[1]); out["structure"] = "BEARISH_BOS"
         else:
             rh, rl = swings["highs"][-1], swings["lows"][-1]
             mid = (rh[1] + rl[1]) / 2
@@ -939,8 +580,7 @@ def analyze_smc_ict_v2(ohlc_res):
         out["signals"].append("⚠️ لا OHLC كافٍ.")
         return out
     if len(df) >= 2:
-        y = df.iloc[-2]
-        out["pdh"] = float(y["high"]); out["pdl"] = float(y["low"])
+        y = df.iloc[-2]; out["pdh"] = float(y["high"]); out["pdl"] = float(y["low"])
     high, low, close = df["high"], df["low"], df["close"]
     tr = pd.concat([high - low, (high - close.shift()).abs(),
                     (low - close.shift()).abs()], axis=1).max(axis=1)
@@ -966,8 +606,7 @@ def _find_yield_col(cols, years):
     norm = {c: _norm_col(c) for c in cols}
     for c, n in norm.items():
         if n in {f"{years}yr", f"{years}year", f"{years}yrs",
-                 f"{years}years", f"{years}y", f"{years}mo"}:
-            return c
+                 f"{years}years", f"{years}y", f"{years}mo"}: return c
     for c, n in norm.items():
         if n.startswith(str(years)) and ("yr" in n or "year" in n or n.endswith("y")):
             return c
@@ -1025,14 +664,10 @@ def fetch_treasury_curve(real: bool = False):
 # FRED
 # ================================================================
 FRED_SERIES_META = {
-    "DGS2": ("عائد 2Y", 8, "daily"),
-    "DGS5": ("عائد 5Y", 8, "daily"),
-    "DGS10": ("عائد 10Y", 8, "daily"),
-    "DGS20": ("عائد 20Y", 8, "daily"),
-    "DGS30": ("عائد 30Y", 8, "daily"),
-    "DFII10": ("عائد حقيقي 10Y", 8, "daily"),
-    "T10YIE": ("تضخم متوقع 10Y", 8, "daily"),
-    "CPIAUCSL": ("CPI", 75, "monthly"),
+    "DGS2": ("عائد 2Y", 8, "daily"), "DGS5": ("عائد 5Y", 8, "daily"),
+    "DGS10": ("عائد 10Y", 8, "daily"), "DGS20": ("عائد 20Y", 8, "daily"),
+    "DGS30": ("عائد 30Y", 8, "daily"), "DFII10": ("عائد حقيقي 10Y", 8, "daily"),
+    "T10YIE": ("تضخم متوقع 10Y", 8, "daily"), "CPIAUCSL": ("CPI", 75, "monthly"),
 }
 
 def _fred_obs_impl(sid: str, key: str):
@@ -1064,20 +699,15 @@ def fetch_fred_obs(sid: str, key: str):
     r = _fred_obs_impl(sid, key); r["tested_at"] = now_utc_text(); return r
 
 FRED_RELEASES = {
-    10: ("CPI", "🔴", "BLS"),
-    50: ("Nonfarm Payrolls", "🔴", "BLS"),
-    53: ("GDP", "🔴", "BEA"),
-    54: ("PCE / Personal Income", "🔴", "BEA"),
+    10: ("CPI", "🔴", "BLS"), 50: ("Nonfarm Payrolls", "🔴", "BLS"),
+    53: ("GDP", "🔴", "BEA"), 54: ("PCE / Personal Income", "🔴", "BEA"),
     9:  ("Retail Sales", "🟠", "Census Bureau"),
 }
-
 FOMC_DATES = {
-    2025: ["2025-01-29", "2025-03-19", "2025-05-07",
-           "2025-06-18", "2025-07-30", "2025-09-17",
-           "2025-11-05", "2025-12-17"],
-    2026: ["2026-01-28", "2026-03-18", "2026-04-29",
-           "2026-06-17", "2026-07-29", "2026-09-16",
-           "2026-10-28", "2026-12-09"],
+    2025: ["2025-01-29","2025-03-19","2025-05-07","2025-06-18",
+           "2025-07-30","2025-09-17","2025-11-05","2025-12-17"],
+    2026: ["2026-01-28","2026-03-18","2026-04-29","2026-06-17",
+           "2026-07-29","2026-09-16","2026-10-28","2026-12-09"],
     2027: [],
 }
 
@@ -1139,12 +769,10 @@ BLS_SERIES = {
 }
 
 def compute_bls_changes(rows):
-    if not rows:
-        return {"mom_pct": None, "yoy_pct": None, "latest_level": None}
+    if not rows: return {"mom_pct": None, "yoy_pct": None, "latest_level": None}
     try: lt = float(rows[0]["value"])
     except (KeyError, ValueError):
         return {"mom_pct": None, "yoy_pct": None, "latest_level": None}
-
     def back(n):
         y = int(rows[0]["year"]); m = int(rows[0]["period"][1:]) - n
         while m <= 0: m += 12; y -= 1
@@ -1153,7 +781,6 @@ def compute_bls_changes(rows):
                 try: return float(r["value"])
                 except ValueError: return None
         return None
-
     pm, py = back(1), back(12)
     return {"latest_level": lt,
             "mom_pct": round((lt/pm - 1)*100, 2) if pm else None,
@@ -1200,8 +827,7 @@ def _bls_v2_impl(key: str = ""):
             lt = rows[0]; ch = compute_bls_changes(rows)
             fr = assess_freshness(f"{lt.get('year')}-{lt.get('period')}", "monthly")
             results[k] = {"status": "CONNECTED" if fr["usable"] else "STALE",
-                          "series_id": sid, "label": lbl,
-                          "level": ch["latest_level"],
+                          "series_id": sid, "label": lbl, "level": ch["latest_level"],
                           "mom_pct": ch["mom_pct"], "yoy_pct": ch["yoy_pct"],
                           "date": f"{lt.get('year')}-{lt.get('period')}",
                           "freshness_detail": fr["detail"], "detail": fr["detail"]}
@@ -1410,22 +1036,18 @@ def fetch_gold_multi():
     for n, c in candidates:
         if c.get("status") == "CONNECTED":
             c["verified_by"] = n
-            c["all_sources"] = {k: {"status": v.get("status"),
-                                    "value": v.get("value")}
+            c["all_sources"] = {k: {"status": v.get("status"), "value": v.get("value")}
                                 for k, v in candidates}
             c["tested_at"] = now_utc_text(); return c
     for n, c in candidates:
         if c.get("status") == "STALE":
             c["verified_by"] = n
-            c["all_sources"] = {k: {"status": v.get("status"),
-                                    "value": v.get("value")}
+            c["all_sources"] = {k: {"status": v.get("status"), "value": v.get("value")}
                                 for k, v in candidates}
             c["tested_at"] = now_utc_text(); return c
-    return {"status": "UNAVAILABLE", "value": None,
-            "source": "multi (all failed)",
+    return {"status": "UNAVAILABLE", "value": None, "source": "multi (all failed)",
             "detail": " | ".join(f"{n}: {c.get('detail', '—')}" for n, c in candidates),
-            "all_sources": {k: {"status": v.get("status"),
-                                "value": v.get("value")}
+            "all_sources": {k: {"status": v.get("status"), "value": v.get("value")}
                             for k, v in candidates},
             "tested_at": now_utc_text()}
 
@@ -1441,35 +1063,26 @@ def render_source_verification(gold_res: dict) -> None:
     rows = []
     for name, info in all_src.items():
         val = info.get("value")
-        rows.append({
-            "المصدر": name,
-            "الحالة": display_status(info.get("status", "NO DATA")),
-            "القيمة": fmt_number(val, 2, " $") if val is not None else "—",
-        })
+        rows.append({"المصدر": name,
+                     "الحالة": display_status(info.get("status", "NO DATA")),
+                     "القيمة": fmt_number(val, 2, " $") if val is not None else "—"})
     st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
-    st.caption(
-        f"المصدر المعتمد: **{gold_res.get('verified_by', '—')}** • "
-        f"{gold_res.get('detail', '')}"
-    )
+    st.caption(f"المصدر المعتمد: **{gold_res.get('verified_by', '—')}** • "
+               f"{gold_res.get('detail', '')}")
 
 # ================================================================
 # CONSISTENCY
 # ================================================================
-CONSISTENCY_THRESHOLDS = {
-    "gold": 0.5, "nominal_10y": 0.05,
-    "real_10y": 0.05, "breakeven_10y": 0.10,
-}
+CONSISTENCY_THRESHOLDS = {"gold": 0.5, "nominal_10y": 0.05,
+                          "real_10y": 0.05, "breakeven_10y": 0.10}
 
 def check_consistency(label, va, vb, sa, sb, th, is_pct=True):
     out = {"metric": label, "source_a": sa, "source_b": sb,
-           "value_a": va, "value_b": vb,
-           "consistent": None, "diff": None, "diff_pct": None,
-           "threshold": th, "detail": ""}
+           "value_a": va, "value_b": vb, "consistent": None,
+           "diff": None, "diff_pct": None, "threshold": th, "detail": ""}
     if va is None or vb is None:
-        out["detail"] = "مصدر واحد أو أكثر غير متاح."
-        return out
-    d = abs(va - vb)
-    base = max(abs(va), abs(vb), 1e-9)
+        out["detail"] = "مصدر واحد أو أكثر غير متاح."; return out
+    d = abs(va - vb); base = max(abs(va), abs(vb), 1e-9)
     dp = (d / base * 100) if is_pct else d
     out["diff"] = round(d, 4); out["diff_pct"] = round(dp, 3)
     if dp <= th:
@@ -1484,8 +1097,7 @@ def run_consistency(market):
     checks = []
     checks.append(check_consistency(
         "الذهب (GC=F vs gold-api)",
-        market.get("gold", {}).get("value"),
-        _goldapi_impl().get("value"),
+        market.get("gold", {}).get("value"), _goldapi_impl().get("value"),
         "Yahoo GC=F", "gold-api", CONSISTENCY_THRESHOLDS["gold"]))
     nom_t = market.get("nominal", {}).get("values", {}).get("10Y")
     nom_f = market.get("fred", {}).get("DGS10", {}).get("value")
@@ -1521,8 +1133,7 @@ def analyze_consensus(events):
         except (TypeError, ValueError): continue
         ev = e.get("event", "?"); diff = act - cons
         if abs(diff) < 1e-6:
-            out["signals"].append(f"⬜ {ev}: مطابق للمتوقع")
-            continue
+            out["signals"].append(f"⬜ {ev}: مطابق للمتوقع"); continue
         d = "أعلى" if diff > 0 else "أقل"
         out["signals"].append(f"📊 {ev}: {act} ({d} من {cons})")
         if any(k in ev for k in ("CPI", "PCE")):
@@ -1531,23 +1142,19 @@ def analyze_consensus(events):
         if any(k in ev for k in ("Nonfarm", "Payrolls")):
             out["bias"] = "BEARISH_GOLD" if diff > 0 else "BULLISH_GOLD"
             out["confidence"] += 10
-    out["confidence"] = min(out["confidence"], 60)
-    return out
+    out["confidence"] = min(out["confidence"], 60); return out
 
 # ================================================================
 # QUALITY SCORE
 # ================================================================
 def source_quality_score(src):
-    s = 0.0
-    st_ = src.get("status")
+    s = 0.0; st_ = src.get("status")
     if st_ == "CONNECTED": s += 40
     elif st_ == "STALE": s += 20
-    if src.get("value") is not None or src.get("rows") or src.get("series"):
-        s += 25
+    if src.get("value") is not None or src.get("rows") or src.get("series"): s += 25
     if src.get("freshness_detail") is not None: s += 20
     if any(k in (src.get("source") or "") for k in
-           ("Treasury", "FRED", "CFTC", "BLS", "BEA", "official")):
-        s += 15
+           ("Treasury", "FRED", "CFTC", "BLS", "BEA", "official")): s += 15
     return min(s, 100.0)
 
 def aggregate_quality(market):
@@ -1564,8 +1171,7 @@ def aggregate_quality(market):
 # ================================================================
 def analyze_economics(market):
     out = {"bias": "NEUTRAL", "confidence": 0, "signals": [], "warnings": []}
-    bls = market.get("bls", {}).get("series", {})
-    fred = market.get("fred", {})
+    bls = market.get("bls", {}).get("series", {}); fred = market.get("fred", {})
     cpi = bls.get("headline_cpi", {}); core = bls.get("core_cpi", {})
     if cpi.get("yoy_pct") is not None:
         if cpi["yoy_pct"] > 3.0:
@@ -1574,8 +1180,7 @@ def analyze_economics(market):
         elif cpi["yoy_pct"] < 2.0:
             out["signals"].append(f"تضخم منخفض ({cpi['yoy_pct']}%) → دعم للذهب")
             out["bias"] = "BULLISH_GOLD"; out["confidence"] += 15
-        else:
-            out["signals"].append(f"تضخم معتدل ({cpi['yoy_pct']}%)")
+        else: out["signals"].append(f"تضخم معتدل ({cpi['yoy_pct']}%)")
     if core.get("yoy_pct") is not None:
         out["signals"].append(f"Core CPI: {core['yoy_pct']}% سنويًا")
     une = bls.get("unemployment", {})
@@ -1597,15 +1202,13 @@ def analyze_economics(market):
         elif r10 < 1.0:
             out["signals"].append(f"عائد حقيقي منخفض ({r10}%) → دعم")
             out["bias"] = "BULLISH_GOLD"; out["confidence"] += 20
-        else:
-            out["signals"].append(f"عائد حقيقي معتدل ({r10}%)")
+        else: out["signals"].append(f"عائد حقيقي معتدل ({r10}%)")
     be = fred.get("T10YIE", {}).get("value")
     if be is not None:
         if be > 2.5:
             out["signals"].append(f"تضخم متوقع مرتفع ({be}%) → دعم")
             out["confidence"] += 10
-        else:
-            out["signals"].append(f"تضخم متوقع {be}%")
+        else: out["signals"].append(f"تضخم متوقع {be}%")
     out["confidence"] = min(out["confidence"], 100)
     if out["confidence"] < 25:
         out["bias"] = "NO_TRADE"
@@ -1624,15 +1227,11 @@ def build_fusion(market, ohlc_res):
         mm = cot.get("managed_money_net", 0)
         chg = cot.get("managed_money_net_change_wow")
         if mm > 150_000:
-            cot_bias = "BULLISH"
-            cot_signals.append(f"MM صافي طويل ({mm:,.0f})")
+            cot_bias = "BULLISH"; cot_signals.append(f"MM صافي طويل ({mm:,.0f})")
         elif mm < 50_000:
-            cot_bias = "BEARISH"
-            cot_signals.append(f"MM صافي قصير/محايد ({mm:,.0f})")
-        else:
-            cot_signals.append(f"MM متوازن ({mm:,.0f})")
-        if chg is not None:
-            cot_signals.append(f"التغير الأسبوعي: {chg:+,.0f}")
+            cot_bias = "BEARISH"; cot_signals.append(f"MM صافي قصير/محايد ({mm:,.0f})")
+        else: cot_signals.append(f"MM متوازن ({mm:,.0f})")
+        if chg is not None: cot_signals.append(f"التغير الأسبوعي: {chg:+,.0f}")
     votes = {"BULLISH": 0, "BEARISH": 0, "NEUTRAL": 0}
     ws = {"econ": 0.35, "smc": 0.30, "cot": 0.25, "dxy": 0.10}
     eb = econ["bias"].replace("_GOLD", "")
@@ -1644,14 +1243,11 @@ def build_fusion(market, ohlc_res):
         votes["BULLISH" if dxy["change"] < 0 else "BEARISH"] += ws["dxy"] * 100
     fb = max(votes, key=votes.get); conf = votes[fb]
     reasons = []
-    if econ["bias"] == "NO_TRADE":
-        reasons.append("بيانات اقتصادية غير كافية")
-    if smc["structure"] == "UNDEFINED":
-        reasons.append("لا OHLC كافٍ")
+    if econ["bias"] == "NO_TRADE": reasons.append("بيانات اقتصادية غير كافية")
+    if smc["structure"] == "UNDEFINED": reasons.append("لا OHLC كافٍ")
     if market.get("quality_score", 0) < 40:
         reasons.append(f"جودة منخفضة ({market['quality_score']}/100)")
-    if conf < 40:
-        reasons.append(f"ثقة منخفضة ({conf:.0f}%)")
+    if conf < 40: reasons.append(f"ثقة منخفضة ({conf:.0f}%)")
     return {"final_bias": "NO_TRADE" if reasons else fb,
             "confidence": round(conf, 1),
             "votes": {k: round(v, 1) for k, v in votes.items()},
@@ -1665,31 +1261,22 @@ def validate_trade(trade, fusion, market):
     checks = []; ok = True; d = trade.get("direction", "LONG")
     e, sl, tp = trade.get("entry"), trade.get("stop_loss"), trade.get("take_profit")
     fb = fusion["final_bias"]
-    if fb == "NO_TRADE":
-        checks.append(("🔴", "الفيوجن NO TRADE", False)); ok = False
+    if fb == "NO_TRADE": checks.append(("🔴", "الفيوجن NO TRADE", False)); ok = False
     elif fb == "BULLISH" and d == "SHORT":
         checks.append(("🟠", "اتجاه معاكس", False)); ok = False
     elif fb == "BEARISH" and d == "LONG":
         checks.append(("🟠", "اتجاه معاكس", False)); ok = False
-    else:
-        checks.append(("🟢", "الاتجاه متوافق", True))
+    else: checks.append(("🟢", "الاتجاه متوافق", True))
     if all(x is not None for x in (e, sl, tp)):
         risk = abs(e - sl); rr = abs(tp - e) / risk if risk > 0 else 0
-        if rr >= 2.0:
-            checks.append(("🟢", f"R:R جيد ({rr:.2f})", True))
-        elif rr >= 1.5:
-            checks.append(("🟠", f"R:R مقبول ({rr:.2f})", True))
-        else:
-            checks.append(("🔴", f"R:R ضعيف ({rr:.2f})", False)); ok = False
-    else:
-        checks.append(("🟠", "مستويات ناقصة", False)); ok = False
+        if rr >= 2.0: checks.append(("🟢", f"R:R جيد ({rr:.2f})", True))
+        elif rr >= 1.5: checks.append(("🟠", f"R:R مقبول ({rr:.2f})", True))
+        else: checks.append(("🔴", f"R:R ضعيف ({rr:.2f})", False)); ok = False
+    else: checks.append(("🟠", "مستويات ناقصة", False)); ok = False
     q = market.get("quality_score", 0)
-    if q >= 70:
-        checks.append(("🟢", f"جودة عالية ({q})", True))
-    elif q >= 40:
-        checks.append(("🟠", f"جودة متوسطة ({q})", True))
-    else:
-        checks.append(("🔴", f"جودة منخفضة ({q})", False)); ok = False
+    if q >= 70: checks.append(("🟢", f"جودة عالية ({q})", True))
+    elif q >= 40: checks.append(("🟠", f"جودة متوسطة ({q})", True))
+    else: checks.append(("🔴", f"جودة منخفضة ({q})", False)); ok = False
     if fusion["cot_bias"] != "NEUTRAL":
         aligned = ((fusion["cot_bias"] == "BULLISH" and d == "LONG") or
                    (fusion["cot_bias"] == "BEARISH" and d == "SHORT"))
@@ -1813,7 +1400,7 @@ def build_market_data():
          "fred": fred, "tested_at": now_utc_text()}
     m["quality_score"] = aggregate_quality(m)
     return m
-
+   
 # ================================================================
 # AUTH GATE
 # ================================================================
@@ -1849,9 +1436,9 @@ for k, v in {"manual_gold_price": None, "trade_journal": [],
              "seen_observations": {}}.items():
     if k not in st.session_state: st.session_state[k] = v
 
-with st.spinner("⏳ تحميل البيانات..."):
+with st.spinner("جاري تحميل البيانات..."):
     market_data = build_market_data()
-with st.spinner("⏳ تحميل OHLC..."):
+with st.spinner("جاري تحميل OHLC..."):
     ohlc_res = fetch_gold_ohlc("6mo", "1d")
 
 # ================================================================
@@ -1930,7 +1517,7 @@ def page_dashboard():
     vc[1].metric("هابط", f"{v.get('BEARISH', 0):.0f}%")
     vc[2].metric("حياد", f"{v.get('NEUTRAL', 0):.0f}%")
 
-    st.markdown("### 🎯 السيناريوهات")
+    st.markdown("### السيناريوهات")
     c1, c2 = st.columns(2)
     with c1:
         st.markdown('<div class="fusion-card"><h4>صاعد</h4>'
@@ -1975,7 +1562,7 @@ def page_data_sources():
     render_source_verification(market_data.get("gold", {}))
 
     st.divider()
-    if st.button("🔍 فحص الوصول للمصادر الرسمية (بدون استخراج)"):
+    if st.button("فحص الوصول للمصادر الرسمية (بدون استخراج)"):
         st.session_state.show_access_check = True
     if st.session_state.get("show_access_check"):
         page_access_only_check()
@@ -1987,22 +1574,23 @@ def page_calendar():
         st.warning("لا أجندة — تحقق من FRED_API_KEY.")
     else:
         st.dataframe(cal, use_container_width=True, hide_index=True)
-    st.markdown("### 📝 Consensus يدوي")
+    st.markdown("### Consensus يدوي")
     with st.form("cons_form"):
         c1, c2, c3, c4 = st.columns(4)
         ev = c1.text_input("الحدث")
         co = c2.number_input("المتوقع", value=0.0)
         pv = c3.number_input("السابق", value=0.0)
         ac = c4.number_input("الفعلي", value=0.0)
-        if st.form_submit_button("💾 حفظ") and ev:
+        if st.form_submit_button("حفظ") and ev:
             st.session_state.manual_consensus[ev] = {
                 "event": ev, "consensus": co, "previous": pv,
                 "actual": ac if ac != 0 else None}
             log_action("manual_input", "add_consensus", new_value=ev)
-            st.success("تم.")
+            st.success("تم الحفظ.")
     if st.session_state.manual_consensus:
         analysis = analyze_consensus(list(st.session_state.manual_consensus.values()))
-        for s in analysis["signals"]: st.markdown(f"- {s}")
+        for s in analysis["signals"]:
+            st.markdown(f"- {s}")
         st.markdown(f"**التحيز:** {analysis['bias']} • **الثقة:** {analysis['confidence']}%")
 
 def page_econ():
@@ -2025,7 +1613,8 @@ def page_econ():
                  "القيمة": fmt_number(v.get("value"), 3),
                  "التاريخ": v.get("date", "—")} for k, v in fred.items()]
         st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
-    for s in econ["signals"]: st.markdown(f"- {s}")
+    for s in econ["signals"]:
+        st.markdown(f"- {s}")
 
 def page_yields():
     render_hero("العوائد والدولار")
@@ -2035,8 +1624,10 @@ def page_yields():
         for i, (k, v) in enumerate(sorted(vals.items())):
             cols[i].metric(k, fmt_number(v, 3, "%"))
     c = st.columns(2)
-    c[0].metric("Real 10Y", fmt_number(market_data.get("real_yield", {}).get("value"), 3, "%"))
-    c[1].metric("Breakeven", fmt_number(market_data.get("breakeven", {}).get("value"), 2, "%"))
+    c[0].metric("Real 10Y",
+                fmt_number(market_data.get("real_yield", {}).get("value"), 3, "%"))
+    c[1].metric("Breakeven",
+                fmt_number(market_data.get("breakeven", {}).get("value"), 2, "%"))
     dxy = market_data.get("dxy", {})
     dc = st.columns(3)
     dc[0].metric("DXY", fmt_number(dxy.get("value"), 2))
@@ -2060,7 +1651,7 @@ def page_cot():
         if mm > 150_000:
             st.success(f"MM صافي طويل بقوة ({mm:,.0f}).")
         elif mm < 50_000:
-            st.info(f"MM محايد/قصير ({mm:,.0f}).")
+            st.info(f"MM محايد أو صافي قصير ({mm:,.0f}).")
         else:
             st.warning(f"MM في منطقة انتقالية ({mm:,.0f}).")
         hist = pd.DataFrame(cot_d.get("rows", []))[
@@ -2069,7 +1660,7 @@ def page_cot():
         st.dataframe(hist, use_container_width=True, hide_index=True)
     else:
         st.warning("بيانات COT Disaggregated غير متاحة.")
-    with st.expander("📜 COT Legacy"):
+    with st.expander("COT Legacy"):
         cot = market_data.get("cot", {})
         ll = cot.get("latest", {})
         if ll:
@@ -2090,8 +1681,10 @@ def page_smc():
     if smc["pdh"]:
         st.markdown(f"PDH: {smc['pdh']:.2f} • PDL: {smc['pdl']:.2f} • "
                     f"ATR: {smc['atr']:.2f}")
-    for s in smc["signals"]: st.markdown(f"- {s}")
-    for s in smc["sweeps"]: st.warning(s["detail"])
+    for s in smc["signals"]:
+        st.markdown(f"- {s}")
+    for s in smc["sweeps"]:
+        st.warning(s["detail"])
 
 def page_tech():
     render_hero("المؤشرات الفنية")
@@ -2113,10 +1706,12 @@ def page_tech():
     c1, c2 = st.columns(2)
     with c1:
         st.markdown("**دعوم**")
-        for s in ind["supports"]: st.markdown(f"- ${s:,.2f}")
+        for s in ind["supports"]:
+            st.markdown(f"- ${s:,.2f}")
     with c2:
         st.markdown("**مقاومات**")
-        for r in ind["resistances"]: st.markdown(f"- ${r:,.2f}")
+        for r in ind["resistances"]:
+            st.markdown(f"- ${r:,.2f}")
 
 def page_consistency():
     render_hero("الاتساق بين المصادر")
@@ -2146,7 +1741,8 @@ def page_evidence():
         evidence.append({"الفئة": "COT", "الدليل": e,
                          "الاتجاه": fusion["cot_bias"]})
     if evidence:
-        st.dataframe(pd.DataFrame(evidence), use_container_width=True, hide_index=True)
+        st.dataframe(pd.DataFrame(evidence),
+                     use_container_width=True, hide_index=True)
     st.markdown(f"**القرار:** {fusion['final_bias']} • "
                 f"**الثقة:** {fusion['confidence']}%")
 
@@ -2158,11 +1754,11 @@ def page_validator():
         e = st.number_input("الدخول", value=0.0)
         sl = st.number_input("SL", value=0.0)
         tp = st.number_input("TP", value=0.0)
-        if st.form_submit_button("🔍 فحص"):
+        if st.form_submit_button("فحص"):
             r = validate_trade(
                 {"direction": d, "entry": e, "stop_loss": sl, "take_profit": tp},
                 fusion, market_data)
-            st.success("✅ يجتاز") if r["valid"] else st.error("🔴 لا يجتاز")
+            st.success("يجتاز الفحص.") if r["valid"] else st.error("لا يجتاز الفحص.")
             for ic, msg, _ in r["checks"]:
                 st.markdown(f"{ic} {msg}")
 
@@ -2176,37 +1772,37 @@ def page_risk():
         sl = c2.number_input("SL", value=0.0)
         tp = c2.number_input("TP", value=0.0)
         cs = c2.number_input("حجم العقد", value=100.0)
-        if st.form_submit_button("📊 حساب"):
+        if st.form_submit_button("حساب"):
             r = calc_risk(bal, rp, e, sl, tp, cs)
             if "error" in r:
                 st.error(r["error"])
             else:
-                st.metric("مخاطرة", f"${r['risk_amount']:,.2f}")
+                st.metric("المخاطرة", f"${r['risk_amount']:,.2f}")
                 c = st.columns(3)
                 c[0].metric("حجم (لوت)", f"{r['position_size_lots']:.4f}")
                 c[1].metric("R:R", f"{r['rr_ratio']:.2f}")
-                c[2].metric("ربح", f"${r['expected_profit']:,.2f}")
+                c[2].metric("ربح متوقع", f"${r['expected_profit']:,.2f}")
 
 def page_backtest():
     render_hero("Backtesting")
     render_warning_box(
-        "⚠️ إشارات سعرية فقط (BOS+ATR) مع slippage 0.5$. "
-        "لا يشمل COT/عوائد/أخبار.")
+        "إشارات سعرية فقط (BOS+ATR) مع slippage 0.5$. "
+        "لا يشمل COT أو العوائد أو الأخبار.")
     c = st.columns(3)
     r = c[0].selectbox("الفترة", ["1y", "2y", "5y", "max"], index=1)
-    slm = c[1].slider("ATR SL ×", 0.5, 3.0, 1.5, 0.1)
-    tpm = c[2].slider("ATR TP ×", 1.0, 6.0, 3.0, 0.1)
+    slm = c[1].slider("ATR SL مضاعف", 0.5, 3.0, 1.5, 0.1)
+    tpm = c[2].slider("ATR TP مضاعف", 1.0, 6.0, 3.0, 0.1)
     max_b = st.slider("حد أقصى للصفقة (شمعة) — 0 = مفتوح", 0, 200, 0, 10)
     mb = None if max_b == 0 else max_b
-    if st.button("▶️ تشغيل"):
-        with st.spinner("جاري..."):
+    if st.button("تشغيل الاختبار"):
+        with st.spinner("جاري الاختبار..."):
             o = fetch_gold_ohlc(r, "1d")
         if o.get("df") is None:
             st.error("OHLC غير متاح."); return
         res = backtest_smc_signals(o["df"], slm, tpm, 20, 0.5, mb)
         m = st.columns(5)
         m[0].metric("صفقات", res["total"])
-        m[1].metric("ربح%", f"{res['win_rate']}%")
+        m[1].metric("نسبة الربح", f"{res['win_rate']}%")
         m[2].metric("Avg R", f"{res['avg_r']:+.2f}")
         m[3].metric("Expectancy", f"{res['expectancy_r']:+.2f}R")
         m[4].metric("Max DD", f"{res['max_dd_r']:.1f}R")
@@ -2221,23 +1817,24 @@ def page_backtest():
 def generate_weekly_report(market):
     fusion = build_fusion(market, ohlc_res)
     now = now_utc_text()
-    md = [f"# 𓂀 Aho — تقرير الذهب الأسبوعي",
+    md = ["# Aho — تقرير الذهب الأسبوعي",
           f"**التوليد:** {now}",
           f"**المستخدم:** {current_user['username']} ({current_role})",
-          "", "---", "", "## 1️⃣ الأسعار"]
+          "", "---", "", "## 1. الأسعار"]
     md.append(f"- **XAUUSD:** {fmt_number(market['gold'].get('value'), 2, ' $')}")
     md.append(f"- **DXY:** {fmt_number(market['dxy'].get('value'), 2)}")
     md.append(f"- **US 10Y:** {fmt_number(market['nominal'].get('values', {}).get('10Y'), 3, '%')}")
     md.append(f"- **Real 10Y:** {fmt_number(market.get('real_yield', {}).get('value'), 3, '%')}")
     md.append(f"- **Breakeven:** {fmt_number(market.get('breakeven', {}).get('value'), 2, '%')}")
-    md.append(""); md.append("## 2️⃣ COT Disaggregated")
+    md.append(""); md.append("## 2. COT Disaggregated")
     cd = market.get("cot_disagg", {}).get("latest", {})
     if cd:
         md.append(f"- **MM Net:** {cd.get('managed_money_net', 0):,.0f}")
         chg = cd.get("managed_money_net_change_wow")
-        if chg is not None: md.append(f"- **تغير WoW:** {chg:+,.0f}")
+        if chg is not None:
+            md.append(f"- **تغير WoW:** {chg:+,.0f}")
         md.append(f"- **OI:** {cd.get('open_interest', 0):,.0f}")
-    md.append(""); md.append("## 3️⃣ الاقتصاد")
+    md.append(""); md.append("## 3. الاقتصاد")
     for k, lbl in [("headline_cpi", "CPI"), ("core_cpi", "Core CPI"),
                    ("unemployment", "البطالة"), ("nonfarm_payrolls", "الوظائف")]:
         s = market.get("bls", {}).get("series", {}).get(k, {})
@@ -2246,35 +1843,37 @@ def generate_weekly_report(market):
             if s.get("yoy_pct") is not None:
                 line += f" • YoY {s['yoy_pct']:+.2f}%"
             md.append(line)
-    md.append(""); md.append("## 4️⃣ الاتساق")
+    md.append(""); md.append("## 4. الاتساق")
     for c in run_consistency(market):
         ic = "🟢" if c["consistent"] else ("🔴" if c["consistent"] is False else "⚪")
         md.append(f"- {ic} **{c['metric']}**: {c['detail']}")
-    md.append(""); md.append("## 5️⃣ الفيوجن")
+    md.append(""); md.append("## 5. الفيوجن")
     md.append(f"- **التحيز:** {fusion['final_bias']} • **الثقة:** {fusion['confidence']}%")
     md.append(f"- **جودة البيانات:** {market.get('quality_score', 0)}/100")
     if fusion["no_trade_reasons"]:
         md.append(f"- **أسباب NO TRADE:** " + " • ".join(fusion["no_trade_reasons"]))
-    md.append(""); md.append("## 6️⃣ الإشارات")
-    for s in fusion["econ"]["signals"]: md.append(f"- {s}")
-    for s in fusion["smc"]["signals"]: md.append(f"- {s}")
-    md.append(""); md.append(f"*Aho𓂀 • {APP_VERSION}*")
+    md.append(""); md.append("## 6. الإشارات")
+    for s in fusion["econ"]["signals"]:
+        md.append(f"- {s}")
+    for s in fusion["smc"]["signals"]:
+        md.append(f"- {s}")
+    md.append(""); md.append(f"*Aho • {APP_VERSION}*")
     return "\n".join(md)
 
 def page_weekly():
     render_hero("التقرير الأسبوعي")
-    if st.button("📝 توليد"):
-        with st.spinner("..."):
+    if st.button("توليد التقرير"):
+        with st.spinner("جاري التوليد..."):
             st.session_state.current_report = generate_weekly_report(market_data)
         log_action("report", "generate_weekly")
     if st.session_state.current_report:
-        with st.expander("👁️ معاينة", expanded=True):
+        with st.expander("معاينة", expanded=True):
             st.markdown(st.session_state.current_report)
         ts = datetime.now().strftime("%Y%m%d_%H%M")
         if can_export():
             c = st.columns(2)
             c[0].download_button(
-                "⬇️ Markdown",
+                "تحميل Markdown",
                 data=st.session_state.current_report.encode("utf-8"),
                 file_name=f"aho_weekly_{ts}.md", mime="text/markdown")
             csv = pd.DataFrame([{
@@ -2283,23 +1882,23 @@ def page_weekly():
                 "dxy": market_data["dxy"].get("value"),
                 "quality": market_data.get("quality_score")}]).to_csv(index=False).encode("utf-8-sig")
             c[1].download_button(
-                "⬇️ CSV", data=csv,
+                "تحميل CSV", data=csv,
                 file_name=f"aho_weekly_{ts}.csv", mime="text/csv")
-        if st.button("📤 إرسال عبر Telegram"):
+        if st.button("إرسال عبر Telegram"):
             r = send_telegram(st.session_state.current_report[:4000])
             st.info(r["detail"])
         with st.form("email_form"):
             to = st.text_input("إرسال إلى (بريد)")
-            if st.form_submit_button("📧 إرسال Email") and to:
+            if st.form_submit_button("إرسال Email") and to:
                 r = send_email(f"Aho Weekly Report {now_utc_text()}",
                                st.session_state.current_report, to)
                 st.info(r["detail"])
         if not can_export():
-            st.info("🔒 دورك لا يسمح بالتصدير.")
+            st.info("دورك لا يسمح بالتصدير.")
 
 def page_history():
     render_hero("سجل التقارير")
-    if st.button("💾 حفظ التقرير الحالي"):
+    if st.button("حفظ التقرير الحالي"):
         fusion = build_fusion(market_data, ohlc_res)
         st.session_state.report_history.append({
             "time": now_utc_text(), "bias": fusion["final_bias"],
@@ -2320,7 +1919,7 @@ def page_journal():
         tp = c2.number_input("TP", value=0.0)
         res = c2.selectbox("النتيجة", ["OPEN", "WIN", "LOSS", "BE"])
         notes = st.text_area("ملاحظات")
-        if st.form_submit_button("➕ إضافة") and can_modify():
+        if st.form_submit_button("إضافة") and can_modify():
             st.session_state.trade_journal.append({
                 "time": now_utc_text(), "direction": d, "entry": e,
                 "sl": sl, "tp": tp, "result": res, "notes": notes})
@@ -2335,7 +1934,135 @@ def page_journal():
 
 def page_audit():
     if current_role not in {"admin", "auditor"}:
-        st.error("🔒 للمدقق/المدير فقط."); return
+        st.error("هذه الصفحة للمدقق والمدير فقط."); return
     render_hero("سجل التدقيق")
     if not st.session_state.audit_log:
-        st.info("لا س
+        st.info("لا سجلات."); return
+    df = pd.DataFrame(st.session_state.audit_log[::-1])
+    st.dataframe(df, use_container_width=True, hide_index=True)
+    if can_export():
+        st.download_button(
+            "تحميل CSV",
+            data=df.to_csv(index=False).encode("utf-8-sig"),
+            file_name=f"aho_audit_{datetime.now().strftime('%Y%m%d')}.csv",
+            mime="text/csv")
+
+def page_admin():
+    if current_role != "admin":
+        st.error("هذه الصفحة للمدير فقط."); return
+    render_hero("Admin")
+    st.markdown("### حالة المفاتيح")
+    for k in ["FRED_API_KEY", "BLS_API_KEY", "BEA_API_KEY",
+              "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID",
+              "GMAIL_USER", "GMAIL_APP_PASSWORD"]:
+        has = bool(get_secret(k))
+        st.markdown(f"- {k}: {'مضبوط' if has else 'مفقود'}")
+    st.markdown("### حالة المصادر")
+    for name, s in [("Gold", market_data["gold"]), ("DXY", market_data["dxy"]),
+                    ("Treasury", market_data["nominal"]),
+                    ("COT Legacy", market_data["cot"]),
+                    ("COT Disagg", market_data["cot_disagg"]),
+                    ("BLS", market_data["bls"]), ("BEA", market_data["bea"])]:
+        st.markdown(f"- {name}: {display_status(s.get('status', 'NO DATA'))}")
+    st.metric("الجودة الإجمالية", f"{market_data['quality_score']}/100")
+    if st.button("تصفير الكاش"):
+        st.cache_data.clear(); st.rerun()
+
+def page_access_check():
+    page_access_only_check()
+
+# ================================================================
+# SIDEBAR
+# ================================================================
+with st.sidebar:
+    st.markdown(
+        '<div class="brand">'
+        '<div class="brand-mark">𓂀</div>'
+        '<div>'
+        '<div class="brand-title">Aho𓂀</div>'
+        '<div class="brand-sub">GOLD INTELLIGENCE</div>'
+        '</div></div>',
+        unsafe_allow_html=True,
+    )
+
+    theme_label = st.radio(
+        "المظهر",
+        ["فاتح", "غامق"],
+        index=0 if st.session_state.theme == "light" else 1,
+        horizontal=True,
+        key="theme_toggle",
+    )
+    new_theme = "light" if theme_label == "فاتح" else "dark"
+    if new_theme != st.session_state.theme:
+        st.session_state.theme = new_theme
+        st.rerun()
+
+    st.markdown("---")
+    role_label = {"admin": "مدير", "analyst": "محلل",
+                  "auditor": "مدقق", "viewer": "قارئ"}.get(current_role, current_role)
+    st.caption(f"{current_user['username']} • {role_label}")
+
+    c1, c2 = st.columns(2)
+    with c1:
+        if st.button("تحديث", key="sb_refresh"):
+            st.cache_data.clear(); st.rerun()
+    with c2:
+        if st.button("خروج", key="sb_logout"):
+            log_action("auth", "logout")
+            st.session_state.authenticated = False
+            st.session_state.user = None
+            st.rerun()
+    st.caption(f"آخر تحديث: {market_data['tested_at']}")
+
+# ================================================================
+# UPDATE BANNER
+# ================================================================
+fresh_alerts = [a for a in new_alerts if not a["is_first"]]
+if fresh_alerts:
+    render_warning_box(
+        "بيانات جديدة منذ آخر زيارة:<br>"
+        + "<br>".join(f"• {a['source']}: {a['old']} → {a['new']}"
+                      for a in fresh_alerts))
+
+# ================================================================
+# NAVIGATION
+# ================================================================
+PAGE_DEFS = [
+    ("dashboard",     page_dashboard,      "لوحة القيادة",        ":material/dashboard:",      {"admin", "analyst", "viewer", "auditor"}),
+    ("data-sources",  page_data_sources,   "مصادر البيانات",      ":material/database:",       {"admin", "analyst", "viewer", "auditor"}),
+    ("calendar",      page_calendar,       "الأجندة الاقتصادية",  ":material/calendar_month:", {"admin", "analyst", "viewer", "auditor"}),
+    ("economics",     page_econ,           "التحليل الاقتصادي",   ":material/trending_up:",    {"admin", "analyst", "viewer", "auditor"}),
+    ("yields",        page_yields,         "العوائد والدولار",    ":material/payments:",       {"admin", "analyst", "viewer", "auditor"}),
+    ("cot",           page_cot,            "COT & OI",            ":material/bar_chart:",      {"admin", "analyst", "viewer", "auditor"}),
+    ("smc",           page_smc,            "SMC/ICT",             ":material/architecture:",   {"admin", "analyst", "auditor"}),
+    ("indicators",    page_tech,           "المؤشرات الفنية",     ":material/show_chart:",     {"admin", "analyst", "auditor"}),
+    ("consistency",   page_consistency,    "الاتساق",             ":material/compare_arrows:", {"admin", "analyst", "viewer", "auditor"}),
+    ("access-check",  page_access_check,   "فحص الوصول",          ":material/link:",           {"admin", "analyst", "auditor"}),
+    ("evidence",      page_evidence,       "مصفوفة الأدلة",       ":material/grid_view:",      {"admin", "analyst", "auditor"}),
+    ("validator",     page_validator,      "فاحص الصفقات",        ":material/verified:",       {"admin", "analyst", "auditor"}),
+    ("risk",          page_risk,           "إدارة المخاطر",       ":material/shield:",         {"admin", "analyst", "auditor"}),
+    ("backtest",      page_backtest,       "Backtesting",         ":material/science:",        {"admin", "analyst", "auditor"}),
+    ("weekly",        page_weekly,         "التقرير الأسبوعي",    ":material/description:",    {"admin", "analyst"}),
+    ("history",       page_history,        "سجل التقارير",        ":material/history:",        {"admin", "analyst", "auditor"}),
+    ("journal",       page_journal,        "سجل الصفقات",         ":material/menu_book:",      {"admin", "analyst", "auditor"}),
+    ("audit",         page_audit,          "سجل التدقيق",         ":material/search:",         {"admin", "auditor"}),
+    ("admin",         page_admin,          "Admin",               ":material/settings:",       {"admin"}),
+]
+
+nav_pages = []
+for key, fn, title, icon, roles in PAGE_DEFS:
+    if current_role in roles:
+        nav_pages.append(st.Page(fn, title=title, icon=icon, url_path=key))
+
+if not nav_pages:
+    st.error("لا توجد صفحات متاحة لدورك الحالي.")
+    st.stop()
+
+pg = st.navigation(nav_pages, position="sidebar")
+pg.run()
+
+# ================================================================
+# FOOTER
+# ================================================================
+st.divider()
+st.caption(f"Aho𓂀  •  {APP_VERSION}  •  {now_utc_text()}") 
