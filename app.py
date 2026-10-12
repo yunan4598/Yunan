@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-import pytz
+from zoneinfo import ZoneInfo
 import pandas as pd
 import streamlit as st
 import yfinance as yf
@@ -397,4 +397,4 @@ elif navigation == "14. TRADING JOURNAL (سجل الصفقات)":
         st.dataframe(pd.DataFrame(st.session_state.trade_journal), use_container_width=True, hide_index=True)
 
 st.divider()
-st.caption("YUNAN GOLD INTELLIGENCE v14.1 • SYSTEM STABLE & FULLY OPERATIONAL")
+st.caption("YUNAN GOLD INTELLIGENCE v14.2 • SYSTEM STABLE & FULLY OPERATIONAL")
