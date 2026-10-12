@@ -1,5 +1,5 @@
 # ================================================================
-# Aho𓂀 — GOLD INTELLIGENCE — v16.2 (LIGHT/DARK + SVG ICONS)
+# Aho𓂀 — GOLD INTELLIGENCE — v16.3 (EMERALD & GOLD IDENTITY)
 # ================================================================
 from __future__ import annotations
 import os, re, json as _json, hmac, smtplib, ssl
@@ -17,9 +17,9 @@ import streamlit as st
 import bcrypt
 
 APP_NAME = "Aho𓂀"
-APP_VERSION = "16.2 — GOLD INTELLIGENCE"
+APP_VERSION = "16.3 — GOLD INTELLIGENCE"
 REQUEST_TIMEOUT = 15
-USER_AGENT = "AhoGoldIntelligence/16.2"
+USER_AGENT = "AhoGoldIntelligence/16.3"
 
 st.set_page_config(
     page_title="Aho𓂀 — Gold Intelligence",
@@ -29,454 +29,416 @@ st.set_page_config(
 )
 
 # ================================================================
-# THEME ENGINE — Light (default) + Dark
+# THEME — EMERALD & GOLD IDENTITY
+# خلفية عاجية دافئة (ليست بيضاء)، أخضر زمردي، ذهبي دافئ
 # ================================================================
-def build_theme_css(theme: str) -> str:
-    if theme == "light":
-        vars_block = """
-        --bg-base:       #f6f8fb;
-        --bg-elev-1:     #ffffff;
-        --bg-elev-2:     #eef2f7;
-        --bg-elev-3:     #e5eaf1;
-        --border:        #e2e8f0;
-        --border-strong: #cbd5e1;
-        --gold:          #b08828;
-        --gold-dim:      #8a6e2a;
-        --gold-light:    #d4b360;
-        --green:         #16a34a;
-        --green-dim:     #15803d;
-        --green-light:   #22c55e;
-        --red:           #dc2626;
-        --amber:         #d97706;
-        --blue:          #2563eb;
-        --text:          #1e293b;
-        --text-muted:    #64748b;
-        --text-dim:      #94a3b8;
-        --shadow:        0 1px 3px rgba(15, 23, 42, .06), 0 4px 12px rgba(15, 23, 42, .05);
-        --shadow-hover:  0 2px 6px rgba(15, 23, 42, .08), 0 8px 24px rgba(15, 23, 42, .08);
-        --btn-text:      #ffffff;
-        --btn-gradient:  linear-gradient(135deg, #b08828, #8a6e2a);
-        --btn-gradient-h:linear-gradient(135deg, #c89838, #a07d32);
-        --hero-gradient: linear-gradient(135deg, rgba(255,255,255,.98), rgba(246,248,251,.9));
-        --signal-bull-bg: linear-gradient(135deg, rgba(220,252,231,.7), rgba(240,253,244,.5));
-        --signal-bull-bd: rgba(22,163,74,.4);
-        --signal-bear-bg: linear-gradient(135deg, rgba(254,226,226,.7), rgba(254,242,242,.5));
-        --signal-bear-bd: rgba(220,38,38,.4);
-        --signal-neutral-bg: linear-gradient(135deg, rgba(254,249,195,.7), rgba(255,251,235,.5));
-        --signal-neutral-bd: rgba(217,119,6,.4);
-        --signal-no-trade-bg: linear-gradient(135deg, rgba(241,245,249,.8), rgba(248,250,252,.6));
-        --signal-no-trade-bd: rgba(148,163,184,.4);
-        --warning-bg:    #fffbeb;
-        --warning-bd:    #fcd34d;
-        --warning-text:  #92400e;
-        --bg-ambient:    radial-gradient(ellipse at 15% 0%, #e8eef7 0%, transparent 50%),
-                         radial-gradient(ellipse at 85% 100%, #f0f4f9 0%, transparent 55%),
-                         #f6f8fb;
-        """
-        native_vars = """
-        --background-color: #f6f8fb;
-        --secondary-background-color: #ffffff;
-        --text-color: #1e293b;
-        --primary-color: #b08828;
-        """
-    else:
-        vars_block = """
-        --bg-base:       #141a24;
-        --bg-elev-1:     #1c2431;
-        --bg-elev-2:     #232d3d;
-        --bg-elev-3:     #2a3444;
-        --border:        #2a3444;
-        --border-strong: #3a4454;
-        --gold:          #e8c98a;
-        --gold-dim:      #b39a5f;
-        --gold-light:    #f0d49a;
-        --green:         #4ade80;
-        --green-dim:     #22c55e;
-        --green-light:   #86efac;
-        --red:           #f87171;
-        --amber:         #fbbf24;
-        --blue:          #60a5fa;
-        --text:          #f0f2f5;
-        --text-muted:    #b8c0cc;
-        --text-dim:      #8896a8;
-        --shadow:        0 2px 12px rgba(0, 0, 0, .25);
-        --shadow-hover:  0 4px 20px rgba(232, 201, 138, .15);
-        --btn-text:      #131a24;
-        --btn-gradient:  linear-gradient(135deg, #e8c98a, #c9a961);
-        --btn-gradient-h:linear-gradient(135deg, #f0d49a, #d9b972);
-        --hero-gradient: linear-gradient(135deg, rgba(35,45,61,.85), rgba(28,36,49,.7));
-        --signal-bull-bg: linear-gradient(135deg, rgba(30,60,42,.6), rgba(22,45,32,.4));
-        --signal-bull-bd: rgba(74,222,128,.4);
-        --signal-bear-bg: linear-gradient(135deg, rgba(60,30,32,.6), rgba(45,22,24,.4));
-        --signal-bear-bd: rgba(248,113,113,.4);
-        --signal-neutral-bg: linear-gradient(135deg, rgba(60,50,25,.6), rgba(45,38,20,.4));
-        --signal-neutral-bd: rgba(251,191,36,.4);
-        --signal-no-trade-bg: linear-gradient(135deg, rgba(35,45,61,.7), rgba(28,36,49,.5));
-        --signal-no-trade-bd: rgba(184,192,204,.3);
-        --warning-bg:    rgba(60,50,25,.4);
-        --warning-bd:    rgba(251,191,36,.4);
-        --warning-text:  #f5dc9a;
-        --bg-ambient:    radial-gradient(ellipse at 20% 0%, #1e2a3d 0%, transparent 55%),
-                         radial-gradient(ellipse at 80% 100%, #1a2535 0%, transparent 60%),
-                         #141a24;
-        """
-        native_vars = """
-        --background-color: #141a24;
-        --secondary-background-color: #1c2431;
-        --text-color: #f0f2f5;
-        --primary-color: #e8c98a;
-        """
-
-    return f"""
+st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap');
 
-:root {{
-    {vars_block}
-    {native_vars}
-    --font-base: 'IBM Plex Sans Arabic', 'Inter', -apple-system, sans-serif;
+:root {
+    /* Emerald & Gold Palette */
+    --emerald-deep:   #0B3D2E;
+    --emerald-dark:   #0A2E23;
+    --emerald-mid:    #145A45;
+    --emerald-light:  #1B7A5A;
+    --emerald-soft:   #E8F1EC;
+    --gold:           #C9A96E;
+    --gold-light:     #E0C68B;
+    --gold-dim:       #9A7B4A;
+    --gold-soft:      #F5EDDD;
+    --bg-ivory:       #F8F6F0;
+    --bg-card:        #FFFFFF;
+    --bg-soft:        #F0EDE4;
+    --border:         #E2DCCF;
+    --border-strong:  #D0C7B5;
+    --text-primary:   #1A1F1C;
+    --text-secondary: #5A6157;
+    --text-dim:       #8A9188;
+    --green-signal:   #2ECC71;
+    --green-deep:     #27AE60;
+    --red-signal:     #E74C3C;
+    --amber-signal:   #F39C12;
+    --font-base: 'IBM Plex Sans Arabic', 'Inter', sans-serif;
     --font-num:  'Inter', 'IBM Plex Sans Arabic', sans-serif;
-}}
+}
 
-html, body, [class*="css"] {{
+/* ============ GLOBAL ============ */
+html, body, [class*="css"] {
     font-family: var(--font-base);
     direction: rtl; text-align: right;
-    color: var(--text);
-}}
+    color: var(--text-primary);
+}
 
-.stApp {{
-    background: var(--bg-ambient);
-    color: var(--text);
-}}
+.stApp {
+    background:
+        radial-gradient(ellipse at 10% 0%, rgba(11,61,46,0.05) 0%, transparent 50%),
+        radial-gradient(ellipse at 90% 100%, rgba(201,169,110,0.07) 0%, transparent 50%),
+        var(--bg-ivory);
+    color: var(--text-primary);
+    overflow-x: hidden !important;
+}
 
-.block-container {{
+.block-container {
     padding-top: 1.3rem !important;
     padding-bottom: 2.5rem !important;
     max-width: 1550px;
-}}
+}
 
-/* =================== SIDEBAR =================== */
-[data-testid="stSidebar"] {{
-    background: var(--bg-elev-1);
-    border-left: 1px solid var(--border);
+/* ============ SIDEBAR ============ */
+[data-testid="stSidebar"] {
+    background: linear-gradient(180deg, var(--emerald-deep) 0%, var(--emerald-dark) 100%);
+    border-left: 1px solid rgba(201,169,110,0.15);
     padding-top: 14px;
-    box-shadow: -2px 0 12px rgba(0,0,0,.03);
-}}
-[data-testid="stSidebar"] * {{ text-align: right; }}
-[data-testid="stSidebar"] hr {{
-    border-color: var(--border) !important;
-    margin: 14px 0 !important;
-}}
+}
+[data-testid="stSidebar"] * { text-align: right; color: #E8E4DC; }
+[data-testid="stSidebar"] .stRadio label { color: #B8C4BC !important; }
+[data-testid="stSidebar"] hr { border-color: rgba(201,169,110,0.15) !important; }
+[data-testid="stSidebar"] .stCaption,
+[data-testid="stSidebar"] [data-testid="stCaptionContainer"] {
+    color: #7A8A7F !important;
+}
+[data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2,
+[data-testid="stSidebar"] h3, [data-testid="stSidebar"] h4 {
+    color: var(--gold-light) !important;
+}
+/* إصلاح مشكلة التقطع - إزالة الارتفاع المفروض */
+[data-testid="stSidebar"] > div:first-child {
+    height: auto !important;
+    min-height: 100vh !important;
+    overflow-y: auto !important;
+}
 
-/* Nav links (st.navigation) */
-[data-testid="stSidebarNav"] {{
-    padding: 8px 0;
-    border-top: 1px solid var(--border);
-    margin-top: 8px;
-    padding-top: 12px;
-}}
-[data-testid="stSidebarNav"] a {{
-    color: var(--text-muted) !important;
+/* Sidebar nav (st.navigation) */
+[data-testid="stSidebarNav"] { padding: 6px 0; }
+[data-testid="stSidebarNav"] ul { padding: 0; }
+[data-testid="stSidebarNav"] a {
+    color: #B8C4BC !important;
     border-radius: 8px !important;
     padding: 8px 10px !important;
     transition: all .15s ease;
     font-size: 13.5px;
-}}
-[data-testid="stSidebarNav"] a:hover {{
-    background: rgba(22, 163, 74, .08) !important;
-    color: var(--text) !important;
-}}
-[data-testid="stSidebarNav"] a[aria-current="page"] {{
-    background: rgba(176, 136, 40, .12) !important;
-    color: var(--gold-dim) !important;
+    margin: 2px 0;
+}
+[data-testid="stSidebarNav"] a:hover {
+    background: rgba(201,169,110,0.12) !important;
+    color: var(--gold-light) !important;
+}
+[data-testid="stSidebarNav"] a[aria-current="page"] {
+    background: linear-gradient(90deg, rgba(201,169,110,0.20), rgba(201,169,110,0.05)) !important;
+    color: var(--gold-light) !important;
     font-weight: 700 !important;
     border-right: 3px solid var(--gold) !important;
-}}
-[data-testid="stSidebarNav"] svg {{
+}
+[data-testid="stSidebarNav"] svg {
     color: var(--gold) !important;
-    width: 18px; height: 18px;
-}}
+    width: 18px !important; height: 18px !important;
+}
 
-/* =================== BRAND =================== */
-.brand {{
+/* ============ BRAND ============ */
+.brand {
     display: flex; align-items: center; gap: 12px;
     padding: 6px 4px 16px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid rgba(201,169,110,0.2);
     margin-bottom: 12px;
-}}
-.brand-mark {{
+}
+.brand-mark {
     width: 46px; height: 46px;
-    border: 1px solid var(--gold);
+    border: 1.5px solid var(--gold);
     border-radius: 12px;
     display: flex; align-items: center; justify-content: center;
     color: var(--gold); font-size: 24px; font-weight: 700;
-    background: var(--bg-elev-2);
-    box-shadow: 0 0 20px rgba(176, 136, 40, .18);
+    background: rgba(201,169,110,0.08);
+    box-shadow: 0 0 22px rgba(201,169,110,0.2);
     font-family: 'Segoe UI Historic', 'Noto Sans Egyptian Hieroglyphs', Inter, sans-serif;
-}}
-.brand-title {{
-    font-family: var(--font-num);
-    letter-spacing: 1.4px; font-weight: 800;
-    font-size: 18px; color: var(--text);
-}}
-.brand-sub {{
-    color: var(--text-dim); font-size: 10.5px;
+}
+.brand-title {
+    font-family: var(--font-num); letter-spacing: 1.4px;
+    font-weight: 800; font-size: 18px; color: var(--gold-light);
+    text-shadow: 0 0 20px rgba(201,169,110,0.3);
+}
+.brand-sub {
+    color: #8A9188; font-size: 10.5px;
     margin-top: 3px; letter-spacing: 1.2px;
-}}
+}
 
-/* =================== HERO =================== */
-.hero {{
+/* ============ HERO ============ */
+.hero {
     border: 1px solid var(--border);
     border-radius: 16px;
     padding: 22px 26px;
-    background: var(--hero-gradient);
+    background: linear-gradient(135deg, #FFFFFF 0%, #FAF8F3 100%);
     margin-bottom: 18px;
-    box-shadow: var(--shadow);
-}}
-.eyebrow {{
-    color: var(--gold); letter-spacing: 1.8px;
+    box-shadow: 0 2px 12px rgba(11,61,46,0.07);
+    border-right: 4px solid var(--gold);
+    position: relative;
+    overflow: hidden;
+}
+.hero::before {
+    content: "";
+    position: absolute;
+    top: -50%; right: -10%;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(46,204,113,0.06), transparent 70%);
+    pointer-events: none;
+}
+.eyebrow {
+    color: var(--emerald-mid); letter-spacing: 1.8px;
     font-size: 11.5px; font-weight: 700;
     font-family: var(--font-num);
-}}
-.hero h1 {{
+}
+.hero h1 {
     margin: 8px 0; font-size: 26px;
-    color: var(--text); font-weight: 700;
-}}
-.hero p {{
-    margin: 0; color: var(--text-muted);
+    color: var(--emerald-deep); font-weight: 700;
+}
+.hero p {
+    margin: 0; color: var(--text-secondary);
     line-height: 1.75; font-size: 13.5px;
-}}
+}
 
-/* =================== METRICS =================== */
-[data-testid="stMetric"] {{
-    background: var(--bg-elev-1);
+/* ============ METRICS ============ */
+[data-testid="stMetric"] {
+    background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 12px;
     padding: 15px 17px;
-    box-shadow: var(--shadow);
+    box-shadow: 0 2px 8px rgba(11,61,46,0.05);
     transition: all .2s ease;
-}}
-[data-testid="stMetric"]:hover {{
+}
+[data-testid="stMetric"]:hover {
     border-color: var(--gold);
-    box-shadow: var(--shadow-hover);
+    box-shadow: 0 4px 16px rgba(201,169,110,0.18);
     transform: translateY(-1px);
-}}
-[data-testid="stMetricLabel"] {{
-    color: var(--text-muted) !important;
+}
+[data-testid="stMetricLabel"] {
+    color: var(--text-secondary) !important;
     font-size: 12.5px !important; font-weight: 500 !important;
-}}
-[data-testid="stMetricValue"] {{
-    color: var(--text) !important;
+}
+[data-testid="stMetricValue"] {
+    color: var(--emerald-deep) !important;
     font-size: 24px !important; font-weight: 700 !important;
+    font-family: var(--font-num);
     letter-spacing: .3px;
     white-space: nowrap !important;
     overflow: visible !important;
     text-overflow: unset !important;
-    font-family: var(--font-num);
     font-variant-numeric: tabular-nums !important;
-}}
+}
 [data-testid="stMetricValue"] > div,
-[data-testid="stMetricValue"] > div > div {{
+[data-testid="stMetricValue"] > div > div {
     white-space: nowrap !important;
     overflow: visible !important;
-}}
+    text-overflow: clip !important;
+}
+[data-testid="stMetricDelta"] {
+    font-size: 12px !important; font-weight: 600 !important;
+}
 
-/* =================== CARDS =================== */
-.fusion-card {{
-    background: var(--bg-elev-1);
+/* ============ CARDS ============ */
+.fusion-card {
+    background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 12px; padding: 18px;
     margin-bottom: 12px;
-    box-shadow: var(--shadow);
-}}
-.fusion-card h4 {{
-    color: var(--gold); margin: 0 0 10px;
-    font-size: 14.5px; font-weight: 600;
-}}
-.fusion-card p {{
-    color: var(--text-muted); font-size: 13px; line-height: 1.85;
-}}
+    box-shadow: 0 2px 8px rgba(11,61,46,0.04);
+    border-top: 3px solid var(--gold);
+}
+.fusion-card h4 {
+    color: var(--emerald-deep);
+    margin: 0 0 10px; font-size: 14.5px; font-weight: 700;
+}
+.fusion-card p {
+    color: var(--text-secondary); font-size: 13px; line-height: 1.85;
+}
 
-/* =================== SIGNAL CARDS =================== */
-.signal-bull {{
-    border: 1px solid var(--signal-bull-bd);
-    background: var(--signal-bull-bg);
+/* ============ SIGNAL CARDS ============ */
+.signal-bull {
+    border: 1px solid rgba(46,204,113,0.35);
+    background: linear-gradient(135deg, rgba(46,204,113,0.10), rgba(46,204,113,0.02));
     border-radius: 12px; padding: 16px 18px; margin: 10px 0;
-}}
-.signal-bear {{
-    border: 1px solid var(--signal-bear-bd);
-    background: var(--signal-bear-bg);
+    border-right: 5px solid var(--green-signal);
+    box-shadow: 0 2px 12px rgba(46,204,113,0.08);
+}
+.signal-bear {
+    border: 1px solid rgba(231,76,60,0.35);
+    background: linear-gradient(135deg, rgba(231,76,60,0.10), rgba(231,76,60,0.02));
     border-radius: 12px; padding: 16px 18px; margin: 10px 0;
-}}
-.signal-neutral {{
-    border: 1px solid var(--signal-neutral-bd);
-    background: var(--signal-neutral-bg);
+    border-right: 5px solid var(--red-signal);
+    box-shadow: 0 2px 12px rgba(231,76,60,0.08);
+}
+.signal-neutral {
+    border: 1px solid rgba(243,156,18,0.35);
+    background: linear-gradient(135deg, rgba(243,156,18,0.10), rgba(243,156,18,0.02));
     border-radius: 12px; padding: 16px 18px; margin: 10px 0;
-}}
-.signal-no-trade {{
-    border: 1px solid var(--signal-no-trade-bd);
-    background: var(--signal-no-trade-bg);
+    border-right: 5px solid var(--amber-signal);
+    box-shadow: 0 2px 12px rgba(243,156,18,0.08);
+}
+.signal-no-trade {
+    border: 1px solid var(--border);
+    background: var(--bg-soft);
     border-radius: 12px; padding: 16px 18px; margin: 10px 0;
-}}
-.signal-bull h3, .signal-bear h3,
-.signal-neutral h3, .signal-no-trade h3 {{
-    color: var(--text) !important;
+    border-right: 5px solid var(--text-dim);
+}
+.signal-bull h3, .signal-bear h3, .signal-neutral h3, .signal-no-trade h3 {
+    color: var(--emerald-deep) !important;
     margin: 0 0 6px; font-size: 16px; font-weight: 700;
-}}
+}
 
-/* =================== WARNING =================== */
-.warning-box {{
-    border: 1px solid var(--warning-bd);
-    background: var(--warning-bg);
+/* ============ WARNING ============ */
+.warning-box {
+    border: 1px solid rgba(243,156,18,0.4);
+    background: linear-gradient(135deg, rgba(243,156,18,0.10), rgba(243,156,18,0.03));
     border-radius: 10px; padding: 13px 16px;
-    margin: 10px 0; color: var(--warning-text);
+    margin: 10px 0; color: #8A5A00;
     font-size: 13px; line-height: 1.7;
-}}
+    border-right: 4px solid var(--amber-signal);
+}
 
-/* =================== BUTTONS =================== */
-.stButton button {{
+/* ============ BUTTONS ============ */
+.stButton button {
     border-radius: 10px;
-    border: 1px solid var(--gold-dim) !important;
-    background: var(--btn-gradient) !important;
-    color: var(--btn-text) !important;
+    border: 1.5px solid var(--gold) !important;
+    background: linear-gradient(135deg, var(--emerald-deep), var(--emerald-mid)) !important;
+    color: var(--gold-light) !important;
     font-weight: 700 !important;
     width: 100%; padding: 10px;
     transition: all .2s ease;
-    box-shadow: 0 2px 8px rgba(176, 136, 40, .15);
-}}
-.stButton button:hover {{
-    background: var(--btn-gradient-h) !important;
-    box-shadow: 0 4px 16px rgba(22, 163, 74, .2);
+    box-shadow: 0 2px 10px rgba(11,61,46,0.18);
+}
+.stButton button:hover {
+    background: linear-gradient(135deg, var(--emerald-mid), var(--emerald-light)) !important;
+    box-shadow: 0 4px 18px rgba(46,204,113,0.3);
     transform: translateY(-1px);
-    border-color: var(--green) !important;
-}}
-.stDownloadButton button {{
+    border-color: var(--gold-light) !important;
+    color: var(--gold-light) !important;
+}
+.stDownloadButton button {
     border-radius: 10px;
-    border: 1px solid var(--border-strong) !important;
-    background: var(--bg-elev-2) !important;
-    color: var(--text) !important; font-weight: 600 !important;
-}}
-.stDownloadButton button:hover {{
-    border-color: var(--green) !important;
-    background: var(--bg-elev-1) !important;
-}}
+    border: 1.5px solid var(--border-strong) !important;
+    background: var(--bg-card) !important;
+    color: var(--emerald-deep) !important;
+    font-weight: 600 !important;
+}
+.stDownloadButton button:hover {
+    border-color: var(--green-signal) !important;
+    background: var(--emerald-soft) !important;
+}
 
-/* =================== INPUTS =================== */
+/* ============ INPUTS ============ */
 .stTextInput input, .stNumberInput input,
 .stSelectbox div[data-baseweb="select"] > div,
-.stTextArea textarea {{
-    background: var(--bg-elev-1) !important;
+.stTextArea textarea {
+    background: var(--bg-card) !important;
     border: 1px solid var(--border-strong) !important;
-    color: var(--text) !important;
+    color: var(--text-primary) !important;
     border-radius: 8px !important;
-}}
+}
 .stTextInput input:focus, .stNumberInput input:focus,
-.stTextArea textarea:focus {{
-    border-color: var(--green) !important;
-    box-shadow: 0 0 0 3px rgba(22, 163, 74, .12) !important;
-}}
+.stTextArea textarea:focus,
+.stSelectbox div[data-baseweb="select"] > div:focus-within {
+    border-color: var(--emerald-light) !important;
+    box-shadow: 0 0 0 3px rgba(46,204,113,0.15) !important;
+}
 
-/* =================== RADIO =================== */
-.stRadio > div {{ gap: 4px; }}
-.stRadio label {{
-    padding: 8px 10px !important;
+/* ============ RADIO ============ */
+.stRadio > div { gap: 6px; }
+.stRadio label {
+    padding: 8px 12px !important;
     border-radius: 8px;
     transition: background .15s;
-    color: var(--text-muted);
-}}
-.stRadio label:hover {{ background: rgba(22, 163, 74, .08); }}
+    color: var(--text-secondary);
+}
+.stRadio label:hover { background: rgba(46,204,113,0.08); }
 
-/* =================== DATAFRAME =================== */
-[data-testid="stDataFrame"] {{
+/* ============ DATAFRAME ============ */
+[data-testid="stDataFrame"] {
     border: 1px solid var(--border);
     border-radius: 10px; overflow: hidden;
-    background: var(--bg-elev-1);
-}}
+    background: var(--bg-card);
+}
 
-/* =================== EXPANDER =================== */
-.streamlit-expanderHeader, details > summary {{
-    background: var(--bg-elev-1) !important;
+/* ============ EXPANDER ============ */
+.streamlit-expanderHeader, details > summary {
+    background: var(--bg-card) !important;
     border-radius: 10px !important;
-    color: var(--text) !important;
+    color: var(--emerald-deep) !important;
     font-weight: 600 !important;
     border: 1px solid var(--border) !important;
-}}
+}
 
-/* =================== HEADINGS / TEXT =================== */
-h1, h2, h3, h4, h5 {{ color: var(--text) !important; }}
-h2 {{ font-size: 21px !important; font-weight: 700 !important; }}
-h3 {{ font-size: 17px !important; font-weight: 600 !important; }}
+/* ============ HEADINGS ============ */
+h1, h2, h3, h4, h5 { color: var(--emerald-deep) !important; }
+h2 { font-size: 21px !important; font-weight: 700 !important; }
+h3 { font-size: 17px !important; font-weight: 600 !important; }
 
-.stCaption, [data-testid="stCaptionContainer"] {{
+/* ============ CAPTIONS / MARKDOWN ============ */
+.stCaption, [data-testid="stCaptionContainer"] {
     color: var(--text-dim) !important;
     font-size: 11.5px !important;
-}}
-
-hr {{ border-color: var(--border) !important; margin: 1.2rem 0 !important; }}
-
-/* Markdown content */
+}
 [data-testid="stMarkdownContainer"] p,
-[data-testid="stMarkdownContainer"] li {{
-    color: var(--text-muted);
-}}
+[data-testid="stMarkdownContainer"] li {
+    color: var(--text-secondary);
+}
 
-/* Success/Info/Warning/Error boxes */
-.stAlert {{
+hr { border-color: var(--border) !important; margin: 1.2rem 0 !important; }
+
+/* ============ ALERTS ============ */
+.stAlert {
     border-radius: 10px !important;
     border: 1px solid var(--border) !important;
-}}
+}
 
-/* Green accent helpers */
-.green-accent {{ color: var(--green) !important; font-weight: 600; }}
-
-/* =================== TABS =================== */
-.stTabs [data-baseweb="tab-list"] {{
+/* ============ TABS ============ */
+.stTabs [data-baseweb="tab-list"] {
     gap: 4px; background: transparent;
     border-bottom: 1px solid var(--border);
-}}
-.stTabs [data-baseweb="tab"] {{
+}
+.stTabs [data-baseweb="tab"] {
     background: transparent !important;
-    color: var(--text-muted) !important;
+    color: var(--text-secondary) !important;
     font-weight: 500; border-radius: 8px 8px 0 0;
-}}
-.stTabs [aria-selected="true"] {{
-    color: var(--gold) !important;
+}
+.stTabs [aria-selected="true"] {
+    color: var(--gold-dim) !important;
     border-bottom: 2px solid var(--gold) !important;
-}}
+}
 
-footer {{ visibility: hidden; }}
+footer { visibility: hidden; }
 
-/* =================== MOBILE =================== */
-@media (max-width: 768px) {{
-    .block-container {{
+/* ============ MOBILE — CRITICAL FIXES ============ */
+@media (max-width: 768px) {
+    .block-container {
         padding-left: .8rem !important;
         padding-right: .8rem !important;
         padding-top: 1rem !important;
-    }}
-    .hero {{ padding: 18px; }}
-    .hero h1 {{ font-size: 20px; }}
-    [data-testid="stMetricValue"] {{ font-size: 20px !important; }}
-    [data-testid="stMetricLabel"] {{ font-size: 11px !important; }}
-    [data-testid="stMetric"] {{ padding: 12px 13px; }}
-    .brand-mark {{ width: 40px; height: 40px; font-size: 20px; }}
-    .brand-title {{ font-size: 15px; }}
-}}
+    }
+    .hero { padding: 18px; }
+    .hero h1 { font-size: 20px; }
+    [data-testid="stMetricValue"] { font-size: 20px !important; }
+    [data-testid="stMetricLabel"] { font-size: 11px !important; }
+    [data-testid="stMetric"] { padding: 12px 13px; }
+    .brand-mark { width: 40px; height: 40px; font-size: 20px; }
+    .brand-title { font-size: 15px; }
+    /* منع التمرير الأفقي */
+    .stApp { overflow-x: hidden !important; }
+    section.main, .main { overflow-x: hidden !important; }
+}
 
-@media (max-width: 480px) {{
-    [data-testid="stMetricValue"] {{
+@media (max-width: 480px) {
+    [data-testid="stMetricValue"] {
         font-size: 17px !important;
         letter-spacing: 0 !important;
-    }}
-    [data-testid="stMetricLabel"] {{ font-size: 10.5px !important; }}
-}}
+    }
+    [data-testid="stMetricLabel"] { font-size: 10.5px !important; }
+    .hero h1 { font-size: 18px; }
+    .fusion-card { padding: 14px; }
+    .signal-bull, .signal-bear, .signal-neutral, .signal-no-trade {
+        padding: 14px;
+    }
+}
 </style>
-"""
-
-# --- Theme init + injection ---
-if "theme_choice" not in st.session_state:
-    st.session_state.theme_choice = "فاتح ☀️"
-current_theme = "light" if "فاتح" in st.session_state.theme_choice else "dark"
-st.markdown(build_theme_css(current_theme), unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
 # ================================================================
 # HELPERS
@@ -637,7 +599,7 @@ def send_email(subject: str, body: str, to_addr: str) -> dict[str, Any]:
         return {"status": "UNAVAILABLE", "detail": f"SMTP: {type(exc).__name__}."}
 
 # ================================================================
-# YAHOO
+# YAHOO FINANCE
 # ================================================================
 def _yahoo_quote_impl(symbols: tuple[str, ...], label: str) -> dict[str, Any]:
     errors = []
@@ -1469,7 +1431,7 @@ def backtest_smc_signals(df, atr_mult_sl=1.5, atr_mult_tp=3.0, lookback=20,
             "detail": f"{len(trades)} صفقة عبر {len(df)} شمعة."}
 
 # ================================================================
-# MARKET DATA
+# MARKET DATA BUILDER
 # ================================================================
 @st.cache_data(ttl=600, show_spinner=False)
 def build_market_data():
@@ -1528,7 +1490,7 @@ current_user = st.session_state.user or {"username": "local", "role": "admin"}
 current_role = current_user["role"]
 
 # ================================================================
-# SESSION
+# SESSION STATE
 # ================================================================
 for k, v in {"manual_gold_price": None, "trade_journal": [], "report_history": [],
              "current_report": None, "seen_observations": {}}.items():
@@ -1573,7 +1535,7 @@ def can_export(): return current_role in {"admin", "analyst"}
 def can_modify(): return current_role in {"admin", "analyst"}
 
 # ================================================================
-# PAGES (defined as functions)
+# PAGES
 # ================================================================
 def page_dashboard():
     render_hero("لوحة القرار الموحد")
@@ -1594,7 +1556,7 @@ def page_dashboard():
         "NO_TRADE": ("signal-no-trade", "⛔", "لا تداول"),
     }.get(fb, ("signal-neutral", "🟡", "حياد"))
     reasons_html = (
-        "<p style='color:#dc2626;margin:6px 0 0;font-size:13px;'>"
+        "<p style='color:#E74C3C;margin:6px 0 0;font-size:13px;font-weight:600;'>"
         + " • ".join(fusion["no_trade_reasons"]) + "</p>"
         if fusion["no_trade_reasons"] else ""
     )
@@ -1993,7 +1955,7 @@ def page_admin():
         st.cache_data.clear(); st.rerun()
 
 # ================================================================
-# SIDEBAR — Brand + Theme toggle + User + Actions
+# SIDEBAR
 # ================================================================
 with st.sidebar:
     st.markdown(
@@ -2005,21 +1967,9 @@ with st.sidebar:
         '</div></div>',
         unsafe_allow_html=True,
     )
-
-    # Theme toggle
-    st.radio(
-        "المظهر",
-        ["فاتح ☀️", "غامق 🌙"],
-        key="theme_choice",
-        horizontal=True,
-        label_visibility="collapsed",
-    )
-
-    # User info
     role_label = {"admin": "🔑 مدير", "analyst": "📊 محلل",
                   "auditor": "🔍 مدقق", "viewer": "👁️ قارئ"}.get(current_role, current_role)
     st.caption(f"**{current_user['username']}** • {role_label}")
-
     c1, c2 = st.columns(2)
     with c1:
         if st.button("↻ تحديث", key="sb_refresh"):
@@ -2030,11 +1980,10 @@ with st.sidebar:
             st.session_state.authenticated = False
             st.session_state.user = None
             st.rerun()
-
     st.caption(f"آخر تحديث: {market_data['tested_at']}")
 
 # ================================================================
-# UPDATE BANNER (above main content)
+# UPDATE BANNER
 # ================================================================
 fresh_alerts = [a for a in new_alerts if not a["is_first"]]
 if fresh_alerts:
@@ -2046,7 +1995,7 @@ if fresh_alerts:
     )
 
 # ================================================================
-# NAVIGATION (st.navigation + SVG Material icons)
+# NAVIGATION — SVG Material Icons
 # ================================================================
 PAGE_DEFS = [
     ("dashboard",     page_dashboard,      "لوحة القيادة",        ":material/dashboard:",      {"admin", "analyst", "viewer", "auditor"}),
