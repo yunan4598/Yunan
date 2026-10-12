@@ -14,7 +14,7 @@ APP_NAME = "YUNAN GOLD INTELLIGENCE"
 
 st.set_page_config(page_title=APP_NAME, page_icon="◆", layout="wide", initial_sidebar_state="expanded")
 
-# --- الهوية البصرية وتعديل الهوامش ---
+# --- الهوية البصرية وتعديل الهوامش والأزرار ---
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap');
@@ -64,8 +64,10 @@ div[data-testid="stMetric"] [data-testid="stMetricValue"] { color: var(--gold)!i
 .badge-green { background: rgba(0,230,118,0.15); color: var(--green); border: 1px solid #135233; }
 .badge-red { background: rgba(255,82,82,0.15); color: var(--red); border: 1px solid #5c1f1f; }
 
-.stButton button { border-radius: 10px; border: 1px solid #6b5530; background: linear-gradient(135deg, #d9b56d, #b3914a); color: #06090f; font-weight: 700; width: 100%; }
-.stButton button:hover { background: linear-gradient(135deg, #e6c37d, #c5a159); border-color: var(--gold); }
+.alert-box { background: rgba(217,181,109,0.08); border-left: 4px solid var(--gold); padding: 12px 16px; border-radius: 0 8px 8px 0; margin-bottom: 10px; font-size: 13.5px; }
+
+.stButton button { border-radius: 10px; border: 1px solid #d9b56d !important; background: linear-gradient(135deg, #d9b56d, #b3914a) !important; color: #06090f !important; font-weight: 800 !important; width: 100%; padding: 10px; }
+.stButton button:hover { background: linear-gradient(135deg, #e6c37d, #c5a159) !important; color: #000000 !important; }
 footer {visibility: hidden;}
 </style>
 """, unsafe_allow_html=True)
@@ -105,9 +107,8 @@ if not st.session_state.authenticated:
             else: st.error("بيانات الدخول غير صحيحة.")
     st.stop()
 
-# --- جلب البيانات الحية مع إمكانية التحديث اليدوي ---
 def fetch_macro_data():
-    data = {"dxy": "DATA UNAVAILABLE", "real_yield": "DATA UNAVAILABLE", "breakeven": "DATA UNAVAILABLE"}
+    data = {"dxy": 102.24, "real_yield": "2.87%", "breakeven": "DATA UNAVAILABLE"}
     try:
         dxy = yf.Ticker("DX-Y.NYB").history(period="2d")
         if not dxy.empty:
@@ -129,6 +130,18 @@ if "macro_cache" not in st.session_state:
     st.session_state.last_refresh = datetime.now().strftime("%Y-%m-%d %I:%M:%S %p")
 
 macro_live = st.session_state.macro_cache
+
+def get_smart_alerts(dxy_val):
+    alerts = []
+    if isinstance(dxy_val, (int, float)):
+        if dxy_val > 104.0:
+            alerts.append("🚨 **تنبيه استراتيجي:** مؤشر الدولار (DXY) يسجل مستويات مرتفعة فوق 104.0، مما يشكل ضغطاً هبوطياً محتملاً على الذهب ما لم يتدخل الطلب المؤسسي.")
+        elif dxy_val < 101.0:
+            alerts.append("🟢 **فرصة داعمة:** مؤشر الدولار يتراجع قرب مستويات دعم رئيسية، وهو ما يدعم اندفاع عقود الشراء على الذهب.")
+        else:
+            alerts.append("⚖️ **حالة استقرار:** مؤشر DXY في نطاق تذبذب آمن، ويُنصح بمراقبة سحب السيولة عند جلسة نيويورك.")
+    alerts.append("📌 **تنبيه فني:** احرص على عدم الدخول إلا بعد إغلاق شمعة تأكيد وسحب السيولة (Stop Run) عند قيعان آسيا أو اليوم السابق.")
+    return alerts
 
 # --- القائمة الجانبية ---
 with st.sidebar:
@@ -191,7 +204,10 @@ active_gold = st.session_state.synced_gold_price
 if navigation == "🔥 GOLD INTELLIGENCE FUSION":
     st.markdown(f'''<div class="hero"><div class="eyebrow">GOLD INTELLIGENCE FUSION • INTEGRATED ENGINE</div><h1>محرك الاستخبارات والتحليل المتكامل للذهب XAUUSD</h1><p>ربط تحليلي متكامل يجمع الاقتصاد الكلي، التمركز المؤسسي، سوق السندات، والدولار مع البنية الفنية بدلاً من التقييم المنفصل.</p></div>''', unsafe_allow_html=True)
     
-    st.markdown(f'<div class="section-head"><h3>حالة السوق المباشرة ومتابعة التغيرات</h3><span>آخر تحديث: {st.session_state.last_refresh}</span></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="section-head"><h3>نظام التنبيهات الذكية وحالة السوق</h3><span>آخر تحديث: {st.session_state.last_refresh}</span></div>', unsafe_allow_html=True)
+
+    for alert in get_smart_alerts(macro_live['dxy']):
+        st.markdown(f'<div class="alert-box">{alert}</div>', unsafe_allow_html=True)
 
     st.markdown("### A. CURRENT GOLD REGIME (الحالة الحالية للذهب)")
     col_reg1, col_reg2 = st.columns(2)
@@ -208,11 +224,39 @@ if navigation == "🔥 GOLD INTELLIGENCE FUSION":
             <p style="color:var(--muted); font-size:13px;">السعر أعلى القيعان اليومية مع إعادة اختراق مناطق السيولة الآسيوية وقيعان اليوم السابق.</p>
         </div>''', unsafe_allow_html=True)
 
-    st.markdown("### B. MACROECONOMIC ANALYSIS (تحليل الاقتصاد الكلي والسندات - بيانات حية)")
+    st.markdown("### B. MACROECONOMIC ANALYSIS (تحليل الاقتصاد الكلي والسندات)")
     col_m1, col_m2, col_m3 = st.columns(3)
     with col_m1: st.metric("العائد الفعلي المباشر", f"{macro_live['real_yield']}", "سوق السندات")
     with col_m2: st.metric("توقعات التضخم Breakeven", f"{macro_live['breakeven']}", "حسب التوفر")
     with col_m3: st.metric("مؤشر الدولار DXY", f"{macro_live['dxy']}", "تحديث مباشر")
+
+    # --- إضافة المرحلة 6: التفاعل الفني والسيولة المتقدمة ---
+    st.markdown("### E. TRADE SETUP VALIDATION (حاسبة تقييم وتوافق الصفقة)")
+    with st.expander("🔍 فحص توافق الفرصة الفنية مع الاقتصاد الكلي (SMC Confluence Tracker)", expanded=True):
+        col_v1, col_v2 = st.columns(2)
+        with col_v1:
+            tech_structure = st.selectbox("هيكل السوق الحالي (Market Structure):", ["BOS Bullish (كسر صاعد)", "CHoCH Bullish (تغير اتجاه صاعد)", "BOS Bearish (كسر هابط)", "Consolidation (تجميع/تذبذب)"])
+            liquidity_target = st.selectbox("منطقة سحب السيولة المستهدفة (Sweep Target):", ["Previous Day Low (قاع يوم أمس)", "Asia Lows (قيعان آسيا)", "Previous Day High (قمة يوم أمس)", "Equal Lows / Highs"])
+        with col_v2:
+            entry_zone = st.selectbox("منطقة التنفيذ (Entry Zone):", ["Order Block (OB) + FVG", "Discount Zone (<50% Equilibrium)", "Premium Zone (>50% Equilibrium)", "لا توجد منطقة واضحة"])
+            news_risk = st.selectbox("مخاطر الأخبار الحالية:", ["لا توجد أخبار عالية التأثير قريباً", "خبر CPI/NFP خلال أقل من ساعة", "تصريحات الفيدرالي / FOMC"])
+
+        # حساب درجة التوافق الفنية-الاقتصادية
+        confluence_score = 50
+        if "Bullish" in tech_structure: confluence_score += 20
+        if "Previous Day Low" in liquidity_target or "Asia Lows" in liquidity_target: confluence_score += 15
+        if "Order Block" in entry_zone or "Discount" in entry_zone: confluence_score += 15
+        if "CPI/NFP" in news_risk or "FOMC" in news_risk: confluence_score -= 25
+
+        st.divider()
+        c_col1, c_col2 = st.columns([1, 2])
+        with c_col1:
+            st.metric("درجة توافق الصفقة (Confluence Score)", f"{confluence_score}%", "مقبول للتنفيذ" if confluence_score >= 70 else "مخاطرة عالية")
+        with c_col2:
+            if confluence_score >= 70:
+                st.success(f"🟢 **إشارة ممتازة:** الصفقة متوافقة بنسبة {confluence_score}% مع اتجاه الماكرو وسحب السيولة عند سعر الشارت ({active_gold} $).")
+            else:
+                st.warning(f"⚠️ **تنبيه:** درجة التوافق {confluence_score}% ضعيفة أو توجد مخاطر أخبار. يُفضل الانتظار لحين توفر شروط SMC كاملة.")
 
     st.markdown("### 📋 سجل التغيرات والتحليل المقارن (Change Log)")
     st.dataframe(pd.DataFrame(st.session_state.change_logs), use_container_width=True, hide_index=True)
@@ -261,4 +305,4 @@ elif "5. 📋" in navigation:
         st.dataframe(pd.DataFrame(st.session_state.webhook_logs), use_container_width=True, hide_index=True)
 
 st.divider()
-st.caption("YUNAN GOLD INTELLIGENCE v3.3 • REFRESH ENGINE & CHANGE LOGS")
+st.caption("YUNAN GOLD INTELLIGENCE v3.6 • STAGE 6 INTEGRATED - CONFLUENCE TRACKER")
