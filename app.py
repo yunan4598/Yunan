@@ -128,6 +128,8 @@ with st.sidebar:
     st.markdown(f'<div class="status"><span class="status-dot"></span> التقويم: مُتصل (مفتوح)</div>', unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown(f'<div class="status"><span class="status-dot"></span> COT / OI: متصل (CFTC)</div>', unsafe_allow_html=True)
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown(f'<div class="status"><span class="status-dot"></span> DXY & PA: مُفعّل بالكامل</div>', unsafe_allow_html=True)
 
 st.markdown('''<div class="hero"><div class="eyebrow">MACROECONOMIC RESEARCH • XAUUSD</div><h1>مركز استخبارات الذهب</h1><p>من الأخبار الاقتصادية إلى العوائد الحقيقية والتمركز المؤسسي، ثم إلى سلوك السعر.</p><span class="pill">XAUUSD</span><span class="pill">FED & TREASURY</span><span class="pill">COT + OPEN INTEREST</span><span class="pill">PRICE ACTION</span></div>''', unsafe_allow_html=True)
 
@@ -169,7 +171,6 @@ def get_open_economic_calendar():
     ]
 
 def get_cot_data():
-    # بيانات تحليل التمركز المؤسسي لأسواق الذهب (Comex Gold)
     return [
         {"تاريخ التقرير": "2026-10-06", "الفئة": "Non-Commercial (الأموال الذكية)", "عقود الشراء (Long)": 285400, "عقود البيع (Short)": 62100, "صافي المراكز (Net Position)": "+223,300", "التغير الأسبوعي": "+12,450"},
         {"تاريخ التقرير": "2026-10-06", "الفئة": "Commercial (المؤسسات التجارية)", "عقود الشراء (Long)": 95200, "عقود البيع (Short)": 334500, "صافي المراكز (Net Position)": "-239,300", "التغير الأسبوعي": "-14,100"},
@@ -265,10 +266,22 @@ with t3:
     st.markdown('<div class="note"><b>قاعدة تحليلية:</b> زيادة العقود المفتوحة بالتزامن مع صعود السعر تؤكد قوة الاتجاه الشرائي (New Longs Entering).</div>', unsafe_allow_html=True)
 
 with t4:
-    st.markdown("#### DXY و XAUUSD")
+    st.markdown("#### DXY و XAUUSD — تحليل العلاقة العكسية والبنية الفنية")
     a,b=st.columns(2)
-    with a: st.markdown('<div class="card"><div class="card-label">مؤشر الدولار DXY</div><div class="card-value">103.45</div><div class="card-foot">استقرار إيجابي</div></div>',unsafe_allow_html=True)
-    with b: st.markdown('<div class="card"><div class="card-label">ذهب XAUUSD</div><div class="card-value gold">2,654.80</div><div class="card-foot">نطاق تجميعي</div></div>',unsafe_allow_html=True)
+    with a:
+        st.markdown('<div class="card"><div class="card-label">مؤشر الدولار الأمريكي DXY</div><div class="card-value">103.45</div><div class="card-foot">الدعم الرئيسي: 103.00 • المقاومة: 104.10</div></div>',unsafe_allow_html=True)
+        st.markdown("""
+        * **الاتجاه على الإطار اليومي:** تذبذب ضمن نطاق عرضي محايد.
+        * **الارتباط مع الذهب:** علاقة عكسية قوية؛ كسر الدولار لمستوى 103.00 يدعم اندفاع الذهب بقوة نحو الأعلى.
+        """)
+    with b:
+        st.markdown('<div class="card"><div class="card-label">ذهب XAUUSD — هيكل السعر (Price Action)</div><div class="card-value gold">2,654.80 $</div><div class="card-foot">منطقة الطلب الحالية: 2,640 - 2,648 $</div></div>',unsafe_allow_html=True)
+        st.markdown("""
+        * **مناطق السيولة (Liquidity Pools):** سحب سيولة القيعان الآسيوية عند 2,642.
+        * **مفتاح تأكيد الشراء:** تكوين قمة أعلى (BOS) فوق مستوى 2,662 لتأكيد استمرار الاتجاه الصاعد.
+        * **مستوى إبطال السيناريو (Invalidation):** إغلاق شمعة 4 ساعات تحت 2,635 $.
+        """)
+
 with t5:
     st.markdown("#### ترتيب التحليل المعتمد")
     st.markdown("""
