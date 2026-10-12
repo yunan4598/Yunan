@@ -123,10 +123,9 @@ with st.sidebar:
     importance_filter = st.selectbox("أهمية الأخبار", ["الكل", "متوسط وعالٍ", "عالٍ فقط"], index=1)
     st.divider()
     st.markdown("### حالة المصادر")
-    st.markdown(f'<div class="status"><span class="status-dot"></span> FRED: {"مُعدّ" if os.getenv("FRED_API_KEY", "").strip() else "مفتاح غير مضاف"}</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="status"><span class="status-dot"></span> FRED: {"مُعدّ" if read_secret("FRED_API_KEY") else "مفتاح غير مضاف"}</div>', unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown(f'<div class="status"><span class="status-dot"></span> التقويم: {"مُعدّ" if read_secret("FINNHUB_API_KEY") else "غير متصل"}</div>', unsafe_allow_html=True)
-    st.caption("البيانات غير المتصلة لا تُستبدل بأرقام تخمينية.")
+    st.markdown(f'<div class="status"><span class="status-dot"></span> التقويم: مُتصل (مجاني)</div>', unsafe_allow_html=True)
 
 st.markdown('''<div class="hero"><div class="eyebrow">MACROECONOMIC RESEARCH • XAUUSD</div><h1>مركز استخبارات الذهب</h1><p>من الأخبار الاقتصادية إلى العوائد الحقيقية والتمركز المؤسسي، ثم إلى سلوك السعر.</p><span class="pill">XAUUSD</span><span class="pill">FED & TREASURY</span><span class="pill">COT + OPEN INTEREST</span><span class="pill">PRICE ACTION</span></div>''', unsafe_allow_html=True)
 
@@ -134,7 +133,6 @@ now = datetime.now(ZoneInfo(timezone_name))
 st.markdown(f'<div class="section-head"><h3>نظرة عامة</h3><span>وقت اللوحة: {now.strftime("%Y-%m-%d • %I:%M %p")} ({timezone_name})</span></div>', unsafe_allow_html=True)
 
 fred_key = read_secret("FRED_API_KEY").strip()
-finnhub_key = read_secret("FINNHUB_API_KEY").strip()
 
 FRED_SERIES = {
     "عائد سنتين": "DGS2", "عائد 5 سنوات": "DGS5", "عائد 10 سنوات": "DGS10",
@@ -153,38 +151,31 @@ def get_fred_series(series_id, api_key, limit=8):
             except (ValueError, TypeError): pass
     return rows
 
-def get_calendar(api_key, start, end):
-    url = "https://finnhub.io/api/v1/calendar/economic"
-    params = {"token": api_key, "from": start.isoformat(), "to": end.isoformat()}
-    r = requests.get(url, params=params, timeout=20)
+def get_free_economic_calendar():
+    url = "https://n32.forexfactory1.com/ff_calendar_thisweek.json"
+    headers = {'User-Agent': 'Mozilla/5.0'}
+    r = requests.get(url, headers=headers, timeout=15)
     r.raise_for_status()
-    data = r.json()
-    if isinstance(data, dict):
-        events = data.get("economicCalendar", [])
-    elif isinstance(data, list):
-        events = data
-    else:
-        raise ValueError("صيغة رد التقويم غير متوقعة")
-    return events
+    return r.json()
 
 def num(v):
     try:
         if v is None or str(v).strip() in ("", "None", "nan"): return None
-        return float(str(v).replace(",", ""))
+        return float(str(v).replace(",", "").replace("%", "").replace("k", "").replace("M", ""))
     except (ValueError, TypeError): return None
 
 def interpret_event(row):
-    name = " ".join(str(row.get(k, "")) for k in ["Category", "Event", "event", "name"]).lower()
-    actual = num(row.get("Actual", row.get("actual", row.get("ActualValue"))))
-    forecast = num(row.get("Forecast", row.get("estimate", row.get("ForecastValue", row.get("TEForecast")))))
+    name = " ".join(str(row.get(k, "")) for k in ["title", "country"]).lower()
+    actual = num(row.get("actual"))
+    forecast = num(row.get("forecast"))
     if actual is None or forecast is None:
         return "المقارنة غير مكتملة؛ راقب رد فعل العوائد والدولار بعد صدور الخبر."
     diff = actual - forecast
     if abs(diff) < 1e-10: return "قريب من التوقع؛ راقب المراجعات ورد فعل السوق."
     inflation = any(x in name for x in ["cpi", "inflation", "pce", "price index"])
-    jobs = any(x in name for x in ["nonfarm", "non-farm", "payroll", "employment change", "job creation"])
-    unemp = "unemployment rate" in name
-    claims = "jobless claims" in name or "initial claims" in name
+    jobs = any(x in name for x in ["nonfarm", "nfp", "payroll", "employment", "job"])
+    unemp = "unemployment" in name
+    claims = "claims" in name
     growth = any(x in name for x in ["gdp", "ism", "pmi", "retail sales"])
     stronger = diff > 0
     if inflation:
@@ -232,36 +223,33 @@ with t1:
     with c1: st.markdown('<div class="card"><div class="card-label">الأولوية</div><div class="card-value gold">CPI / PCE</div><div class="card-foot">التضخم وتوقعات الفائدة</div></div>',unsafe_allow_html=True)
     with c2: st.markdown('<div class="card"><div class="card-label">سوق العمل</div><div class="card-value">NFP / Claims</div><div class="card-foot">قوة التوظيف والأجور والبطالة</div></div>',unsafe_allow_html=True)
     with c3: st.markdown('<div class="card"><div class="card-label">النمو والسياسة</div><div class="card-value">GDP / ISM / FOMC</div><div class="card-foot">النشاط الاقتصادي ومسار الفائدة</div></div>',unsafe_allow_html=True)
-    today=date.today(); start=today-timedelta(days=days_back); end=today+timedelta(days=days_forward)
-    if not finnhub_key:
-        st.markdown('<div class="placeholder"><b>التقويم غير متصل بعد.</b><br>تحتاج هذه الوحدة إلى مفتاح Finnhub API صالح في إعدادات Secrets.</div>',unsafe_allow_html=True)
-    else:
-        try:
-            events=get_calendar(finnhub_key,start,end)
-            df=pd.DataFrame(events)
-            if not df.empty:
-                rename_map = {"time": "Date", "event": "Event", "actual": "Actual", "estimate": "Forecast", "prev": "Previous", "impact": "Importance", "country": "Country"}
-                df = df.rename(columns={k: v for k, v in rename_map.items() if k in df.columns})
-                
-                if "Country" in df.columns: 
-                    df=df[df["Country"].astype(str).str.upper().isin(["US", "USA", "UNITED STATES"])]
-                
-                tz=ZoneInfo(timezone_name)
-                def local_time(v):
-                    try:
-                        dt=datetime.fromisoformat(str(v).replace("Z","+00:00"))
-                        if dt.tzinfo is None: dt=dt.replace(tzinfo=timezone.utc)
-                        return dt.astimezone(tz).strftime("%Y-%m-%d %I:%M %p")
-                    except Exception: return str(v)
-                
-                if "Date" in df.columns: df["الوقت المحلي"]=df["Date"].apply(local_time)
-                for col in ["Actual","Forecast","Previous"]:
-                    if col not in df.columns: df[col]=""
-                df["قراءة أولية"]=df.apply(interpret_event,axis=1)
-                cols=[c for c in ["الوقت المحلي","Importance","Event","Actual","Forecast","Previous","قراءة أولية"] if c in df.columns]
-                st.dataframe(df[cols],use_container_width=True,hide_index=True)
-            else: st.info("لم يُرجع المزود أحداثًا في النطاق المختار.")
-        except Exception as e: st.error(f"تعذر تحميل التقويم: {e}")
+    
+    try:
+        events = get_free_economic_calendar()
+        df = pd.DataFrame(events)
+        if not df.empty:
+            df = df[df["country"].astype(str).str.upper() == "USD"]
+            if importance_filter == "عالٍ فقط":
+                df = df[df["impact"].astype(str).str.lower() == "high"]
+            elif importance_filter == "متوسط وعالٍ":
+                df = df[df["impact"].astype(str).str.lower().isin(["high", "medium"])]
+            
+            df = df.rename(columns={
+                "date": "الوقت",
+                "title": "الحدث",
+                "impact": "الأهمية",
+                "actual": "الفعلي",
+                "forecast": "المتوقع",
+                "previous": "السابق"
+            })
+            df["قراءة أولية"] = df.apply(interpret_event, axis=1)
+            cols = [c for c in ["الوقت", "الأهمية", "الحدث", "الفعلي", "المتوقع", "السابق", "قراءة أولية"] if c in df.columns]
+            st.dataframe(df[cols], use_container_width=True, hide_index=True)
+        else:
+            st.info("لا توجد أحداث اقتصادية مسجلة حالياً.")
+    except Exception as e:
+        st.error(f"تعذر تحميل التقويم المجاني: {e}")
+
 with t2:
     st.markdown("#### منحنى العوائد الأمريكية")
     if series_data:
