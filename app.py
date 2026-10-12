@@ -69,6 +69,7 @@ if not APP_USERNAME or not APP_PASSWORD:
 
 if "authenticated" not in st.session_state: st.session_state.authenticated = False
 if "webhook_logs" not in st.session_state: st.session_state.webhook_logs = []
+if "custom_gold_price" not in st.session_state: st.session_state.custom_gold_price = None
 
 if not st.session_state.authenticated:
     st.markdown('<div class="hero"><div class="eyebrow">YUNAN GOLD INTELLIGENCE</div><h1>تسجيل الدخول</h1><p>لوحة استخبارات الذهب الخاصة.</p></div>', unsafe_allow_html=True)
@@ -86,7 +87,11 @@ if not st.session_state.authenticated:
 @st.cache_data(ttl=60)
 def get_live_market_data():
     try:
-        gold = yf.Ticker("GC=F").history(period="2d")
+        # استخدام الذهب الفوري Spot Gold بدلاً من العقود الآجلة
+        gold = yf.Ticker("XAUUSD=X").history(period="2d")
+        if gold.empty:
+            gold = yf.Ticker("GC=F").history(period="2d")
+            
         dxy = yf.Ticker("DX-Y.NYB").history(period="2d")
         
         gold_price = round(gold["Close"].iloc[-1], 2) if not gold.empty else 2650.00
@@ -102,9 +107,12 @@ def get_live_market_data():
             "dxy": dxy_price, "dxy_change": dxy_change
         }
     except Exception:
-        return {"gold": 2652.10, "gold_change": 0.0, "dxy": 103.45, "dxy_change": 0.0}
+        return {"gold": 2650.00, "gold_change": 0.0, "dxy": 103.45, "dxy_change": 0.0}
 
 live_data = get_live_market_data()
+
+# اختيار السعر الفعال (اليدوي إن وُجد، وإلا الحي من API)
+current_gold = st.session_state.custom_gold_price if st.session_state.custom_gold_price is not None else live_data["gold"]
 
 with st.sidebar:
     if st.button("تسجيل الخروج", use_container_width=True):
@@ -113,20 +121,35 @@ with st.sidebar:
     st.markdown('<div class="brand"><div class="brand-mark">◆</div><div><div class="brand-title">YUNAN GOLD</div><div class="brand-sub">INTELLIGENCE PLATFORM</div></div></div>', unsafe_allow_html=True)
     timezone_name = st.selectbox("المنطقة الزمنية", ["America/Caracas", "America/New_York", "UTC"], index=0)
     importance_filter = st.selectbox("أهمية الأخبار", ["الكل", "متوسط وعالٍ", "عالٍ فقط"], index=1)
+    
+    st.divider()
+    st.markdown("### ⚙️ ضبط السعر المباشر")
+    manual_p = st.number_input("تعديل سعر الذهب يدويًا ($)", value=float(current_gold), step=0.5, format="%.2f")
+    col_btn1, col_btn2 = st.columns(2)
+    with col_btn1:
+        if st.button("اعتماد السعر", use_container_width=True):
+            st.session_state.custom_gold_price = manual_p
+            st.rerun()
+    with col_btn2:
+        if st.button("إعادة للحي", use_container_width=True):
+            st.session_state.custom_gold_price = None
+            st.rerun()
+
     st.divider()
     st.markdown("### 📡 حالة الأسعار الحية")
-    st.markdown(f'<div class="status"><span class="status-dot"></span> الذهب الحي: {live_data["gold"]} $</div>', unsafe_allow_html=True)
+    price_source = "يدوي مُعتمد" if st.session_state.custom_gold_price is not None else "Spot Gold API"
+    st.markdown(f'<div class="status"><span class="status-dot"></span> الذهب: {current_gold} $ ({price_source})</div>', unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown(f'<div class="status"><span class="status-dot"></span> الدولار الحي: {live_data["dxy"]}</div>', unsafe_allow_html=True)
 
 tz = pytz.timezone(timezone_name)
 now = datetime.now(tz)
 
-st.markdown(f'''<div class="hero"><div class="eyebrow">MACROECONOMIC RESEARCH • XAUUSD</div><h1>مركز استخبارات الذهب المتقدم</h1><p>ربط حي لأسعار السوق والعوائد والتمركز المؤسسي وحساب المخاطر الآلي.</p></div>''', unsafe_allow_html=True)
+st.markdown(f'''<div class="hero"><div class="eyebrow">MACROECONOMIC RESEARCH • XAUUSD</div><h1>مركز استخبارات الذهب المتقدم</h1><p>ربط حي لأسعار الذهب الفوري (Spot Gold) والعوائد وحساب المخاطر مع إمكانية التعديل اليدوي المباشر.</p></div>''', unsafe_allow_html=True)
 st.markdown(f'<div class="section-head"><h3>نظرة عامة للسوق المباشر</h3><span>وقت اللوحة: {now.strftime("%Y-%m-%d • %I:%M %p")}</span></div>', unsafe_allow_html=True)
 
 m1, m2, m3, m4 = st.columns(4)
-with m1: st.metric("ذهب XAUUSD الحي", f'{live_data["gold"]} $', f'{live_data["gold_change"]:+} $')
+with m1: st.metric("ذهب XAUUSD المعتمد", f'{current_gold} $', f'{live_data["gold_change"]:+} $' if st.session_state.custom_gold_price is None else "مُدخل يدويًا")
 with m2: st.metric("مؤشر الدولار DXY", f'{live_data["dxy"]}', f'{live_data["dxy_change"]:+} ')
 with m3: st.metric("العائد الحقيقي (10Y)", "1.82%", "-0.03%")
 with m4: st.metric("درجة التوافق المؤسسي", "88% 🟢", "ممتاز")
@@ -134,8 +157,8 @@ with m4: st.metric("درجة التوافق المؤسسي", "88% 🟢", "ممت
 t1, t2, t3, t4, t5 = st.tabs(["التقويم والارتباط", "التمركز المؤسسي (COT Auto)", "محرك التحليل والمخاطر", "جلسات التداول", "سجل الفرص والحاسبة"])
 
 with t1:
-    st.markdown("#### حركة أسعار الذهب والدولار الحية")
-    st.write(f"سعر الذهب الحالي المباشر: **{live_data['gold']} $** | مؤشر DXY المباشر: **{live_data['dxy']}**")
+    st.markdown("#### حركة أسعار الذهب والدولار")
+    st.write(f"سعر الذهب المعتمد باللوحة: **{current_gold} $** | مؤشر DXY المباشر: **{live_data['dxy']}**")
 
 with t2:
     st.markdown("#### الأتمتة التلقائية لتقرير التمركز المؤسسي (CFTC COT)")
@@ -168,7 +191,7 @@ with t5:
     st.markdown("#### 📋 سجل الفرص وتأكيد التوافق الاقتصادي الآلي")
     with st.form("manual_entry_form"):
         sig = st.selectbox("نوع الإشارة الفنية", ["BOS Bullish (4H)", "Sweep Asia Lows", "Order Block Retest"])
-        price_val = st.text_input("السعر الحقيقي", value=str(live_data["gold"]))
+        price_val = st.text_input("السعر الحقيقي", value=str(current_gold))
         if st.form_submit_button("تسجيل الصفقة مع حساب التوافق الآلي"):
             score = "90% 🟢 (توافق ممتاز)" if float(price_val or 0) > 2600 else "60% 🟡 (مخاطرة)"
             st.session_state.webhook_logs.insert(0, {
@@ -185,4 +208,4 @@ with t5:
         st.dataframe(pd.DataFrame(st.session_state.webhook_logs), use_container_width=True, hide_index=True)
 
 st.divider()
-st.caption("YUNAN GOLD INTELLIGENCE v2.0 • LIVE DATA & RISK ENGINE INTEGRATED")
+st.caption("YUNAN GOLD INTELLIGENCE v2.0 • SPOT GOLD & DUAL PRICE CONTROLS")
