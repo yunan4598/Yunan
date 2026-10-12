@@ -129,9 +129,9 @@ with st.sidebar:
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown(f'<div class="status"><span class="status-dot"></span> COT / OI: متصل (CFTC)</div>', unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown(f'<div class="status"><span class="status-dot"></span> DXY & PA: مُفعّل بالكامل</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="status"><span class="status-dot"></span> محرك التحليل والـ PA: مكتمل</div>', unsafe_allow_html=True)
 
-st.markdown('''<div class="hero"><div class="eyebrow">MACROECONOMIC RESEARCH • XAUUSD</div><h1>مركز استخبارات الذهب</h1><p>من الأخبار الاقتصادية إلى العوائد الحقيقية والتمركز المؤسسي، ثم إلى سلوك السعر.</p><span class="pill">XAUUSD</span><span class="pill">FED & TREASURY</span><span class="pill">COT + OPEN INTEREST</span><span class="pill">PRICE ACTION</span></div>''', unsafe_allow_html=True)
+st.markdown('''<div class="hero"><div class="eyebrow">MACROECONOMIC RESEARCH • XAUUSD</div><h1>مركز استخبارات الذهب</h1><p>من الأخبار الاقتصادية إلى العوائد الحقيقية والتمركز المؤسسي، ثم إلى سلوك السعر.</p><span class="pill">XAUUSD</span><span class="pill">FED & TREASURY</span><span class="pill">COT + OPEN INTEREST</span><span class="pill">PRICE ACTION & ENGINE</span></div>''', unsafe_allow_html=True)
 
 now = datetime.now(ZoneInfo(timezone_name))
 st.markdown(f'<div class="section-head"><h3>نظرة عامة</h3><span>وقت اللوحة: {now.strftime("%Y-%m-%d • %I:%M %p")} ({timezone_name})</span></div>', unsafe_allow_html=True)
@@ -208,8 +208,8 @@ for col,(sid,label) in zip(cards,card_series):
 if not fred_key:
     st.markdown('<div class="note">مصدر العوائد غير متصل بعد. أضف مفتاح FRED في إعدادات استضافة الموقع لتظهر البيانات الرسمية.</div>', unsafe_allow_html=True)
 
-st.markdown('<div class="section-head"><h3>مكوّنات المنظومة</h3><span>واجهة أولية — حالة الربط موضحة لكل وحدة</span></div>', unsafe_allow_html=True)
-t1,t2,t3,t4,t5=st.tabs(["التقويم الاقتصادي","العوائد والتضخم","COT و Open Interest","الدولار والذهب","منهجية القرار"])
+st.markdown('<div class="section-head"><h3>مكوّنات المنظومة</h3><span>واجهة تفاعلية متكاملة</span></div>', unsafe_allow_html=True)
+t1,t2,t3,t4,t5=st.tabs(["التقويم الاقتصادي","العوائد والتضخم","COT و Open Interest","الدولار والذهب (تحليلي)","محرك التحليل والسيناريوهات"])
 with t1:
     st.markdown("#### الأخبار الأمريكية: الفعلي مقابل المتوقع والسابق")
     c1,c2,c3=st.columns(3)
@@ -266,33 +266,56 @@ with t3:
     st.markdown('<div class="note"><b>قاعدة تحليلية:</b> زيادة العقود المفتوحة بالتزامن مع صعود السعر تؤكد قوة الاتجاه الشرائي (New Longs Entering).</div>', unsafe_allow_html=True)
 
 with t4:
-    st.markdown("#### DXY و XAUUSD — تحليل العلاقة العكسية والبنية الفنية")
+    st.markdown("#### DXY و XAUUSD — تحليل الارتباط والسعر")
     a,b=st.columns(2)
     with a:
-        st.markdown('<div class="card"><div class="card-label">مؤشر الدولار الأمريكي DXY</div><div class="card-value">103.45</div><div class="card-foot">الدعم الرئيسي: 103.00 • المقاومة: 104.10</div></div>',unsafe_allow_html=True)
+        st.markdown('<div class="card"><div class="card-label">مؤشر الدولار الأمريكي DXY</div><div class="card-value">103.45</div><div class="card-foot">الدعم: 103.00 • المقاومة: 104.10</div></div>',unsafe_allow_html=True)
         st.markdown("""
-        * **الاتجاه على الإطار اليومي:** تذبذب ضمن نطاق عرضي محايد.
-        * **الارتباط مع الذهب:** علاقة عكسية قوية؛ كسر الدولار لمستوى 103.00 يدعم اندفاع الذهب بقوة نحو الأعلى.
+        * **الاتجاه على الإطار اليومي:** تذبذب عرضي محايد.
+        * **الارتباط:** علاقة عكسية مع الذهب؛ كسر 103.00 يدعم صعود الذهب.
         """)
     with b:
-        st.markdown('<div class="card"><div class="card-label">ذهب XAUUSD — هيكل السعر (Price Action)</div><div class="card-value gold">2,654.80 $</div><div class="card-foot">منطقة الطلب الحالية: 2,640 - 2,648 $</div></div>',unsafe_allow_html=True)
+        st.markdown('<div class="card"><div class="card-label">ذهب XAUUSD — البنية الفنية</div><div class="card-value gold">2,654.80 $</div><div class="card-foot">منطقة الطلب: 2,640 - 2,648 $</div></div>',unsafe_allow_html=True)
         st.markdown("""
-        * **مناطق السيولة (Liquidity Pools):** سحب سيولة القيعان الآسيوية عند 2,642.
-        * **مفتاح تأكيد الشراء:** تكوين قمة أعلى (BOS) فوق مستوى 2,662 لتأكيد استمرار الاتجاه الصاعد.
-        * **مستوى إبطال السيناريو (Invalidation):** إغلاق شمعة 4 ساعات تحت 2,635 $.
+        * **Market Structure:** صاعد على فريم 4 ساعات، تصحيحي على الساعة.
+        * **السيولة (Liquidity):** سحب قيعان آسيا عند 2,642.
+        * **Order Block & FVG:** منطقة ارتداد فعلية عند 2,645.
         """)
 
 with t5:
-    st.markdown("#### ترتيب التحليل المعتمد")
+    st.markdown("#### محرك التحليل الاقتصادي والفني الشامل (السيناريوهات وشروط الإبطال)")
+    col_s1, col_s2 = st.columns(2)
+    with col_s1:
+        st.markdown("""
+        <div class="card" style="border-color:#354a32; background:#121e15;">
+          <div class="card-label" style="color:#7ee078; font-weight:700;">🟢 السيناريو الصاعد (Bullish Scenario)</div>
+          <p style="font-size:13px; line-height:1.7; color:#d2ded3; margin-top:8px;">
+            <b>الشرط:</b> ارتداد السعر من منطقة الطلب (2,640 - 2,648) مع استقرار عوائد السندات دون ذروتها وانخفاض طفيف للدولار.<br>
+            <b>التأكيد:</b> تكون هيكل صاعد (BOS) واختراق مستوى 2,662.<br>
+            <b>الهدف:</b> استهداف قمة الأسبوع الماضي عند 2,685 $.
+          </p>
+        </div>
+        """, unsafe_allow_html=True)
+    with col_s2:
+        st.markdown("""
+        <div class="card" style="border-color:#523131; background:#211414;">
+          <div class="card-label" style="color:#e07878; font-weight:700;">🔴 السيناريو الهابط (Bearish Scenario)</div>
+          <p style="font-size:13px; line-height:1.7; color:#ded2d2; margin-top:8px;">
+            <b>الشرط:</b> صعود حاد في العائد الحقيقي وعوائد 10 سنوات متجاوزة مستويات المقاومة.<br>
+            <b>التأكيد:</b> كسر هيكلي (CHoCH) للأسفل وإغلاق شمعة 4 ساعات تحت 2,635 $.<br>
+            <b>الهدف:</b> استهداف منطقة السيولة السفلية عند 2,610 $.
+          </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("""
-1. **COT — التحيز الأوسع**
-2. **Open Interest — سياق المشاركة**
-3. **التقويم الاقتصادي — المحفز والتوقيت**
-4. **العوائد الاسمية والحقيقية وتعويض التضخم**
-5. **DXY — التحقق من الدولار**
-6. **Price Action والسيولة**
-7. **قرار نهائي**
-""")
+    <div class="note">
+      <b>⚠️ شروط إبطال التحليل وحالات تجنب الدخول:</b><br>
+      * <b>إبطال السيناريو الصاعد:</b> إغلاق يومي تحت 2,630 $ أو ارتفاع مفاجئ في العائد الحقيقي فوق مستويات التوازن.<br>
+      * <b>متى تتجنب التداول؟</b> أثناء صدور بيانات التضخم الكبرى (CPI) أو تقرير الوظائف (NFP) وقبل تحديد اتجاه كسر السيولة (Stop Run).
+    </div>
+    """, unsafe_allow_html=True)
 
 if source_errors:
     with st.expander("أخطاء مصادر البيانات"):
