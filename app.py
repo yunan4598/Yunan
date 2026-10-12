@@ -10,7 +10,6 @@ from dotenv import load_dotenv
 load_dotenv()
 APP_NAME = "YUNAN GOLD INTELLIGENCE"
 FRED_BASE = "https://api.stlouisfed.org/fred/series/observations"
-TE_BASE = "https://api.tradingeconomics.com"
 
 st.set_page_config(page_title=APP_NAME, page_icon="◆", layout="wide", initial_sidebar_state="expanded")
 
@@ -58,7 +57,6 @@ footer {visibility:hidden;}
 </style>
 """, unsafe_allow_html=True)
 
-# Private-site gate: set APP_USERNAME and APP_PASSWORD in the hosting platform's Secrets.
 def read_secret(name, default=""):
     try:
         value = st.secrets.get(name, default)
@@ -76,10 +74,10 @@ if not APP_USERNAME or not APP_PASSWORD:
     <div class="hero">
       <div class="eyebrow">PRIVATE ACCESS • SETUP REQUIRED</div>
       <h1>تجهيز الدخول الخاص</h1>
-      <p>الموقع مضبوط على وضع خاص. قبل النشر، أضف APP_USERNAME وAPP_PASSWORD في Secrets لدى خدمة الاستضافة. لا تضع كلمة المرور داخل ملفات الموقع.</p>
+      <p>الموقع مضبوط على وضع خاص. أضف APP_USERNAME وAPP_PASSWORD في Secrets.</p>
     </div>
     """, unsafe_allow_html=True)
-    st.info("لم يتم إعداد بيانات الدخول بعد. هذا إجراء حماية مقصود؛ لن تُعرض لوحة البيانات قبل إعدادها.")
+    st.info("لم يتم إعداد بيانات الدخول بعد.")
     st.stop()
 
 if "authenticated" not in st.session_state:
@@ -92,7 +90,7 @@ if not st.session_state.authenticated:
     <div class="hero">
       <div class="eyebrow">YUNAN GOLD INTELLIGENCE</div>
       <h1>تسجيل الدخول</h1>
-      <p>لوحة استخبارات الذهب الخاصة. أدخل بيانات الدخول التي أعددتها عند نشر الموقع.</p>
+      <p>لوحة استخبارات الذهب الخاصة.</p>
       <span class="pill">PRIVATE DASHBOARD</span><span class="pill">XAUUSD</span>
     </div>
     """, unsafe_allow_html=True)
@@ -111,9 +109,6 @@ if not st.session_state.authenticated:
         else:
             st.session_state.login_attempts += 1
             st.error("بيانات الدخول غير صحيحة.")
-            if st.session_state.login_attempts >= 8:
-                st.warning("وصلت إلى حد المحاولات في هذه الجلسة. أعد تحميل الصفحة لبدء جلسة جديدة.")
-    st.caption("لا تشارك بيانات الدخول. استخدم كلمة مرور قوية وفريدة.")
     st.stop()
 
 with st.sidebar:
@@ -130,16 +125,17 @@ with st.sidebar:
     st.markdown("### حالة المصادر")
     st.markdown(f'<div class="status"><span class="status-dot"></span> FRED: {"مُعدّ" if os.getenv("FRED_API_KEY", "").strip() else "مفتاح غير مضاف"}</div>', unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown(f'<div class="status"><span class="status-dot"></span> التقويم: {"مُعدّ" if os.getenv("TRADING_ECONOMICS_API_KEY", "").strip() else "غير متصل"}</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="status"><span class="status-dot"></span> التقويم: {"مُعدّ" if read_secret("FINNHUB_API_KEY") else "غير متصل"}</div>', unsafe_allow_html=True)
     st.caption("البيانات غير المتصلة لا تُستبدل بأرقام تخمينية.")
 
-st.markdown('''<div class="hero"><div class="eyebrow">MACROECONOMIC RESEARCH • XAUUSD</div><h1>مركز استخبارات الذهب</h1><p>من الأخبار الاقتصادية إلى العوائد الحقيقية والتمركز المؤسسي، ثم إلى سلوك السعر. لوحة واحدة تساعدك على بناء سيناريو واضح للذهب دون تحويل أي مؤشر منفرد إلى إشارة تداول آلية.</p><span class="pill">XAUUSD</span><span class="pill">FED & TREASURY</span><span class="pill">COT + OPEN INTEREST</span><span class="pill">PRICE ACTION</span></div>''', unsafe_allow_html=True)
+st.markdown('''<div class="hero"><div class="eyebrow">MACROECONOMIC RESEARCH • XAUUSD</div><h1>مركز استخبارات الذهب</h1><p>من الأخبار الاقتصادية إلى العوائد الحقيقية والتمركز المؤسسي، ثم إلى سلوك السعر.</p><span class="pill">XAUUSD</span><span class="pill">FED & TREASURY</span><span class="pill">COT + OPEN INTEREST</span><span class="pill">PRICE ACTION</span></div>''', unsafe_allow_html=True)
 
 now = datetime.now(ZoneInfo(timezone_name))
 st.markdown(f'<div class="section-head"><h3>نظرة عامة</h3><span>وقت اللوحة: {now.strftime("%Y-%m-%d • %I:%M %p")} ({timezone_name})</span></div>', unsafe_allow_html=True)
 
-fred_key = os.getenv("FRED_API_KEY", "").strip()
-te_key = os.getenv("TRADING_ECONOMICS_API_KEY", "").strip()
+fred_key = read_secret("FRED_API_KEY").strip()
+finnhub_key = read_secret("FINNHUB_API_KEY").strip()
+
 FRED_SERIES = {
     "عائد سنتين": "DGS2", "عائد 5 سنوات": "DGS5", "عائد 10 سنوات": "DGS10",
     "عائد 20 سنة": "DGS20", "عائد 30 سنة": "DGS30", "العائد الحقيقي 10 سنوات": "DFII10",
@@ -158,12 +154,18 @@ def get_fred_series(series_id, api_key, limit=8):
     return rows
 
 def get_calendar(api_key, start, end):
-    url=f"{TE_BASE}/calendar/country/united states/{start.isoformat()}/{end.isoformat()}"
-    r=requests.get(url, params={"c":api_key,"f":"json","values":"true"}, timeout=20)
+    url = "https://finnhub.io/api/v1/calendar/economic"
+    params = {"token": api_key, "from": start.isoformat(), "to": end.isoformat()}
+    r = requests.get(url, params=params, timeout=20)
     r.raise_for_status()
-    data=r.json()
-    if not isinstance(data,list): raise ValueError("صيغة رد التقويم غير متوقعة")
-    return data
+    data = r.json()
+    if isinstance(data, dict):
+        events = data.get("economicCalendar", [])
+    elif isinstance(data, list):
+        events = data
+    else:
+        raise ValueError("صيغة رد التقويم غير متوقعة")
+    return events
 
 def num(v):
     try:
@@ -172,19 +174,19 @@ def num(v):
     except (ValueError, TypeError): return None
 
 def interpret_event(row):
-    name=" ".join(str(row.get(k, "")) for k in ["Category","Event"]).lower()
-    actual=num(row.get("Actual", row.get("ActualValue")))
-    forecast=num(row.get("Forecast", row.get("ForecastValue", row.get("TEForecast"))))
+    name = " ".join(str(row.get(k, "")) for k in ["Category", "Event", "event", "name"]).lower()
+    actual = num(row.get("Actual", row.get("actual", row.get("ActualValue"))))
+    forecast = num(row.get("Forecast", row.get("estimate", row.get("ForecastValue", row.get("TEForecast")))))
     if actual is None or forecast is None:
         return "المقارنة غير مكتملة؛ راقب رد فعل العوائد والدولار بعد صدور الخبر."
-    diff=actual-forecast
-    if abs(diff)<1e-10: return "قريب من التوقع؛ راقب المراجعات ورد فعل السوق."
-    inflation=any(x in name for x in ["cpi","inflation","pce","price index"])
-    jobs=any(x in name for x in ["nonfarm","non-farm","payroll","employment change","job creation"])
-    unemp="unemployment rate" in name
-    claims="jobless claims" in name or "initial claims" in name
-    growth=any(x in name for x in ["gdp","ism","pmi","retail sales"])
-    stronger=diff>0
+    diff = actual - forecast
+    if abs(diff) < 1e-10: return "قريب من التوقع؛ راقب المراجعات ورد فعل السوق."
+    inflation = any(x in name for x in ["cpi", "inflation", "pce", "price index"])
+    jobs = any(x in name for x in ["nonfarm", "non-farm", "payroll", "employment change", "job creation"])
+    unemp = "unemployment rate" in name
+    claims = "jobless claims" in name or "initial claims" in name
+    growth = any(x in name for x in ["gdp", "ism", "pmi", "retail sales"])
+    stronger = diff > 0
     if inflation:
         return ("التضخم أعلى من التوقع؛ قد يضغط على الذهب إذا ارتفعت العوائد الحقيقية والدولار." if stronger else "التضخم أقل من التوقع؛ قد يدعم الذهب إذا تراجعت العوائد الحقيقية والدولار.")
     if jobs:
@@ -197,7 +199,6 @@ def interpret_event(row):
         return "مفاجأة في بيانات النمو؛ لا تحدد اتجاه الذهب قبل فحص العوائد والدولار."
     return "توجد مفاجأة رقمية؛ افحص طبيعة المؤشر والمراجعات ورد فعل السوق."
 
-# Pull official yield observations only when a key is configured.
 series_data={}; source_errors=[]
 if fred_key:
     for label, sid in FRED_SERIES.items():
@@ -221,7 +222,7 @@ for col,(sid,label) in zip(cards,card_series):
             st.caption("بانتظار ربط مصدر البيانات")
 
 if not fred_key:
-    st.markdown('<div class="note">مصدر العوائد غير متصل بعد. أضف مفتاح FRED في إعدادات استضافة الموقع لتظهر البيانات الرسمية. لن نعرض أرقامًا تجريبية على أنها بيانات حقيقية.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="note">مصدر العوائد غير متصل بعد. أضف مفتاح FRED في إعدادات استضافة الموقع لتظهر البيانات الرسمية.</div>', unsafe_allow_html=True)
 
 st.markdown('<div class="section-head"><h3>مكوّنات المنظومة</h3><span>واجهة أولية — حالة الربط موضحة لكل وحدة</span></div>', unsafe_allow_html=True)
 t1,t2,t3,t4,t5=st.tabs(["التقويم الاقتصادي","العوائد والتضخم","COT و Open Interest","الدولار والذهب","منهجية القرار"])
@@ -232,18 +233,19 @@ with t1:
     with c2: st.markdown('<div class="card"><div class="card-label">سوق العمل</div><div class="card-value">NFP / Claims</div><div class="card-foot">قوة التوظيف والأجور والبطالة</div></div>',unsafe_allow_html=True)
     with c3: st.markdown('<div class="card"><div class="card-label">النمو والسياسة</div><div class="card-value">GDP / ISM / FOMC</div><div class="card-foot">النشاط الاقتصادي ومسار الفائدة</div></div>',unsafe_allow_html=True)
     today=date.today(); start=today-timedelta(days=days_back); end=today+timedelta(days=days_forward)
-    if not te_key:
-        st.markdown('<div class="placeholder"><b>التقويم غير متصل بعد.</b><br>تحتاج هذه الوحدة إلى مزود تقويم اقتصادي ومفتاح API صالح. بعد الربط ستعرض وقت الخبر حسب المنطقة الزمنية المختارة، والأهمية، والفعلي، والمتوقع، والسابق، وقراءة أولية محافظة.</div>',unsafe_allow_html=True)
-        st.caption("قبل شراء أي اشتراك، نتحقق من سعره وصلاحيات API المطلوبة.")
+    if not finnhub_key:
+        st.markdown('<div class="placeholder"><b>التقويم غير متصل بعد.</b><br>تحتاج هذه الوحدة إلى مفتاح Finnhub API صالح في إعدادات Secrets.</div>',unsafe_allow_html=True)
     else:
         try:
-            events=get_calendar(te_key,start,end); df=pd.DataFrame(events)
+            events=get_calendar(finnhub_key,start,end)
+            df=pd.DataFrame(events)
             if not df.empty:
-                if "Country" in df.columns: df=df[df["Country"].astype(str).str.lower().isin(["united states","united states of america","usa"])]
-                if "Importance" in df.columns:
-                    imp=pd.to_numeric(df["Importance"],errors="coerce")
-                    if importance_filter=="متوسط وعالٍ": df=df[imp>=2]
-                    elif importance_filter=="عالٍ فقط": df=df[imp>=3]
+                rename_map = {"time": "Date", "event": "Event", "actual": "Actual", "estimate": "Forecast", "prev": "Previous", "impact": "Importance", "country": "Country"}
+                df = df.rename(columns={k: v for k, v in rename_map.items() if k in df.columns})
+                
+                if "Country" in df.columns: 
+                    df=df[df["Country"].astype(str).str.upper().isin(["US", "USA", "UNITED STATES"])]
+                
                 tz=ZoneInfo(timezone_name)
                 def local_time(v):
                     try:
@@ -251,11 +253,12 @@ with t1:
                         if dt.tzinfo is None: dt=dt.replace(tzinfo=timezone.utc)
                         return dt.astimezone(tz).strftime("%Y-%m-%d %I:%M %p")
                     except Exception: return str(v)
+                
                 if "Date" in df.columns: df["الوقت المحلي"]=df["Date"].apply(local_time)
                 for col in ["Actual","Forecast","Previous"]:
                     if col not in df.columns: df[col]=""
                 df["قراءة أولية"]=df.apply(interpret_event,axis=1)
-                cols=[c for c in ["الوقت المحلي","Importance","Category","Event","Actual","Forecast","Previous","Revised","LastUpdate","قراءة أولية"] if c in df.columns]
+                cols=[c for c in ["الوقت المحلي","Importance","Event","Actual","Forecast","Previous","قراءة أولية"] if c in df.columns]
                 st.dataframe(df[cols],use_container_width=True,hide_index=True)
             else: st.info("لم يُرجع المزود أحداثًا في النطاق المختار.")
         except Exception as e: st.error(f"تعذر تحميل التقويم: {e}")
@@ -274,33 +277,26 @@ with t2:
             chart=pd.DataFrame(chart_rows); chart["التاريخ"]=pd.to_datetime(chart["التاريخ"])
             st.line_chart(chart.pivot(index="التاريخ",columns="المؤشر",values="العائد (%)"))
     else:
-        st.markdown('<div class="placeholder">ستظهر هنا عوائد 2Y و5Y و10Y و20Y و30Y، والعائد الحقيقي DFII10، وتعويض التضخم T10YIE، مع تاريخ آخر قراءة ومقارنة بالتحديث السابق.</div>',unsafe_allow_html=True)
-    st.caption("سلاسل FRED الرسمية قد تكون يومية ومتأخرة عن حركة السوق اللحظية.")
+        st.markdown('<div class="placeholder">ستظهر هنا عوائد الخزانة والعائد الحقيقي وتضخم 10 سنوات.</div>',unsafe_allow_html=True)
 with t3:
     st.markdown("#### تمركز العقود الآجلة")
-    st.markdown('<div class="placeholder"><b>الوحدة مصممة ولم يتم ربطها بمصدر حي بعد.</b><br>المطلوب: تقرير COT من CFTC، تصنيف Commercial / Non-commercial، صافي المراكز، التغير الأسبوعي، وOpen Interest. سنعرض تاريخ التقرير ومصدره، ونوضح أن Open Interest وحده لا يكشف هوية من فتح العقود ولا اتجاهه بشكل قطعي.</div>',unsafe_allow_html=True)
-    a,b=st.columns(2)
-    with a: st.markdown('<div class="card"><div class="card-label">COT Bias</div><div class="card-value">غير متاح</div><div class="card-foot">بانتظار ربط بيانات CFTC</div></div>',unsafe_allow_html=True)
-    with b: st.markdown('<div class="card"><div class="card-label">Open Interest</div><div class="card-value">غير متاح</div><div class="card-foot">بانتظار ربط سلسلة العقود</div></div>',unsafe_allow_html=True)
+    st.markdown('<div class="placeholder"><b>الوحدة مصممة ولم يتم ربطها بمصدر حي بعد.</b></div>',unsafe_allow_html=True)
 with t4:
     st.markdown("#### DXY و XAUUSD")
     a,b=st.columns(2)
-    with a:
-        st.markdown('<div class="placeholder"><b>مؤشر الدولار DXY</b><br>لم يتم توصيل مصدر بيانات سعرية حي. لن نستخدم مؤشرًا بديلًا على أنه DXY دون توضيح الفرق.</div>',unsafe_allow_html=True)
-    with b:
-        st.markdown('<div class="placeholder"><b>السعر والبنية الفنية للذهب</b><br>سيُضاف لاحقًا إدخال السعر الحالي، الاتجاه متعدد الأطر، السيولة، مناطق الدعم والمقاومة، وشرط الإبطال، ثم ربط TradingView عند إعداد Webhook.</div>',unsafe_allow_html=True)
+    with a: st.markdown('<div class="placeholder"><b>مؤشر الدولار DXY</b></div>',unsafe_allow_html=True)
+    with b: st.markdown('<div class="placeholder"><b>السعر والبنية الفنية للذهب</b></div>',unsafe_allow_html=True)
 with t5:
     st.markdown("#### ترتيب التحليل المعتمد")
     st.markdown("""
-1. **COT — التحيز الأوسع:** قراءة التموضع الأسبوعي، لا توقيت الدخول.
-2. **Open Interest — سياق المشاركة:** يُفسر مع السعر والحجم ونوع العقد، لا منفردًا.
-3. **التقويم الاقتصادي — المحفز والتوقيت:** ما المتوقع؟ ما الفعلي؟ هل توجد مراجعات؟
-4. **العوائد الاسمية والحقيقية وتعويض التضخم:** هل تغير تسعير الفائدة بما يدعم الذهب أو يضغط عليه؟
-5. **DXY — التحقق من الدولار:** هل يتوافق رد فعله مع فرضية السوق؟
-6. **Price Action والسيولة:** لا دخول قبل تأكيد سعري محدد، مع مستوى إبطال واضح.
-7. **قرار نهائي:** شراء / بيع / انتظار / إلغاء السيناريو؛ عند تعارض الأدلة تكون الأولوية للانتظار.
+1. **COT — التحيز الأوسع**
+2. **Open Interest — سياق المشاركة**
+3. **التقويم الاقتصادي — المحفز والتوقيت**
+4. **العوائد الاسمية والحقيقية وتعويض التضخم**
+5. **DXY — التحقق من الدولار**
+6. **Price Action والسيولة**
+7. **قرار نهائي**
 """)
-    st.markdown('<div class="note">هذه اللوحة أداة بحث وتحليل وليست توصية مالية. الخبر وحده لا يكفي للدخول، والتفسير الآلي أولي وقد لا يعكس كل مكونات التقرير أو مراجعاته.</div>',unsafe_allow_html=True)
 
 if source_errors:
     with st.expander("أخطاء مصادر البيانات"):
