@@ -1,27 +1,21 @@
 import os
 import json
-from datetime import datetime, timedelta
+from datetime import datetime
 import pytz
 import pandas as pd
-import requests
 import streamlit as st
-import yfinance as yf
-from dotenv import load_dotenv
 
-# --- إعداد البيئة والتطبيق ---
-load_dotenv()
+# --- إعداد التطبيق الأساسي ---
 APP_NAME = "YUNAN GOLD INTELLIGENCE"
-
 st.set_page_config(page_title=APP_NAME, page_icon="◆", layout="wide", initial_sidebar_state="expanded")
 
-# --- الهوية البصرية المؤسسية (Dark / Gold / Green / Red) ---
+# --- الهوية البصرية المؤسسية ---
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap');
 :root { 
     --bg: #06090f; 
     --panel: #0d131d; 
-    --panel2: #111a26; 
     --line: #1e2c3d; 
     --gold: #d9b56d; 
     --green: #00e676; 
@@ -42,29 +36,18 @@ html, body, [class*="css"] { font-family:'IBM Plex Sans Arabic','Inter',sans-ser
 .brand-sub { color: var(--muted); font-size: 11px; margin-top: 2px; }
 
 .hero { border: 1px solid #233142; border-radius: 16px; padding: 20px 24px; background: linear-gradient(135deg, rgba(17,25,38,0.95), rgba(8,12,18,0.95)); margin-bottom: 18px; position: relative; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
-.hero:after { content: '◆'; position: absolute; left: 24px; top: 4px; font-size: 110px; color: rgba(217,181,109,0.035); }
 .eyebrow { color: var(--gold); letter-spacing: 2px; font-size: 11px; font-weight: 700; font-family: Inter, sans-serif; }
 .hero h1 { margin: 6px 0 6px; font-size: 23px; color: #f7f5ef; font-weight: 700; }
 .hero p { margin: 0; color: #9fb0c6; max-width: 820px; line-height: 1.7; font-size: 13.5px; }
 
-.section-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 18px 0 10px; }
-.section-head h3 { font-size: 17px; font-weight: 700; margin: 0; color: #f1f4f8; }
-.section-head span { color: var(--muted); font-size: 12px; }
-
-div[data-testid="stMetric"] { background: linear-gradient(145deg, #0f1622, #0a0f17); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+div[data-testid="stMetric"] { background: linear-gradient(145deg, #0f1622, #0a0f17); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; }
 div[data-testid="stMetric"] label { color: var(--muted)!important; font-size: 12px; }
 div[data-testid="stMetric"] [data-testid="stMetricValue"] { color: var(--gold)!important; font-size: 24px; font-weight: 700; }
-
-.status { display: inline-flex; align-items: center; gap: 7px; color: #c3cedb; font-size: 12px; padding: 7px 10px; border-radius: 8px; background: #0a0f17; border: 1px solid #1c2836; width: 100%; }
-.status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); display: inline-block; box-shadow: 0 0 8px var(--green); }
 
 .fusion-card { background: #0b111a; border: 1px solid var(--line); border-radius: 12px; padding: 18px; margin-bottom: 15px; }
 .fusion-badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; margin-bottom: 8px; }
 .badge-gold { background: rgba(217,181,109,0.15); color: var(--gold); border: 1px solid #544427; }
 .badge-green { background: rgba(0,230,118,0.15); color: var(--green); border: 1px solid #135233; }
-.badge-red { background: rgba(255,82,82,0.15); color: var(--red); border: 1px solid #5c1f1f; }
-
-.alert-box { background: rgba(217,181,109,0.08); border-left: 4px solid var(--gold); padding: 12px 16px; border-radius: 0 8px 8px 0; margin-bottom: 10px; font-size: 13.5px; }
 
 .stButton button { border-radius: 10px; border: 1px solid #d9b56d !important; background: linear-gradient(135deg, #d9b56d, #b3914a) !important; color: #06090f !important; font-weight: 800 !important; width: 100%; padding: 10px; }
 .stButton button:hover { background: linear-gradient(135deg, #e6c37d, #c5a159) !important; color: #000000 !important; }
@@ -72,7 +55,7 @@ footer {visibility: hidden;}
 </style>
 """, unsafe_allow_html=True)
 
-# --- جلب البيانات الآمنية ---
+# --- إدارة الدخول ---
 def read_secret(name, default=""):
     try:
         value = st.secrets.get(name, default)
@@ -83,67 +66,56 @@ def read_secret(name, default=""):
 APP_USERNAME = read_secret("APP_USERNAME")
 APP_PASSWORD = read_secret("APP_PASSWORD")
 
-if not APP_USERNAME or not APP_PASSWORD:
-    st.info("لم يتم إعداد بيانات الدخول بعد. أضف APP_USERNAME و APP_PASSWORD في Streamlit Secrets.")
-    st.stop()
+if APP_USERNAME and APP_PASSWORD:
+    if "authenticated" not in st.session_state: st.session_state.authenticated = False
+    if not st.session_state.authenticated:
+        st.markdown('<div class="hero"><div class="eyebrow">YUNAN GOLD INTELLIGENCE</div><h1>تسجيل الدخول المؤسسي</h1></div>', unsafe_allow_html=True)
+        with st.form("login"):
+            u = st.text_input("اسم المستخدم")
+            p = st.text_input("كلمة المرور", type="password")
+            if st.form_submit_button("دخول"):
+                import hmac
+                if hmac.compare_digest(u.encode(), APP_USERNAME.encode()) and hmac.compare_digest(p.encode(), APP_PASSWORD.encode()):
+                    st.session_state.authenticated = True
+                    st.rerun()
+                else: st.error("بيانات غير صحيحة")
+        st.stop()
 
-if "authenticated" not in st.session_state: st.session_state.authenticated = False
+# --- إدارة الذاكرة ---
 if "synced_gold_price" not in st.session_state: st.session_state.synced_gold_price = 4186.67
 if "trade_journal" not in st.session_state: st.session_state.trade_journal = []
 
-if not st.session_state.authenticated:
-    st.markdown('<div class="hero"><div class="eyebrow">YUNAN GOLD INTELLIGENCE</div><h1>تسجيل الدخول المؤسسي</h1><p>نظام قرار استخبارات الذهب المتكامل.</p></div>', unsafe_allow_html=True)
-    with st.form("login_form"):
-        u = st.text_input("اسم المستخدم")
-        p = st.text_input("كلمة المرور", type="password")
-        if st.form_submit_button("دخول إلى المنصة", use_container_width=True):
-            import hmac
-            if hmac.compare_digest(u.encode(), APP_USERNAME.encode()) and hmac.compare_digest(p.encode(), APP_PASSWORD.encode()):
-                st.session_state.authenticated = True
-                st.rerun()
-            else: st.error("بيانات الدخول غير صحيحة.")
-    st.stop()
-
-# --- القائمة الجانبية المحدثة بالإضافات الخمس الرئسية ---
+# --- القائمة الجانبية ---
 with st.sidebar:
     st.markdown('<div class="brand"><div class="brand-mark">◆</div><div><div class="brand-title">YUNAN GOLD</div><div class="brand-sub">INTELLIGENCE TERMINAL</div></div></div>', unsafe_allow_html=True)
     
     navigation = st.radio(
         "الوحدات الرئيسية للأنظمة:",
         [
-            "🧠 1. محرك الذكاء الاقتصادي (Gold Engine)",
-            "📊 2. الفائدة الأمريكية والمفاجآت (Fed & Surprises)",
-            "🏦 3. التمركز المؤسسي والسيولة (COT & Liquidity)",
-            "🎯 4. فحص الصفقات وسلوك الجلسات (Validator & Sessions)",
-            "🧪 5. مختبر الأداء وسجل الصفقات (Journal & Lab)"
-        ],
-        label_visibility="collapsed"
+            "محرك الذكاء الاقتصادي",
+            "الفائدة الأمريكية والمفاجآت",
+            "التمركز المؤسسي والسيولة",
+            "فحص الصفقات وسلوك الجلسات",
+            "مختبر الأداء وسجل الصفقات"
+        ]
     )
 
     st.divider()
-    st.markdown("### ⚙️ مطابقة سعر الشارت الحية")
-    manual_chart_price = st.text_input("السعر الفعلي من شارتك ($)", value=str(st.session_state.synced_gold_price))
-    if st.button("تحديث فوري للسعر"):
+    manual_price = st.text_input("سعر الشارت الفعلي ($)", value=str(st.session_state.synced_gold_price))
+    if st.button("تحديث السعر"):
         try:
-            st.session_state.synced_gold_price = float(manual_chart_price)
-            st.success("تمت مطابقة السعر بنجاح!")
+            st.session_state.synced_gold_price = float(manual_price)
+            st.success("تم تحديث السعر")
             st.rerun()
         except ValueError:
-            st.error("الرجاء إدخال رقم صحيح.")
+            st.error("رقم غير صحيح")
 
-    st.markdown(f'<div class="status" style="margin-top:10px;"><span class="status-dot"></span> السعر المعتمد: <strong style="color:var(--green); margin-right:4px;">{st.session_state.synced_gold_price} $</strong></div>', unsafe_allow_html=True)
-    
-    st.divider()
-    timezone_name = st.selectbox("المنطقة الزمنية", ["America/Caracas", "America/New_York", "UTC"], index=0)
-    
-    st.divider()
-    st.markdown("### 🛰️ مؤشر جودة البيانات (Data Quality)")
-    st.caption("• DXY (Yahoo): متصل 🟢\n• 10Y Yields: متصل 🟢\n• FRED API: بانتظار المفتاح 🟡")
+    st.caption(f"السعر المعتمد حالياً: {st.session_state.synced_gold_price} $")
 
 active_gold = st.session_state.synced_gold_price
 
-# --- 1. محرك الذكاء الاقتصادي للذهب (Gold Intelligence Engine) ---
-if "1. 🧠" in navigation:
+# --- 1. محرك الذكاء الاقتصادي ---
+if navigation == "محرك الذكاء الاقتصادي":
     st.markdown('''<div class="hero"><div class="eyebrow">MACRO & FUSION ENGINE</div><h1>🧠 محرك الذكاء الاقتصادي للذهب (Gold Intelligence Engine)</h1><p>ربط محركات السوق بدلاً من اختزال التحليل. يوضح الأدلة المؤيدة والمعارضة والتفاصيل المسؤولة عن تحريك السعر حالياً.</p></div>''', unsafe_allow_html=True)
 
     st.markdown("### 📊 تحليل الأدلة المؤيدة والمعارضة للذهب (Evidence Matrix)")
@@ -160,7 +132,7 @@ if "1. 🧠" in navigation:
     st.info("⚖️ **النتيجة الحالية:** تضارب بين ارتفاع العوائد الحقيقية وتراجع الدولار؛ لذلك لا يُعتمد اتجاه أحادي دون انتظار سحب السيولة (Stop Run) عند افتتاح جلسة نيويورك.")
 
 # --- 2. توقعات الفائدة والمفاجآت الاقتصادية ---
-elif "2. 📊" in navigation:
+elif navigation == "الفائدة الأمريكية والمفاجآت":
     st.markdown('''<div class="hero"><div class="eyebrow">FED RATE & SURPRISE DETECTOR</div><h1>📊 لوحة توقعات الفائدة وكاشف المفاجآت الاقتصادية</h1><p>مراقبة قرارات الفيدرالي ومقارنة القراءات الفعلية للتضخم والوظائف بالتوقعات وقاعدة البيانات التاريخية.</p></div>''', unsafe_allow_html=True)
 
     col_fed1, col_fed2 = st.columns(2)
@@ -186,7 +158,7 @@ elif "2. 📊" in navigation:
     st.dataframe(pd.DataFrame(surprises), use_container_width=True, hide_index=True)
 
 # --- 3. التمركز المؤسسي والسيولة ---
-elif "3. 🏦" in navigation:
+elif navigation == "التمركز المؤسسي والسيولة":
     st.markdown('''<div class="hero"><div class="eyebrow">INSTITUTIONAL POSITIONING</div><h1>🏦 لوحة السيولة والتمركز المؤسسي (COT & Liquidity)</h1><p>متابعة تقارير COT الأسبوعية وتغير الفائدة المفتوحة (Open Interest) مع ربطها بمناطق السيولة الفنية.</p></div>''', unsafe_allow_html=True)
 
     col_cot1, col_cot2, col_cot3 = st.columns(3)
@@ -196,8 +168,8 @@ elif "3. 🏦" in navigation:
 
     st.warning("⚠️ **تنبيه مؤسسي:** بيانات COT أسبوعية ومتأخرة نسبياً، واستخدامها يكون لتحديد التحيز الاستراتيجي وليس للتنفيذ اللحظي.")
 
-# --- 4. فحص الصفقات وسلوك الجلسات (Trade Setup Validator) ---
-elif "4. 🎯" in navigation:
+# --- 4. فحص الصفقات وسلوك الجلسات ---
+elif navigation == "فحص الصفقات وسلوك الجلسات":
     st.markdown('''<div class="hero"><div class="eyebrow">PRICE ACTION & VALIDATOR</div><h1>🎯 فحص الصفقات وسلوك الجلسات (Trade Setup Validator)</h1><p>فحص الشروط الفنية والمخاطر قبل الدخول لمنع القرارات العاطفية والتأكد من توافق الاتجاه.</p></div>''', unsafe_allow_html=True)
 
     with st.form("validator_form"):
@@ -227,7 +199,7 @@ elif "4. 🎯" in navigation:
             st.error(f"🚫 **NO TRADE (تجنب الدخول):** درجة التوافق {score}%. المخاطرة عالية جداً ولا توجد شروط مكتملة.")
 
 # --- 5. سجل الصفقات ومختبر الأداء ---
-elif "5. 🧪" in navigation:
+elif navigation == "مختبر الأداء وسجل الصفقات":
     st.markdown('''<div class="hero"><div class="eyebrow">PERFORMANCE LAB & JOURNAL</div><h1>🧪 سجل الصفقات ومختبر تقييم الأداء (Trading Journal)</h1><p>تسجيل كل فرصة وتحليل النتائج والتزامك بالخطة لمعرفة أي النماذج تحقق أعلى ربحية بكفاءة.</p></div>''', unsafe_allow_html=True)
 
     with st.form("journal_entry"):
@@ -258,4 +230,4 @@ elif "5. 🧪" in navigation:
         st.dataframe(pd.DataFrame(st.session_state.trade_journal), use_container_width=True, hide_index=True)
 
 st.divider()
-st.caption("YUNAN GOLD INTELLIGENCE v5.0 • FIVE-MODULE INSTITUTIONAL TERMINAL")
+st.caption("YUNAN GOLD INTELLIGENCE v5.1 • STABLE DISPLAY FIX")
