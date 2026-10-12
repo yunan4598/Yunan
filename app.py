@@ -32,18 +32,11 @@ html, body, [class*="css"] { font-family:'IBM Plex Sans Arabic','Inter',sans-ser
 .eyebrow { color:var(--gold); letter-spacing:2px; font-size:11px; font-weight:700; font-family:Inter,sans-serif; }
 .hero h1 { margin:8px 0 6px; font-size:29px; color:#f7f5ef; font-weight:700; }
 .hero p { margin:0; color:#aebaca; max-width:800px; line-height:1.8; font-size:14px; }
-.pill { display:inline-block; padding:5px 10px; border:1px solid #39485d; border-radius:999px; color:#d9e2ee; font-size:11px; margin:10px 5px 0 0; background:#121c29; }
 .section-head { display:flex; align-items:center; justify-content:space-between; gap:10px; margin:22px 0 12px; }
 .section-head h3 { font-size:18px; font-weight:700; margin:0; color:#f1f4f8; }
 .section-head span { color:var(--muted); font-size:12px; }
-.card { background:linear-gradient(145deg,#121b28,#0e151f); border:1px solid var(--line); border-radius:15px; padding:16px 17px; min-height:118px; }
-.card-label { color:#a8b5c5; font-size:12px; margin-bottom:10px; }
-.card-value { color:#f3f5f8; font-size:25px; font-weight:700; line-height:1.3; font-family:Inter,'IBM Plex Sans Arabic',sans-serif; }
-.card-foot { color:#8191a5; font-size:11px; margin-top:9px; }
-.gold { color:var(--gold)!important; }
 .status { display:inline-flex; align-items:center; gap:7px; color:#c3cedb; font-size:12px; padding:7px 10px; border-radius:8px; background:#111b28; border:1px solid #2a394c; }
 .status-dot { width:7px; height:7px; border-radius:50%; background:#d7a954; display:inline-block; }
-.note { padding:12px 14px; border:1px solid #4b412b; background:#211d15; border-radius:10px; color:#d6c39e; font-size:13px; line-height:1.7; }
 div[data-testid="stMetric"] { background:linear-gradient(145deg,#121b28,#0e151f); border:1px solid var(--line); border-radius:15px; padding:14px 16px; }
 .stTabs [data-baseweb="tab-list"] { gap:8px; background:#0d141e; padding:7px; border-radius:12px; border:1px solid var(--line); }
 .stTabs [data-baseweb="tab"] { border-radius:8px; color:#b9c5d3; padding:8px 16px; }
@@ -69,6 +62,7 @@ if not APP_USERNAME or not APP_PASSWORD:
 
 if "authenticated" not in st.session_state: st.session_state.authenticated = False
 if "webhook_logs" not in st.session_state: st.session_state.webhook_logs = []
+if "synced_gold_price" not in st.session_state: st.session_state.synced_gold_price = 4186.67
 
 if not st.session_state.authenticated:
     st.markdown('<div class="hero"><div class="eyebrow">YUNAN GOLD INTELLIGENCE</div><h1>تسجيل الدخول</h1><p>لوحة استخبارات الذهب الخاصة.</p></div>', unsafe_allow_html=True)
@@ -83,27 +77,15 @@ if not st.session_state.authenticated:
             else: st.error("بيانات الدخول غير صحيحة.")
     st.stop()
 
-@st.cache_data(ttl=30)
-def get_live_market_data():
+@st.cache_data(ttl=60)
+def get_dxy_data():
     try:
-        # استخدام الرمز المباشر للذهب الفوري من Yahoo Finance مع جلب اللحظة الحالية
-        ticker = yf.Ticker("GC=F")
-        todays_data = ticker.history(period="1d", interval="1m")
-        if not todays_data.empty:
-            gold_price = round(todays_data["Close"].iloc[-1], 2)
-        else:
-            hist = ticker.history(period="5d")
-            gold_price = round(hist["Close"].iloc[-1], 2) if not hist.empty else 4187.87
-
         dxy = yf.Ticker("DX-Y.NYB").history(period="2d")
-        dxy_price = round(dxy["Close"].iloc[-1], 2) if not dxy.empty else 103.50
-        
-        return {"gold": gold_price, "dxy": dxy_price}
+        return round(dxy["Close"].iloc[-1], 2) if not dxy.empty else 102.20
     except Exception:
-        return {"gold": 4187.87, "dxy": 103.45}
+        return 102.20
 
-live_data = get_live_market_data()
-current_gold = live_data["gold"]
+dxy_val = get_dxy_data()
 
 with st.sidebar:
     if st.button("تسجيل الخروج", use_container_width=True):
@@ -113,19 +95,28 @@ with st.sidebar:
     timezone_name = st.selectbox("المنطقة الزمنية", ["America/Caracas", "America/New_York", "UTC"], index=0)
     
     st.divider()
-    st.markdown("### 📡 حالة الأسعار الحية التلقائية")
-    st.markdown(f'<div class="status"><span class="status-dot"></span> الذهب الحي: {current_gold} $</div>', unsafe_allow_html=True)
-    st.markdown(f'<div class="status" style="margin-top:8px;"><span class="status-dot"></span> الدولار الحي: {live_data["dxy"]}</div>', unsafe_allow_html=True)
+    st.markdown("### ⚙️ مطابقة سعر الشارت")
+    manual_chart_price = st.text_input("سعر الذهب الفعلي من شارتك", value=str(st.session_state.synced_gold_price))
+    if st.button("تحديث فوري للسعر", use_container_width=True):
+        try:
+            st.session_state.synced_gold_price = float(manual_chart_price)
+            st.success("تمت مطابقة السعر بنجاح!")
+            st.rerun()
+        except ValueError:
+            st.error("الرجاء إدخال رقم صحيح.")
+
+    st.markdown(f'<div class="status" style="margin-top:12px;"><span class="status-dot"></span> السعر المُعتمد: {st.session_state.synced_gold_price} $</div>', unsafe_allow_html=True)
 
 tz = pytz.timezone(timezone_name)
 now = datetime.now(tz)
+active_gold = st.session_state.synced_gold_price
 
-st.markdown(f'''<div class="hero"><div class="eyebrow">MACROECONOMIC RESEARCH • XAUUSD</div><h1>مركز استخبارات الذهب المتقدم</h1><p>جلب تلقائي حي ومباشر لسعر الذهب الفوري متوافق تماماً مع حركة السوق لحظياً.</p></div>''', unsafe_allow_html=True)
+st.markdown(f'''<div class="hero"><div class="eyebrow">MACROECONOMIC RESEARCH • XAUUSD</div><h1>مركز استخبارات الذهب المتقدم</h1><p>لوحة قرار تكتيكية متوافقة تماماً مع شارتك مع حاسبة مخاطر وسجل فرص فوري.</p></div>''', unsafe_allow_html=True)
 st.markdown(f'<div class="section-head"><h3>نظرة عامة للسوق المباشر</h3><span>وقت اللوحة: {now.strftime("%Y-%m-%d • %I:%M %p")}</span></div>', unsafe_allow_html=True)
 
 m1, m2, m3, m4 = st.columns(4)
-with m1: st.metric("سعر الذهب التلقائي الحي", f'{current_gold} $', "تحديث آلي لحظي")
-with m2: st.metric("مؤشر الدولار DXY", f'{live_data["dxy"]}', "حي")
+with m1: st.metric("سعر الشارت المُعتمد", f'{active_gold} $', "مطابق لمنصتك")
+with m2: st.metric("مؤشر الدولار DXY", f'{dxy_val}', "حي")
 with m3: st.metric("العائد الحقيقي (10Y)", "1.82%", "-0.03%")
 with m4: st.metric("درجة التوافق المؤسسي", "92% 🟢", "ممتاز")
 
@@ -133,19 +124,19 @@ t1, t2, t3, t4, t5 = st.tabs(["التقويم والارتباط", "التمرك
 
 with t1:
     st.markdown("#### حالة الارتباط وسعر الذهب الفعلي")
-    st.write(f"السعر التلقائي الحالي المسجل في المنصة: **{current_gold} $**.")
+    st.write(f"السعر الفعلي الحالي المعتمد في اللوحة: **{active_gold} $** (مطابق تماماً لما تراه على شارتك).")
 
 with t2:
     st.markdown("#### التمركز المؤسسي (CFTC COT)")
-    st.dataframe(pd.DataFrame([{"الفئة": "Non-Commercials", "صافي المراكز": "+223,300"}]), use_container_width=True, hide_index=True)
+    st.dataframe(pd.DataFrame([{"الفئة": "Non-Commercials (الأموال الذكية)", "عقود الشراء": 285400, "عقود البيع": 62100, "صافي المراكز": "+223,300"}]), use_container_width=True, hide_index=True)
 
 with t3:
     st.markdown("#### محرك التحليل والسيناريوهات")
-    st.info(f"السعر الحالي عند {current_gold} يتحرك قرب مستويات السيولة ومنطقة سحب القيعان.")
+    st.info(f"السعر الحالي عند {active_gold} يختبر مناطق سيولة هامة ومناطق استهداف القيعان.")
 
 with t4:
     st.markdown("#### جلسات التداول")
-    st.write(f"المنطقة الزمنية: {timezone_name}")
+    st.write(f"المنطقة الزمنية الحالية: {timezone_name}")
 
 with t5:
     st.markdown("#### 🧮 حاسبة حجم العقود وإدارة المخاطر")
@@ -162,13 +153,13 @@ with t5:
     st.markdown("#### 📋 سجل الفرص وتوثيق الصفقات")
     with st.form("manual_entry_form"):
         sig = st.selectbox("نوع الإشارة", ["Sweep Asia Lows", "BOS Bullish", "Order Block Retest"])
-        price_val = st.text_input("السعر عند الإشارة", value=str(current_gold))
-        if st.form_submit_button("تسجيل الصفقة"):
+        price_val = st.text_input("السعر عند الإشارة", value=str(active_gold))
+        if st.form_submit_button("تسجيل الصفقة بالسعر الحالي"):
             st.session_state.webhook_logs.insert(0, {
                 "الوقت": now.strftime("%Y-%m-%d %I:%M %p"),
                 "الإشارة": sig,
                 "السعر": f"{price_val} $",
-                "الحالة": "مُسجل آلياً 🟢"
+                "الحالة": "مُطابق لشارتك 🟢"
             })
             st.success("تم تسجيل الصفقة بنجاح!")
             st.rerun()
@@ -177,4 +168,4 @@ with t5:
         st.dataframe(pd.DataFrame(st.session_state.webhook_logs), use_container_width=True, hide_index=True)
 
 st.divider()
-st.caption("YUNAN GOLD INTELLIGENCE v2.2 • FULLY AUTOMATED LIVE SPOT PRICE ENGINE")
+st.caption("YUNAN GOLD INTELLIGENCE v2.3 • EXACT CHART SYNC ENGINE")
