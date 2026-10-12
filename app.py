@@ -78,7 +78,6 @@ if ACTIVE_THEME == "light":
         border-right: none !important;
         box-shadow: none !important;
         outline: none !important;
-        --sidebar-width: 21rem !important;
     }
 
     /* إزالة أي حدود داخلية داخل الشريط الجانبي */
@@ -93,6 +92,7 @@ if ACTIVE_THEME == "light":
         border-bottom: none !important;
         box-shadow: none !important;
         outline: none !important;
+        overflow: hidden !important;
     }
 
     /* إخفاء شامل لمقبض السحب الرأسي بكل أسمائه المحتملة */
@@ -106,12 +106,7 @@ if ACTIVE_THEME == "light":
     [data-testid="stSidebar"] > div[role="separator"]::before,
     [data-testid="stSidebar"] > div[role="separator"]::after,
     [data-testid="stSidebar"] > div[aria-orientation="vertical"],
-    [data-testid="stSidebar"][aria-expanded="false"] > div[role="separator"],
-    div[data-testid="stSidebarCollapsedControl"],
-    div[data-testid="collapsedControl"],
-    button[kind="header"],
-    button[aria-label="Close sidebar"],
-    button[aria-label="Open sidebar"] {
+    [data-testid="stSidebar"][aria-expanded="false"] > div[role="separator"] {
         display: none !important;
         visibility: hidden !important;
         opacity: 0 !important;
@@ -127,22 +122,52 @@ if ACTIVE_THEME == "light":
         pointer-events: none !important;
     }
 
-    /* إخفاء المقبض عند طي الشريط الجانبي على الجوال */
-    @media (max-width: 768px) {
-        [data-testid="stSidebar"] {
-            --sidebar-width: 22rem !important;
+    /* إخفاء الشريط الجانبي بالكامل على الجوال عندما يكون مطويًا */
+    @media (max-width: 900px) {
+        section[data-testid="stSidebar"][aria-expanded="false"] {
+            display: none !important;
+            visibility: hidden !important;
+            width: 0 !important;
+            min-width: 0 !important;
+            max-width: 0 !important;
+            height: 0 !important;
+            overflow: hidden !important;
+            transform: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
             border: none !important;
             box-shadow: none !important;
         }
-        [data-testid="stSidebar"][aria-expanded="false"] {
-            margin-left: calc(-1 * min(22rem, 85vw)) !important;
-            box-shadow: none !important;
+        section[data-testid="stSidebar"][aria-expanded="false"] > div,
+        section[data-testid="stSidebar"][aria-expanded="false"] > div > div,
+        section[data-testid="stSidebar"][aria-expanded="false"] [data-testid="stSidebarContent"],
+        section[data-testid="stSidebar"][aria-expanded="false"] [data-testid="stSidebarUserContent"],
+        section[data-testid="stSidebar"][aria-expanded="false"] [data-testid="stSidebarNav"],
+        section[data-testid="stSidebar"][aria-expanded="false"] * {
+            display: none !important;
+            visibility: hidden !important;
+            width: 0 !important;
+            min-width: 0 !important;
+            max-width: 0 !important;
+            height: 0 !important;
+            overflow: hidden !important;
+            margin: 0 !important;
+            padding: 0 !important;
             border: none !important;
         }
-        [data-testid="stSidebarResizeHandle"],
+        section[data-testid="stSidebar"][aria-expanded="true"] {
+            display: block !important;
+            visibility: visible !important;
+            width: min(22rem, 85vw) !important;
+            min-width: min(22rem, 85vw) !important;
+            max-width: min(22rem, 85vw) !important;
+        }
+        /* إخفاء زر الفتح/الإغلاق الافتراضي */
         div[data-testid="stSidebarCollapsedControl"],
+        div[data-testid="collapsedControl"],
         button[aria-label="Open sidebar"],
-        button[aria-label="Close sidebar"] {
+        button[aria-label="Close sidebar"],
+        [data-testid="stSidebarResizeHandle"] {
             display: none !important;
             visibility: hidden !important;
         }
@@ -297,7 +322,6 @@ else:
         border-right: none !important;
         box-shadow: none !important;
         outline: none !important;
-        --sidebar-width: 21rem !important;
     }
 
     /* إزالة أي حدود داخلية داخل الشريط الجانبي */
@@ -312,6 +336,7 @@ else:
         border-bottom: none !important;
         box-shadow: none !important;
         outline: none !important;
+        overflow: hidden !important;
     }
 
     /* إخفاء شامل لمقبض السحب الرأسي بكل أسمائه المحتملة */
@@ -325,12 +350,7 @@ else:
     [data-testid="stSidebar"] > div[role="separator"]::before,
     [data-testid="stSidebar"] > div[role="separator"]::after,
     [data-testid="stSidebar"] > div[aria-orientation="vertical"],
-    [data-testid="stSidebar"][aria-expanded="false"] > div[role="separator"],
-    div[data-testid="stSidebarCollapsedControl"],
-    div[data-testid="collapsedControl"],
-    button[kind="header"],
-    button[aria-label="Close sidebar"],
-    button[aria-label="Open sidebar"] {
+    [data-testid="stSidebar"][aria-expanded="false"] > div[role="separator"] {
         display: none !important;
         visibility: hidden !important;
         opacity: 0 !important;
@@ -346,22 +366,52 @@ else:
         pointer-events: none !important;
     }
 
-    /* إخفاء المقبض عند طي الشريط الجانبي على الجوال */
-    @media (max-width: 768px) {
-        [data-testid="stSidebar"] {
-            --sidebar-width: 22rem !important;
+    /* إخفاء الشريط الجانبي بالكامل على الجوال عندما يكون مطويًا */
+    @media (max-width: 900px) {
+        section[data-testid="stSidebar"][aria-expanded="false"] {
+            display: none !important;
+            visibility: hidden !important;
+            width: 0 !important;
+            min-width: 0 !important;
+            max-width: 0 !important;
+            height: 0 !important;
+            overflow: hidden !important;
+            transform: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
             border: none !important;
             box-shadow: none !important;
         }
-        [data-testid="stSidebar"][aria-expanded="false"] {
-            margin-left: calc(-1 * min(22rem, 85vw)) !important;
-            box-shadow: none !important;
+        section[data-testid="stSidebar"][aria-expanded="false"] > div,
+        section[data-testid="stSidebar"][aria-expanded="false"] > div > div,
+        section[data-testid="stSidebar"][aria-expanded="false"] [data-testid="stSidebarContent"],
+        section[data-testid="stSidebar"][aria-expanded="false"] [data-testid="stSidebarUserContent"],
+        section[data-testid="stSidebar"][aria-expanded="false"] [data-testid="stSidebarNav"],
+        section[data-testid="stSidebar"][aria-expanded="false"] * {
+            display: none !important;
+            visibility: hidden !important;
+            width: 0 !important;
+            min-width: 0 !important;
+            max-width: 0 !important;
+            height: 0 !important;
+            overflow: hidden !important;
+            margin: 0 !important;
+            padding: 0 !important;
             border: none !important;
         }
-        [data-testid="stSidebarResizeHandle"],
+        section[data-testid="stSidebar"][aria-expanded="true"] {
+            display: block !important;
+            visibility: visible !important;
+            width: min(22rem, 85vw) !important;
+            min-width: min(22rem, 85vw) !important;
+            max-width: min(22rem, 85vw) !important;
+        }
+        /* إخفاء زر الفتح/الإغلاق الافتراضي */
         div[data-testid="stSidebarCollapsedControl"],
+        div[data-testid="collapsedControl"],
         button[aria-label="Open sidebar"],
-        button[aria-label="Close sidebar"] {
+        button[aria-label="Close sidebar"],
+        [data-testid="stSidebarResizeHandle"] {
             display: none !important;
             visibility: hidden !important;
         }
