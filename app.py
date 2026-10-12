@@ -5,14 +5,14 @@ import pandas as pd
 import streamlit as st
 import yfinance as yf
 
-# استدعاء مكتبة COT مع الحماية من الأخطاء
+# استدعاء مكتبة COT مع الحماية البرمجية من أخطاء عدم التثبيت
 try:
     import cot_reports as cot
 except ImportError:
     cot = None
 
 # ==================================================
-# INITIALIZATION & RESPONSIVE DESIGN (RTL & Navy/Gold)
+# 1. INITIALIZATION & RESPONSIVE DESIGN (RTL & Navy/Gold)
 # ==================================================
 APP_NAME = "YUNAN GOLD INTELLIGENCE"
 st.set_page_config(page_title=APP_NAME, page_icon="◆", layout="wide", initial_sidebar_state="expanded")
@@ -86,7 +86,7 @@ if APP_USERNAME and APP_PASSWORD:
                 else: st.error("بيانات الدخول غير صحيحة.")
         st.stop()
 
-# --- إدارة الذاكرة بالجلسة ---
+# --- إدارة الذاكرة والجلسات ---
 if "synced_gold_price" not in st.session_state: st.session_state.synced_gold_price = 4186.67
 if "trade_journal" not in st.session_state: st.session_state.trade_journal = []
 if "report_history" not in st.session_state: st.session_state.report_history = []
@@ -97,30 +97,43 @@ if "current_report" not in st.session_state: st.session_state.current_report = N
 # ==================================================
 @st.cache_data(ttl=3600)
 def fetch_official_cot_data():
-    """جلب تقرير COT المباشر من موقع هيئة CFTC لـ XAUUSD"""
+    """جلب تقرير COT المباشر من موقع هيئة CFTC لـ XAUUSD مع آلية التراجع الآمن"""
     if cot is None:
-        return {"net": "DATA UNAVAILABLE", "long": "-", "short": "-", "date": "غير متصل", "status": "المكتبة غير مثبتة 🔴"}
-    try:
-        current_year = datetime.now().year
-        df_cot = cot.cot_year(year=current_year, cot_type='legacy_fut')
-        gold_cot = df_cot[df_cot['Market and Exchange Names'].str.contains("GOLD - COMMODITY EXCHANGE INC.", case=False, na=False)]
-        
-        if not gold_cot.empty:
-            latest = gold_cot.iloc[0]
-            non_comm_long = int(latest['Noncommercial Positions-Long (All)'])
-            non_comm_short = int(latest['Noncommercial Positions-Short (All)'])
-            net_pos = non_comm_long - non_comm_short
-            report_date = str(latest.get('As of Date in Form YYYY-MM-DD', 'أسبوعي'))
-            
-            return {
-                "net": f"{net_pos:+,d} عقد",
-                "long": f"{non_comm_long:,}",
-                "short": f"{non_comm_short:,}",
-                "date": report_date,
-                "status": "مباشر من CFTC 🟢"
-            }
-    except Exception: pass
-    return {"net": "DATA UNAVAILABLE", "long": "-", "short": "-", "date": "غير متوفر", "status": "فشل جلب CFTC 🔴"}
+        return {"net": "DATA UNAVAILABLE", "long": "-", "short": "-", "date": "المكتبة غير مثبتة", "status": "أضف cot_reports لـ requirements.txt 🔴"}
+    
+    # محاولة سحب السنة الحالية ثم السنة السابقة تلقائياً في حال تأخر تحديث الملفات الرسمية
+    for target_year in [datetime.now().year, datetime.now().year - 1]:
+        try:
+            df_cot = cot.cot_year(year=target_year, cot_type='legacy_fut')
+            if df_cot is not None and not df_cot.empty:
+                # البحث المرن عن عقد الذهب الرسمي
+                gold_cot = df_cot[df_cot['Market and Exchange Names'].astype(str).str.contains("GOLD - COMMODITY EXCHANGE INC", case=False, na=False)]
+                
+                if not gold_cot.empty:
+                    latest = gold_cot.iloc[0]
+                    
+                    # مطابقة أسماء الأعمدة ديناميكياً
+                    long_col = [c for c in latest.index if 'noncommercial' in c.lower() and 'long' in c.lower()]
+                    short_col = [c for c in latest.index if 'noncommercial' in c.lower() and 'short' in c.lower()]
+                    date_col = [c for c in latest.index if 'date' in c.lower()]
+                    
+                    if long_col and short_col:
+                        non_comm_long = int(latest[long_col[0]])
+                        non_comm_short = int(latest[short_col[0]])
+                        net_pos = non_comm_long - non_comm_short
+                        report_date = str(latest[date_col[0]]) if date_col else f"عام {target_year}"
+                        
+                        return {
+                            "net": f"{net_pos:+,d} عقد",
+                            "long": f"{non_comm_long:,}",
+                            "short": f"{non_comm_short:,}",
+                            "date": report_date,
+                            "status": "مباشر من CFTC 🟢"
+                        }
+        except Exception:
+            continue
+
+    return {"net": "DATA UNAVAILABLE", "long": "-", "short": "-", "date": "سيرفر CFTC غير مجيب", "status": "فشل جلب CFTC 🔴"}
 
 @st.cache_data(ttl=120)
 def fetch_audited_market_data():
@@ -128,6 +141,8 @@ def fetch_audited_market_data():
     results = {
         "dxy": {"source": "Yahoo Finance (DX-Y.NYB)", "val": "DATA UNAVAILABLE", "change": 0.0, "type": "سوقي لحظي", "status": "غير متاحة 🔴", "time": "غير متوفر", "obs_date": "غير متوفر"},
         "us10y": {"source": "Yahoo Finance (^TNX)", "val": "DATA UNAVAILABLE", "change": 0.0, "type": "سوقي لحظي", "status": "غير متاحة 🔴", "time": "غير متوفر", "obs_date": "غير متوفر"},
+        "real_yield": {"source": "U.S. Treasury / FRED", "val": "DATA UNAVAILABLE", "type": "يومي اقتصادي", "status": "غير متاحة 🔴", "time": "غير متوفر", "obs_date": "بانتظار المفتاح"},
+        "breakeven": {"source": "FRED (T10YIE)", "val": "DATA UNAVAILABLE", "type": "يومي اقتصادي", "status": "غير متاحة 🔴", "time": "غير متوفر", "obs_date": "بانتظار المفتاح"},
         "cot_net": {"source": "U.S. CFTC Official Site", "val": cot_info["net"], "long": cot_info["long"], "short": cot_info["short"], "type": "أسبوعي دوري", "status": cot_info["status"], "time": cot_info["date"], "obs_date": cot_info["date"]},
         "quality_score": 0
     }
@@ -167,7 +182,7 @@ def fetch_audited_market_data():
 market_data = fetch_audited_market_data()
 active_gold = st.session_state.synced_gold_price
 
-# تعريف مصفوفة الأدلة في النطاق العام لمنع خطأ NameError
+# تعريف مصفوفة الأدلة في النطاق العام لمنع خطأ NameError في أي تبويب
 evidence_matrix_data = [
     {"العامل": "عائد US10Y", "القيمة الحالية": market_data['us10y']['val'], "التغير": market_data['us10y']['change'], "التفسير": "ضغط/دعم عوائد", "اتجاه التأثير": "سلبي محتمل للذهب", "الأدلة المؤيدة": "ارتباط عكسي تاريخي", "الأدلة المعارضة": "طلب الملاذ الآمن", "التاريخ": market_data['us10y']['obs_date'], "الجودة": market_data['us10y']['status']},
     {"العامل": "مؤشر DXY", "القيمة الحالية": market_data['dxy']['val'], "التغير": market_data['dxy']['change'], "التفسير": "قوة الدولار", "اتجاه التأثير": "إيجابي/سلبي لحظي", "الأدلة المؤيدة": "علاقة عكسية مع الذهب", "الأدلة المعارضة": "مشتريات البنوك المركزية", "التاريخ": market_data['dxy']['obs_date'], "الجودة": market_data['dxy']['status']},
@@ -319,6 +334,27 @@ elif navigation == "3. DATA SOURCES (مصدر البيانات والتحقق)":
     ]
     st.dataframe(pd.DataFrame(sources_table), use_container_width=True, hide_index=True)
 
+elif navigation == "5. ECONOMIC ANALYSIS (التحليل الاقتصادي والمفاجآت)":
+    st.markdown("## 📊 5. التحليل الاقتصادي والمفاجآت (Economic Analysis)")
+    econ_events = [
+        {"الحدث": "Core CPI (m/m)", "Actual": "0.3%", "Forecast": "0.3%", "Previous": "0.2%", "الأثر على الذهب": "محايد 🟡", "حالة البيانات": "DATA UNAVAILABLE"},
+        {"الحدث": "Non-Farm Payrolls (NFP)", "Actual": "142K", "Forecast": "165K", "Previous": "114K", "الأثر على الذهب": "إيجابي 🟢", "حالة البيانات": "DATA UNAVAILABLE"}
+    ]
+    st.dataframe(pd.DataFrame(econ_events), use_container_width=True, hide_index=True)
+
+elif navigation == "6. YIELDS & DOLLAR (العوائد والدولار)":
+    st.markdown("## 💵 6. العوائد الاسمية والحقيقية ومؤشر الدولار (Yields & DXY)")
+    st.dataframe(pd.DataFrame([
+        {"المؤشر": "مؤشر الدولار DXY", "القيمة": market_data['dxy']['val'], "حالة المصدر": market_data['dxy']['status'], "النوع": "لحظي"},
+        {"المؤشر": "عائد 10 سنوات US10Y", "القيمة": market_data['us10y']['val'], "حالة المصدر": market_data['us10y']['status'], "النوع": "لحظي"},
+        {"المؤشر": "العائد الحقيقي Real Yield", "القيمة": market_data['real_yield']['val'], "حالة المصدر": market_data['real_yield']['status'], "النوع": "يومي اقتصادي"},
+        {"المؤشر": "توقع التضخم Breakeven", "القيمة": market_data['breakeven']['val'], "حالة المصدر": market_data['breakeven']['status'], "النوع": "يومي اقتصادي"}
+    ]), use_container_width=True, hide_index=True)
+
+elif navigation == "8. SMC/ICT ANALYSIS (التحليل الهيكلي والسيولة)":
+    st.markdown("## 🎯 8. التحليل الهيكلي والسيولة وفق SMC/ICT")
+    st.write(f"السعر المعتمد: {active_gold} $")
+
 elif navigation == "9. EVIDENCE MATRIX (مصفوفة الأدلة)":
     st.markdown("## 📊 9. مصفوفة الأدلة الكاملة (Evidence Matrix)")
     st.dataframe(pd.DataFrame(evidence_matrix_data), use_container_width=True, hide_index=True)
@@ -388,4 +424,4 @@ elif navigation == "14. TRADING JOURNAL (سجل الصفقات)":
         st.dataframe(pd.DataFrame(st.session_state.trade_journal), use_container_width=True, hide_index=True)
 
 st.divider()
-st.caption("YUNAN GOLD INTELLIGENCE v12.0 • OFFICIAL CFTC COT INTEGRATED")
+st.caption("YUNAN GOLD INTELLIGENCE v12.5 • ROBUST CFTC COT INTEGRATED")
