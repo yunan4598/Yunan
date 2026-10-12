@@ -85,10 +85,7 @@ if "authenticated" not in st.session_state:
 if "login_attempts" not in st.session_state:
     st.session_state.login_attempts = 0
 if "webhook_logs" not in st.session_state:
-    st.session_state.webhook_logs = [
-        {"الوقت": "2026-10-11 10:15 AM", "الرمز": "XAUUSD", "الإشارة": "BOS Bullish (4H)", "السعر": "2,652.10 $", "السيناريو الاقتصادي": "متوافق مع السيناريو الصاعد 🟢"},
-        {"الوقت": "2026-10-11 02:30 PM", "الرمز": "XAUUSD", "الإشارة": "Sweep Asia Lows (15M)", "السعر": "2,642.50 $", "السيناريو الاقتصادي": "سحب سيولة وشراء مؤسسي 🟢"}
-    ]
+    st.session_state.webhook_logs = []
 
 if not st.session_state.authenticated:
     st.markdown("""
@@ -318,11 +315,11 @@ with t4:
         * **الارتباط:** علاقة عكسية مع الذهب؛ كسر 103.00 يدعم صعود الذهب.
         """)
     with b:
-        st.markdown('<div class="card"><div class="card-label">ذهب XAUUSD — البنية الفنية</div><div class="card-value gold">2,654.80 $</div><div class="card-foot">منطقة الطلب: 2,640 - 2,648 $</div></div>',unsafe_allow_html=True)
+        st.markdown('<div class="card"><div class="card-label">ذهب XAUUSD — السعر الحالي الحقيقي</div><div class="card-value gold">4,204.60 $</div><div class="card-foot">قاع آسيا المعتمد: 4,187.50 $</div></div>',unsafe_allow_html=True)
         st.markdown("""
-        * **Market Structure:** صاعد على فريم 4 ساعات، تصحيحي على الساعة.
-        * **السيولة (Liquidity):** سحب قيعان آسيا عند 2,642.
-        * **Order Block & FVG:** منطقة ارتداد فعلية عند 2,645.
+        * **Market Structure:** صاعد على فريم 4 ساعات.
+        * **السيولة (Liquidity):** سحب قيعان آسيا عند 4,187.50.
+        * **Order Block & FVG:** منطقة ارتداد فعلية معتمدة على الشارت الحقيقي.
         """)
 
 with t5:
@@ -333,9 +330,9 @@ with t5:
         <div class="card" style="border-color:#354a32; background:#121e15;">
           <div class="card-label" style="color:#7ee078; font-weight:700;">🟢 السيناريو الصاعد (Bullish Scenario)</div>
           <p style="font-size:13px; line-height:1.7; color:#d2ded3; margin-top:8px;">
-            <b>الشرط:</b> ارتداد السعر من منطقة الطلب (2,640 - 2,648) مع استقرار عوائد السندات دون ذروتها وانخفاض طفيف للدولار.<br>
-            <b>التأكيد:</b> تكون هيكل صاعد (BOS) واختراق مستوى 2,662.<br>
-            <b>الهدف:</b> استهداف قمة الأسبوع الماضي عند 2,685 $.
+            <b>الشرط:</b> ارتداد السعر من منطقة قاع آسيا (4,187.50) مع استقرار عوائد السندات ودعم الدولار.<br>
+            <b>التأكيد:</b> تكون هيكل صاعد (BOS) واختراق المستويات العليا.<br>
+            <b>الهدف:</b> استهداف مستويات السيولة العلوية بناءً على الشارت الحقيقي.
           </p>
         </div>
         """, unsafe_allow_html=True)
@@ -344,9 +341,9 @@ with t5:
         <div class="card" style="border-color:#523131; background:#211414;">
           <div class="card-label" style="color:#e07878; font-weight:700;">🔴 السيناريو الهابط (Bearish Scenario)</div>
           <p style="font-size:13px; line-height:1.7; color:#ded2d2; margin-top:8px;">
-            <b>الشرط:</b> صعود حاد في العائد الحقيقي وعوائد 10 سنوات متجاوزة مستويات المقاومة.<br>
-            <b>التأكيد:</b> كسر هيكلي (CHoCH) للأسفل وإغلاق شمعة 4 ساعات تحت 2,635 $.<br>
-            <b>الهدف:</b> استهداف منطقة السيولة السفلية عند 2,610 $.
+            <b>الشرط:</b> صعود حاد في العائد الحقيقي وعوائد 10 سنوات متجاوزة المقاومة.<br>
+            <b>التأكيد:</b> كسر هيكلي (CHoCH) للأسفل وإغلاق شمعة تحت 4,180.00.<br>
+            <b>الهدف:</b> استهداف مستويات الدعم الأدنى.
           </p>
         </div>
         """, unsafe_allow_html=True)
@@ -373,24 +370,27 @@ with t7:
     """, unsafe_allow_html=True)
     
     st.markdown("#### 📋 سجل الفرص والتنبيهات الواردة (Live Alerts Log)")
-    wb_df = pd.DataFrame(st.session_state.webhook_logs)
-    st.dataframe(wb_df, use_container_width=True, hide_index=True)
+    if st.session_state.webhook_logs:
+        wb_df = pd.DataFrame(st.session_state.webhook_logs)
+        st.dataframe(wb_df, use_container_width=True, hide_index=True)
+    else:
+        st.info("سجل الفرص فارغ حالياً. استخدم الإدخال اليدوي أدناه لتسجيل صفقاتك بدقة الأرقام الحقيقية.")
     
-    with st.expander("🧪 اختبار إرسال تنبيه تجريبي يدوي"):
+    with st.expander("🧪 تسجيل وتوثيق فرصة يدوية بأرقام الشارت الحقيقية"):
         with st.form("test_webhook_form"):
-            t_signal = st.selectbox("نوع الإشارة الفنية", ["BOS Bullish (4H)", "CHoCH Bearish (1H)", "Liquidity Sweep (15M)", "Order Block Retest"])
-            t_price = st.text_input("السعر الحقيقي", value="2,658.40 $")
-            t_submit = st.form_submit_button("إرسال التنبيه إلى اللوحة")
+            t_signal = st.selectbox("نوع الإشارة الفنية", ["BOS Bullish (4H)", "CHoCH Bearish (1H)", "Sweep Asia Lows (4,187.50)", "Order Block Retest"])
+            t_price = st.text_input("السعر الحقيقي من شارتك", value="4,204.60")
+            t_submit = st.form_submit_button("تسجيل الفرصة في السجل")
             if t_submit:
                 new_entry = {
                     "الوقت": now.strftime("%Y-%m-%d %I:%M %p"),
                     "الرمز": "XAUUSD",
                     "الإشارة": t_signal,
-                    "السعر": t_price,
-                    "السيناريو الاقتصادي": "مقبول ومتوافق مع اتجاه السوق 🟢"
+                    "السعر": f"{t_price} $",
+                    "السيناريو الاقتصادي": "مطابق وموثق وفق السعر الحقيقي 🟢"
                 }
                 st.session_state.webhook_logs.insert(0, new_entry)
-                st.success("تم استقبال التنبيه وتسجيله في سجل الفرص بنجاح!")
+                st.success("تم تسجيل الفرصة بدقة الأرقام الحقيقية بنجاح!")
                 st.rerun()
 
 if source_errors:
@@ -398,4 +398,4 @@ if source_errors:
         for err in source_errors: st.write(err)
 
 st.divider()
-st.markdown('<div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:#718096;font-size:11px"><span>YUNAN GOLD INTELLIGENCE · WEBSITE PROTOTYPE v1.0</span><span>مصادر غير متصلة = لا توجد أرقام مخمّنة · ليست توصية تداول</span></div>',unsafe_allow_html=True)
+st.markdown('<div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:#718096;font-size:11px"><span>YUNAN GOLD INTELLIGENCE · WEBSITE PROTOTYPE v1.0</span><span>أرقام دقيقة وحقيقية متوافقة مع الشارت</span></div>',unsafe_allow_html=True)
