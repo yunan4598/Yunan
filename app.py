@@ -1,5 +1,5 @@
 # ================================================================
-# Aho𓂀 — GOLD INTELLIGENCE — v16.1 (THEME + BRAND UPDATE)
+# Aho𓂀 — GOLD INTELLIGENCE — v16.2 (LIGHT/DARK + SVG ICONS)
 # ================================================================
 from __future__ import annotations
 import os, re, json as _json, hmac, smtplib, ssl
@@ -17,10 +17,9 @@ import streamlit as st
 import bcrypt
 
 APP_NAME = "Aho𓂀"
-APP_NAME_LATIN = "AHO"
-APP_VERSION = "16.1 — GOLD INTELLIGENCE"
+APP_VERSION = "16.2 — GOLD INTELLIGENCE"
 REQUEST_TIMEOUT = 15
-USER_AGENT = "AhoGoldIntelligence/16.1"
+USER_AGENT = "AhoGoldIntelligence/16.2"
 
 st.set_page_config(
     page_title="Aho𓂀 — Gold Intelligence",
@@ -30,326 +29,454 @@ st.set_page_config(
 )
 
 # ================================================================
-# THEME — Premium Dark (warm charcoal + gold)
+# THEME ENGINE — Light (default) + Dark
 # ================================================================
-st.markdown("""
+def build_theme_css(theme: str) -> str:
+    if theme == "light":
+        vars_block = """
+        --bg-base:       #f6f8fb;
+        --bg-elev-1:     #ffffff;
+        --bg-elev-2:     #eef2f7;
+        --bg-elev-3:     #e5eaf1;
+        --border:        #e2e8f0;
+        --border-strong: #cbd5e1;
+        --gold:          #b08828;
+        --gold-dim:      #8a6e2a;
+        --gold-light:    #d4b360;
+        --green:         #16a34a;
+        --green-dim:     #15803d;
+        --green-light:   #22c55e;
+        --red:           #dc2626;
+        --amber:         #d97706;
+        --blue:          #2563eb;
+        --text:          #1e293b;
+        --text-muted:    #64748b;
+        --text-dim:      #94a3b8;
+        --shadow:        0 1px 3px rgba(15, 23, 42, .06), 0 4px 12px rgba(15, 23, 42, .05);
+        --shadow-hover:  0 2px 6px rgba(15, 23, 42, .08), 0 8px 24px rgba(15, 23, 42, .08);
+        --btn-text:      #ffffff;
+        --btn-gradient:  linear-gradient(135deg, #b08828, #8a6e2a);
+        --btn-gradient-h:linear-gradient(135deg, #c89838, #a07d32);
+        --hero-gradient: linear-gradient(135deg, rgba(255,255,255,.98), rgba(246,248,251,.9));
+        --signal-bull-bg: linear-gradient(135deg, rgba(220,252,231,.7), rgba(240,253,244,.5));
+        --signal-bull-bd: rgba(22,163,74,.4);
+        --signal-bear-bg: linear-gradient(135deg, rgba(254,226,226,.7), rgba(254,242,242,.5));
+        --signal-bear-bd: rgba(220,38,38,.4);
+        --signal-neutral-bg: linear-gradient(135deg, rgba(254,249,195,.7), rgba(255,251,235,.5));
+        --signal-neutral-bd: rgba(217,119,6,.4);
+        --signal-no-trade-bg: linear-gradient(135deg, rgba(241,245,249,.8), rgba(248,250,252,.6));
+        --signal-no-trade-bd: rgba(148,163,184,.4);
+        --warning-bg:    #fffbeb;
+        --warning-bd:    #fcd34d;
+        --warning-text:  #92400e;
+        --bg-ambient:    radial-gradient(ellipse at 15% 0%, #e8eef7 0%, transparent 50%),
+                         radial-gradient(ellipse at 85% 100%, #f0f4f9 0%, transparent 55%),
+                         #f6f8fb;
+        """
+        native_vars = """
+        --background-color: #f6f8fb;
+        --secondary-background-color: #ffffff;
+        --text-color: #1e293b;
+        --primary-color: #b08828;
+        """
+    else:
+        vars_block = """
+        --bg-base:       #141a24;
+        --bg-elev-1:     #1c2431;
+        --bg-elev-2:     #232d3d;
+        --bg-elev-3:     #2a3444;
+        --border:        #2a3444;
+        --border-strong: #3a4454;
+        --gold:          #e8c98a;
+        --gold-dim:      #b39a5f;
+        --gold-light:    #f0d49a;
+        --green:         #4ade80;
+        --green-dim:     #22c55e;
+        --green-light:   #86efac;
+        --red:           #f87171;
+        --amber:         #fbbf24;
+        --blue:          #60a5fa;
+        --text:          #f0f2f5;
+        --text-muted:    #b8c0cc;
+        --text-dim:      #8896a8;
+        --shadow:        0 2px 12px rgba(0, 0, 0, .25);
+        --shadow-hover:  0 4px 20px rgba(232, 201, 138, .15);
+        --btn-text:      #131a24;
+        --btn-gradient:  linear-gradient(135deg, #e8c98a, #c9a961);
+        --btn-gradient-h:linear-gradient(135deg, #f0d49a, #d9b972);
+        --hero-gradient: linear-gradient(135deg, rgba(35,45,61,.85), rgba(28,36,49,.7));
+        --signal-bull-bg: linear-gradient(135deg, rgba(30,60,42,.6), rgba(22,45,32,.4));
+        --signal-bull-bd: rgba(74,222,128,.4);
+        --signal-bear-bg: linear-gradient(135deg, rgba(60,30,32,.6), rgba(45,22,24,.4));
+        --signal-bear-bd: rgba(248,113,113,.4);
+        --signal-neutral-bg: linear-gradient(135deg, rgba(60,50,25,.6), rgba(45,38,20,.4));
+        --signal-neutral-bd: rgba(251,191,36,.4);
+        --signal-no-trade-bg: linear-gradient(135deg, rgba(35,45,61,.7), rgba(28,36,49,.5));
+        --signal-no-trade-bd: rgba(184,192,204,.3);
+        --warning-bg:    rgba(60,50,25,.4);
+        --warning-bd:    rgba(251,191,36,.4);
+        --warning-text:  #f5dc9a;
+        --bg-ambient:    radial-gradient(ellipse at 20% 0%, #1e2a3d 0%, transparent 55%),
+                         radial-gradient(ellipse at 80% 100%, #1a2535 0%, transparent 60%),
+                         #141a24;
+        """
+        native_vars = """
+        --background-color: #141a24;
+        --secondary-background-color: #1c2431;
+        --text-color: #f0f2f5;
+        --primary-color: #e8c98a;
+        """
+
+    return f"""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap');
 
-:root {
-  --bg-base:      #141a24;
-  --bg-elev-1:    #1c2431;
-  --bg-elev-2:    #232d3d;
-  --border:       #2a3444;
-  --border-soft:  #22303f;
-  --gold:         #e8c98a;
-  --gold-dim:     #b39a5f;
-  --green:        #4ade80;
-  --red:          #f87171;
-  --amber:        #fbbf24;
-  --blue:         #60a5fa;
-  --text:         #f0f2f5;
-  --text-muted:   #b8c0cc;
-  --text-dim:     #8896a8;
-}
+:root {{
+    {vars_block}
+    {native_vars}
+    --font-base: 'IBM Plex Sans Arabic', 'Inter', -apple-system, sans-serif;
+    --font-num:  'Inter', 'IBM Plex Sans Arabic', sans-serif;
+}}
 
-html, body, [class*="css"] {
-  font-family: 'IBM Plex Sans Arabic', 'Inter', sans-serif;
-  direction: rtl; text-align: right; color: var(--text);
-}
+html, body, [class*="css"] {{
+    font-family: var(--font-base);
+    direction: rtl; text-align: right;
+    color: var(--text);
+}}
 
-.stApp {
-  background:
-    radial-gradient(ellipse at 20% 0%, #1e2a3d 0%, transparent 55%),
-    radial-gradient(ellipse at 80% 100%, #1a2535 0%, transparent 60%),
-    var(--bg-base);
-  color: var(--text);
-}
+.stApp {{
+    background: var(--bg-ambient);
+    color: var(--text);
+}}
 
-.block-container {
-  padding-top: 1.4rem !important;
-  padding-bottom: 2.5rem !important;
-  max-width: 1550px;
-}
+.block-container {{
+    padding-top: 1.3rem !important;
+    padding-bottom: 2.5rem !important;
+    max-width: 1550px;
+}}
 
-/* ---------- Sidebar ---------- */
-[data-testid="stSidebar"] {
-  background: linear-gradient(180deg, #171f2b 0%, #131a24 100%);
-  border-left: 1px solid var(--border);
-  padding-top: 12px;
-}
-[data-testid="stSidebar"] * { text-align: right; }
-[data-testid="stSidebar"] .stRadio label {
-  color: var(--text-muted) !important; font-size: 13.5px;
-}
+/* =================== SIDEBAR =================== */
+[data-testid="stSidebar"] {{
+    background: var(--bg-elev-1);
+    border-left: 1px solid var(--border);
+    padding-top: 14px;
+    box-shadow: -2px 0 12px rgba(0,0,0,.03);
+}}
+[data-testid="stSidebar"] * {{ text-align: right; }}
+[data-testid="stSidebar"] hr {{
+    border-color: var(--border) !important;
+    margin: 14px 0 !important;
+}}
 
-/* ---------- Brand Aho𓂀 ---------- */
-.brand {
-  display: flex; align-items: center; gap: 12px;
-  padding: 6px 0 18px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 16px;
-}
-.brand-mark {
-  width: 46px; height: 46px;
-  border: 1px solid var(--gold-dim);
-  border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--gold); font-size: 24px; font-weight: 700;
-  background: linear-gradient(145deg, #2a2418, #1a2030);
-  box-shadow: 0 0 22px rgba(232, 201, 138, 0.18);
-  font-family: 'Segoe UI Historic', 'Noto Sans Egyptian Hieroglyphs', Inter, sans-serif;
-}
-.brand-title {
-  font-family: Inter, 'IBM Plex Sans Arabic', sans-serif;
-  letter-spacing: 1.4px; font-weight: 800;
-  font-size: 18px; color: var(--text);
-  text-shadow: 0 0 20px rgba(232, 201, 138, 0.25);
-}
-.brand-sub {
-  color: var(--text-dim); font-size: 10.5px;
-  margin-top: 3px; letter-spacing: 1.2px;
-}
+/* Nav links (st.navigation) */
+[data-testid="stSidebarNav"] {{
+    padding: 8px 0;
+    border-top: 1px solid var(--border);
+    margin-top: 8px;
+    padding-top: 12px;
+}}
+[data-testid="stSidebarNav"] a {{
+    color: var(--text-muted) !important;
+    border-radius: 8px !important;
+    padding: 8px 10px !important;
+    transition: all .15s ease;
+    font-size: 13.5px;
+}}
+[data-testid="stSidebarNav"] a:hover {{
+    background: rgba(22, 163, 74, .08) !important;
+    color: var(--text) !important;
+}}
+[data-testid="stSidebarNav"] a[aria-current="page"] {{
+    background: rgba(176, 136, 40, .12) !important;
+    color: var(--gold-dim) !important;
+    font-weight: 700 !important;
+    border-right: 3px solid var(--gold) !important;
+}}
+[data-testid="stSidebarNav"] svg {{
+    color: var(--gold) !important;
+    width: 18px; height: 18px;
+}}
 
-/* ---------- Hero ---------- */
-.hero {
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 22px 26px;
-  background: linear-gradient(135deg,
-    rgba(35, 45, 61, 0.85) 0%,
-    rgba(28, 36, 49, 0.7) 100%);
-  margin-bottom: 18px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35),
-              inset 0 1px 0 rgba(255, 255, 255, 0.03);
-}
-.eyebrow {
-  color: var(--gold); letter-spacing: 1.8px;
-  font-size: 11.5px; font-weight: 700;
-  font-family: Inter, sans-serif;
-}
-.hero h1 {
-  margin: 8px 0; font-size: 26px;
-  color: var(--text); font-weight: 700;
-  text-shadow: 0 0 30px rgba(232, 201, 138, 0.15);
-}
-.hero p {
-  margin: 0; color: var(--text-muted);
-  line-height: 1.75; font-size: 13.5px;
-}
+/* =================== BRAND =================== */
+.brand {{
+    display: flex; align-items: center; gap: 12px;
+    padding: 6px 4px 16px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 12px;
+}}
+.brand-mark {{
+    width: 46px; height: 46px;
+    border: 1px solid var(--gold);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--gold); font-size: 24px; font-weight: 700;
+    background: var(--bg-elev-2);
+    box-shadow: 0 0 20px rgba(176, 136, 40, .18);
+    font-family: 'Segoe UI Historic', 'Noto Sans Egyptian Hieroglyphs', Inter, sans-serif;
+}}
+.brand-title {{
+    font-family: var(--font-num);
+    letter-spacing: 1.4px; font-weight: 800;
+    font-size: 18px; color: var(--text);
+}}
+.brand-sub {{
+    color: var(--text-dim); font-size: 10.5px;
+    margin-top: 3px; letter-spacing: 1.2px;
+}}
 
-/* ---------- Metrics ---------- */
-[data-testid="stMetric"] {
-  background: var(--bg-elev-1);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 15px 17px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
-  transition: all 0.2s ease;
-}
-[data-testid="stMetric"]:hover {
-  border-color: var(--gold-dim);
-  box-shadow: 0 4px 20px rgba(232, 201, 138, 0.12);
-}
-[data-testid="stMetricLabel"] {
-  color: var(--text-muted) !important;
-  font-size: 12.5px !important; font-weight: 500 !important;
-}
-[data-testid="stMetricValue"] {
-  color: var(--text) !important;
-  font-size: 24px !important; font-weight: 700 !important;
-  letter-spacing: 0.3px;
-  white-space: nowrap !important;
-  overflow: visible !important;
-  text-overflow: unset !important;
-  font-variant-numeric: tabular-nums !important;
-}
+/* =================== HERO =================== */
+.hero {{
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px 26px;
+    background: var(--hero-gradient);
+    margin-bottom: 18px;
+    box-shadow: var(--shadow);
+}}
+.eyebrow {{
+    color: var(--gold); letter-spacing: 1.8px;
+    font-size: 11.5px; font-weight: 700;
+    font-family: var(--font-num);
+}}
+.hero h1 {{
+    margin: 8px 0; font-size: 26px;
+    color: var(--text); font-weight: 700;
+}}
+.hero p {{
+    margin: 0; color: var(--text-muted);
+    line-height: 1.75; font-size: 13.5px;
+}}
+
+/* =================== METRICS =================== */
+[data-testid="stMetric"] {{
+    background: var(--bg-elev-1);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 15px 17px;
+    box-shadow: var(--shadow);
+    transition: all .2s ease;
+}}
+[data-testid="stMetric"]:hover {{
+    border-color: var(--gold);
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-1px);
+}}
+[data-testid="stMetricLabel"] {{
+    color: var(--text-muted) !important;
+    font-size: 12.5px !important; font-weight: 500 !important;
+}}
+[data-testid="stMetricValue"] {{
+    color: var(--text) !important;
+    font-size: 24px !important; font-weight: 700 !important;
+    letter-spacing: .3px;
+    white-space: nowrap !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+    font-family: var(--font-num);
+    font-variant-numeric: tabular-nums !important;
+}}
 [data-testid="stMetricValue"] > div,
-[data-testid="stMetricValue"] > div > div {
-  white-space: nowrap !important;
-  overflow: visible !important;
-  text-overflow: clip !important;
-}
-[data-testid="stMetricDelta"] {
-  font-size: 12px !important; font-weight: 600 !important;
-}
+[data-testid="stMetricValue"] > div > div {{
+    white-space: nowrap !important;
+    overflow: visible !important;
+}}
 
-/* ---------- Cards ---------- */
-.fusion-card {
-  background: var(--bg-elev-1);
-  border: 1px solid var(--border);
-  border-radius: 12px; padding: 18px;
-  margin-bottom: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
-}
-.fusion-card h4 {
-  color: var(--gold); margin: 0 0 10px;
-  font-size: 14.5px; font-weight: 600;
-}
-.fusion-card p {
-  color: var(--text-muted); font-size: 13px; line-height: 1.85;
-}
+/* =================== CARDS =================== */
+.fusion-card {{
+    background: var(--bg-elev-1);
+    border: 1px solid var(--border);
+    border-radius: 12px; padding: 18px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow);
+}}
+.fusion-card h4 {{
+    color: var(--gold); margin: 0 0 10px;
+    font-size: 14.5px; font-weight: 600;
+}}
+.fusion-card p {{
+    color: var(--text-muted); font-size: 13px; line-height: 1.85;
+}}
 
-/* ---------- Signal cards ---------- */
-.signal-bull {
-  border: 1px solid rgba(74, 222, 128, 0.35);
-  background: linear-gradient(135deg,
-    rgba(30, 60, 42, 0.6), rgba(22, 45, 32, 0.4));
-  border-radius: 12px; padding: 16px 18px; margin: 10px 0;
-  box-shadow: 0 0 24px rgba(74, 222, 128, 0.08);
-}
-.signal-bear {
-  border: 1px solid rgba(248, 113, 113, 0.35);
-  background: linear-gradient(135deg,
-    rgba(60, 30, 32, 0.6), rgba(45, 22, 24, 0.4));
-  border-radius: 12px; padding: 16px 18px; margin: 10px 0;
-  box-shadow: 0 0 24px rgba(248, 113, 113, 0.08);
-}
-.signal-neutral {
-  border: 1px solid rgba(251, 191, 36, 0.35);
-  background: linear-gradient(135deg,
-    rgba(60, 50, 25, 0.6), rgba(45, 38, 20, 0.4));
-  border-radius: 12px; padding: 16px 18px; margin: 10px 0;
-  box-shadow: 0 0 24px rgba(251, 191, 36, 0.08);
-}
-.signal-no-trade {
-  border: 1px solid rgba(184, 192, 204, 0.25);
-  background: linear-gradient(135deg,
-    rgba(35, 45, 61, 0.7), rgba(28, 36, 49, 0.5));
-  border-radius: 12px; padding: 16px 18px; margin: 10px 0;
-}
+/* =================== SIGNAL CARDS =================== */
+.signal-bull {{
+    border: 1px solid var(--signal-bull-bd);
+    background: var(--signal-bull-bg);
+    border-radius: 12px; padding: 16px 18px; margin: 10px 0;
+}}
+.signal-bear {{
+    border: 1px solid var(--signal-bear-bd);
+    background: var(--signal-bear-bg);
+    border-radius: 12px; padding: 16px 18px; margin: 10px 0;
+}}
+.signal-neutral {{
+    border: 1px solid var(--signal-neutral-bd);
+    background: var(--signal-neutral-bg);
+    border-radius: 12px; padding: 16px 18px; margin: 10px 0;
+}}
+.signal-no-trade {{
+    border: 1px solid var(--signal-no-trade-bd);
+    background: var(--signal-no-trade-bg);
+    border-radius: 12px; padding: 16px 18px; margin: 10px 0;
+}}
 .signal-bull h3, .signal-bear h3,
-.signal-neutral h3, .signal-no-trade h3 {
-  color: var(--text) !important;
-  margin: 0 0 6px; font-size: 16px; font-weight: 700;
-}
+.signal-neutral h3, .signal-no-trade h3 {{
+    color: var(--text) !important;
+    margin: 0 0 6px; font-size: 16px; font-weight: 700;
+}}
 
-/* ---------- Warning ---------- */
-.warning-box {
-  border: 1px solid rgba(251, 191, 36, 0.4);
-  background: rgba(60, 50, 25, 0.4);
-  border-radius: 10px; padding: 13px 16px;
-  margin: 10px 0; color: #f5dc9a;
-  font-size: 13px; line-height: 1.7;
-}
+/* =================== WARNING =================== */
+.warning-box {{
+    border: 1px solid var(--warning-bd);
+    background: var(--warning-bg);
+    border-radius: 10px; padding: 13px 16px;
+    margin: 10px 0; color: var(--warning-text);
+    font-size: 13px; line-height: 1.7;
+}}
 
-/* ---------- Buttons ---------- */
-.stButton button {
-  border-radius: 10px;
-  border: 1px solid var(--gold-dim) !important;
-  background: linear-gradient(135deg, #e8c98a 0%, #c9a961 100%) !important;
-  color: #131a24 !important; font-weight: 700 !important;
-  width: 100%; padding: 10px;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 12px rgba(232, 201, 138, 0.15);
-}
-.stButton button:hover {
-  background: linear-gradient(135deg, #f0d49a 0%, #d9b972 100%) !important;
-  box-shadow: 0 4px 20px rgba(232, 201, 138, 0.3);
-  transform: translateY(-1px);
-}
-.stDownloadButton button {
-  border-radius: 10px;
-  border: 1px solid var(--border) !important;
-  background: var(--bg-elev-2) !important;
-  color: var(--text) !important; font-weight: 600 !important;
-}
-.stDownloadButton button:hover {
-  border-color: var(--gold-dim) !important;
-  background: var(--bg-elev-1) !important;
-}
+/* =================== BUTTONS =================== */
+.stButton button {{
+    border-radius: 10px;
+    border: 1px solid var(--gold-dim) !important;
+    background: var(--btn-gradient) !important;
+    color: var(--btn-text) !important;
+    font-weight: 700 !important;
+    width: 100%; padding: 10px;
+    transition: all .2s ease;
+    box-shadow: 0 2px 8px rgba(176, 136, 40, .15);
+}}
+.stButton button:hover {{
+    background: var(--btn-gradient-h) !important;
+    box-shadow: 0 4px 16px rgba(22, 163, 74, .2);
+    transform: translateY(-1px);
+    border-color: var(--green) !important;
+}}
+.stDownloadButton button {{
+    border-radius: 10px;
+    border: 1px solid var(--border-strong) !important;
+    background: var(--bg-elev-2) !important;
+    color: var(--text) !important; font-weight: 600 !important;
+}}
+.stDownloadButton button:hover {{
+    border-color: var(--green) !important;
+    background: var(--bg-elev-1) !important;
+}}
 
-/* ---------- Inputs ---------- */
+/* =================== INPUTS =================== */
 .stTextInput input, .stNumberInput input,
 .stSelectbox div[data-baseweb="select"] > div,
-.stTextArea textarea {
-  background: var(--bg-elev-2) !important;
-  border: 1px solid var(--border) !important;
-  color: var(--text) !important;
-  border-radius: 8px !important;
-}
+.stTextArea textarea {{
+    background: var(--bg-elev-1) !important;
+    border: 1px solid var(--border-strong) !important;
+    color: var(--text) !important;
+    border-radius: 8px !important;
+}}
 .stTextInput input:focus, .stNumberInput input:focus,
-.stTextArea textarea:focus {
-  border-color: var(--gold-dim) !important;
-  box-shadow: 0 0 0 2px rgba(232, 201, 138, 0.15) !important;
-}
+.stTextArea textarea:focus {{
+    border-color: var(--green) !important;
+    box-shadow: 0 0 0 3px rgba(22, 163, 74, .12) !important;
+}}
 
-/* ---------- Radio ---------- */
-.stRadio > div { gap: 4px; }
-.stRadio label {
-  padding: 8px 10px !important;
-  border-radius: 8px;
-  transition: background 0.15s;
-}
-.stRadio label:hover { background: rgba(232, 201, 138, 0.08); }
+/* =================== RADIO =================== */
+.stRadio > div {{ gap: 4px; }}
+.stRadio label {{
+    padding: 8px 10px !important;
+    border-radius: 8px;
+    transition: background .15s;
+    color: var(--text-muted);
+}}
+.stRadio label:hover {{ background: rgba(22, 163, 74, .08); }}
 
-/* ---------- Dataframe ---------- */
-[data-testid="stDataFrame"] {
-  border: 1px solid var(--border);
-  border-radius: 10px; overflow: hidden;
-}
+/* =================== DATAFRAME =================== */
+[data-testid="stDataFrame"] {{
+    border: 1px solid var(--border);
+    border-radius: 10px; overflow: hidden;
+    background: var(--bg-elev-1);
+}}
 
-/* ---------- Expander ---------- */
-.streamlit-expanderHeader {
-  background: var(--bg-elev-1) !important;
-  border-radius: 10px !important;
-  color: var(--text) !important; font-weight: 600 !important;
-}
+/* =================== EXPANDER =================== */
+.streamlit-expanderHeader, details > summary {{
+    background: var(--bg-elev-1) !important;
+    border-radius: 10px !important;
+    color: var(--text) !important;
+    font-weight: 600 !important;
+    border: 1px solid var(--border) !important;
+}}
 
-/* ---------- Divider ---------- */
-hr { border-color: var(--border) !important; margin: 1.2rem 0 !important; }
+/* =================== HEADINGS / TEXT =================== */
+h1, h2, h3, h4, h5 {{ color: var(--text) !important; }}
+h2 {{ font-size: 21px !important; font-weight: 700 !important; }}
+h3 {{ font-size: 17px !important; font-weight: 600 !important; }}
 
-/* ---------- Caption ---------- */
-.stCaption, [data-testid="stCaptionContainer"] {
-  color: var(--text-dim) !important; font-size: 11.5px !important;
-}
+.stCaption, [data-testid="stCaptionContainer"] {{
+    color: var(--text-dim) !important;
+    font-size: 11.5px !important;
+}}
 
-/* ---------- Headings ---------- */
-h1, h2, h3, h4, h5 { color: var(--text) !important; }
-h2 { font-size: 21px !important; font-weight: 700 !important; }
-h3 { font-size: 17px !important; font-weight: 600 !important; }
+hr {{ border-color: var(--border) !important; margin: 1.2rem 0 !important; }}
 
-/* ---------- Tabs ---------- */
-.stTabs [data-baseweb="tab-list"] {
-  gap: 4px; background: transparent;
-  border-bottom: 1px solid var(--border);
-}
-.stTabs [data-baseweb="tab"] {
-  background: transparent !important;
-  color: var(--text-muted) !important;
-  font-weight: 500; border-radius: 8px 8px 0 0;
-}
-.stTabs [aria-selected="true"] {
-  color: var(--gold) !important;
-  border-bottom: 2px solid var(--gold) !important;
-}
+/* Markdown content */
+[data-testid="stMarkdownContainer"] p,
+[data-testid="stMarkdownContainer"] li {{
+    color: var(--text-muted);
+}}
 
-footer { visibility: hidden; }
+/* Success/Info/Warning/Error boxes */
+.stAlert {{
+    border-radius: 10px !important;
+    border: 1px solid var(--border) !important;
+}}
 
-/* ---------- Mobile ---------- */
-@media (max-width: 640px) {
-  .hero { padding: 18px; }
-  .hero h1 { font-size: 20px; }
-  [data-testid="stMetricValue"] { font-size: 19px !important; }
-  [data-testid="stMetricLabel"] { font-size: 11px !important; }
-  [data-testid="stMetric"] { padding: 12px 13px; }
-  .block-container {
-    padding-left: 0.8rem !important;
-    padding-right: 0.8rem !important;
-  }
-  .brand-mark { width: 40px; height: 40px; font-size: 20px; }
-  .brand-title { font-size: 15px; }
-}
+/* Green accent helpers */
+.green-accent {{ color: var(--green) !important; font-weight: 600; }}
 
-@media (max-width: 480px) {
-  [data-testid="stMetricValue"] {
-    font-size: 17px !important;
-    letter-spacing: 0 !important;
-  }
-  [data-testid="stMetricLabel"] { font-size: 10.5px !important; }
-}
+/* =================== TABS =================== */
+.stTabs [data-baseweb="tab-list"] {{
+    gap: 4px; background: transparent;
+    border-bottom: 1px solid var(--border);
+}}
+.stTabs [data-baseweb="tab"] {{
+    background: transparent !important;
+    color: var(--text-muted) !important;
+    font-weight: 500; border-radius: 8px 8px 0 0;
+}}
+.stTabs [aria-selected="true"] {{
+    color: var(--gold) !important;
+    border-bottom: 2px solid var(--gold) !important;
+}}
+
+footer {{ visibility: hidden; }}
+
+/* =================== MOBILE =================== */
+@media (max-width: 768px) {{
+    .block-container {{
+        padding-left: .8rem !important;
+        padding-right: .8rem !important;
+        padding-top: 1rem !important;
+    }}
+    .hero {{ padding: 18px; }}
+    .hero h1 {{ font-size: 20px; }}
+    [data-testid="stMetricValue"] {{ font-size: 20px !important; }}
+    [data-testid="stMetricLabel"] {{ font-size: 11px !important; }}
+    [data-testid="stMetric"] {{ padding: 12px 13px; }}
+    .brand-mark {{ width: 40px; height: 40px; font-size: 20px; }}
+    .brand-title {{ font-size: 15px; }}
+}}
+
+@media (max-width: 480px) {{
+    [data-testid="stMetricValue"] {{
+        font-size: 17px !important;
+        letter-spacing: 0 !important;
+    }}
+    [data-testid="stMetricLabel"] {{ font-size: 10.5px !important; }}
+}}
 </style>
-""", unsafe_allow_html=True)
+"""
+
+# --- Theme init + injection ---
+if "theme_choice" not in st.session_state:
+    st.session_state.theme_choice = "فاتح ☀️"
+current_theme = "light" if "فاتح" in st.session_state.theme_choice else "dark"
+st.markdown(build_theme_css(current_theme), unsafe_allow_html=True)
 
 # ================================================================
 # HELPERS
@@ -469,10 +596,11 @@ if "audit_log" not in st.session_state:
 
 def log_action(category: str, action: str, old_value: Any = None,
                new_value: Any = None, reason: str = "") -> None:
+    usr = st.session_state.get("user") or {}
     st.session_state.audit_log.append({
         "time": now_utc_text(),
-        "user": st.session_state.get("user", {}).get("username", "—") if st.session_state.get("user") else "—",
-        "role": st.session_state.get("user", {}).get("role", "—") if st.session_state.get("user") else "—",
+        "user": usr.get("username", "—"),
+        "role": usr.get("role", "—"),
         "category": category, "action": action,
         "old_value": old_value, "new_value": new_value, "reason": reason,
     })
@@ -1381,14 +1509,7 @@ if "user" not in st.session_state: st.session_state.user = None
 
 users = _get_users()
 if users and not st.session_state.authenticated:
-    st.markdown(
-        '<div class="hero">'
-        '<div class="eyebrow">Aho𓂀  •  GOLD INTELLIGENCE</div>'
-        '<h1>تسجيل الدخول</h1>'
-        '<p>أدخل بياناتك للوصول إلى المنصة.</p>'
-        '</div>',
-        unsafe_allow_html=True,
-    )
+    render_hero("تسجيل الدخول", "أدخل بياناتك للوصول إلى المنصة.")
     with st.form("login"):
         u = st.text_input("اسم المستخدم")
         p = st.text_input("كلمة المرور", type="password")
@@ -1441,61 +1562,6 @@ def detect_new(market):
 new_alerts = detect_new(market_data)
 
 # ================================================================
-# SIDEBAR + RBAC
-# ================================================================
-NAV_ITEMS = [
-    ("🔥 MAIN DASHBOARD", {"admin", "analyst", "viewer", "auditor"}),
-    ("📊 DATA SOURCES", {"admin", "analyst", "viewer", "auditor"}),
-    ("📅 ECONOMIC CALENDAR", {"admin", "analyst", "viewer", "auditor"}),
-    ("📈 ECONOMIC ANALYSIS", {"admin", "analyst", "viewer", "auditor"}),
-    ("💵 YIELDS & DOLLAR", {"admin", "analyst", "viewer", "auditor"}),
-    ("📋 COT & OI", {"admin", "analyst", "viewer", "auditor"}),
-    ("🧠 SMC/ICT", {"admin", "analyst", "auditor"}),
-    ("📉 TECHNICAL INDICATORS", {"admin", "analyst", "auditor"}),
-    ("🔗 CONSISTENCY", {"admin", "analyst", "viewer", "auditor"}),
-    ("🔍 EVIDENCE MATRIX", {"admin", "analyst", "auditor"}),
-    ("✅ TRADE VALIDATOR", {"admin", "analyst", "auditor"}),
-    ("🛡️ RISK MANAGEMENT", {"admin", "analyst", "auditor"}),
-    ("🧪 BACKTESTING", {"admin", "analyst", "auditor"}),
-    ("📄 WEEKLY REPORT", {"admin", "analyst"}),
-    ("📜 REPORT HISTORY", {"admin", "analyst", "auditor"}),
-    ("📓 TRADING JOURNAL", {"admin", "analyst", "auditor"}),
-    ("🔎 AUDIT LOG", {"admin", "auditor"}),
-    ("⚙️ ADMIN", {"admin"}),
-]
-
-def allowed_nav(role):
-    return [n for n, roles in NAV_ITEMS if role in roles]
-
-def can_export(): return current_role in {"admin", "analyst"}
-def can_modify(): return current_role in {"admin", "analyst"}
-
-with st.sidebar:
-    st.markdown(
-        '<div class="brand">'
-        '<div class="brand-mark">𓂀</div>'
-        '<div>'
-        '<div class="brand-title">Aho𓂀</div>'
-        '<div class="brand-sub">GOLD INTELLIGENCE</div>'
-        '</div></div>',
-        unsafe_allow_html=True,
-    )
-    nav_items = allowed_nav(current_role)
-    navigation = st.radio("القائمة", nav_items, label_visibility="collapsed")
-    role_label = {"admin": "🔑 مدير", "analyst": "📊 محلل",
-                  "auditor": "🔍 مدقق", "viewer": "👁️ قارئ"}.get(current_role, current_role)
-    st.caption(f"**{current_user['username']}** • {role_label}")
-    if st.button("🚪 تسجيل الخروج"):
-        log_action("auth", "logout")
-        st.session_state.authenticated = False
-        st.session_state.user = None
-        st.rerun()
-    st.divider()
-    if st.button("↻ تحديث البيانات"):
-        st.cache_data.clear(); st.rerun()
-    st.caption(f"آخر تحديث: {market_data['tested_at']}")
-
-# ================================================================
 # ACTIVE GOLD
 # ================================================================
 if st.session_state.manual_gold_price is not None:
@@ -1503,36 +1569,21 @@ if st.session_state.manual_gold_price is not None:
 else:
     active_gold = safe_float(market_data["gold"].get("value"))
 
-# ================================================================
-# UPDATE BANNER
-# ================================================================
-fresh_alerts = [a for a in new_alerts if not a["is_first"]]
-if fresh_alerts:
-    st.markdown(
-        '<div class="warning-box">🔔 <b>بيانات جديدة منذ آخر زيارة:</b><br>'
-        + "<br>".join(f"• {a['source']}: {a['old']} → {a['new']}" for a in fresh_alerts)
-        + '</div>',
-        unsafe_allow_html=True,
-    )
+def can_export(): return current_role in {"admin", "analyst"}
+def can_modify(): return current_role in {"admin", "analyst"}
 
 # ================================================================
-# PAGES
+# PAGES (defined as functions)
 # ================================================================
 def page_dashboard():
     render_hero("لوحة القرار الموحد")
-
     c = st.columns(3)
-    c[0].metric("XAUUSD (GC=F)",
-                fmt_number(active_gold, 2, " $") if active_gold else "—")
+    c[0].metric("XAUUSD (GC=F)", fmt_number(active_gold, 2, " $") if active_gold else "—")
     c[1].metric("DXY", fmt_number(market_data["dxy"].get("value"), 2))
-    c[2].metric("US 10Y",
-                fmt_number(market_data["nominal"].get("values", {}).get("10Y"), 3, "%"))
-
+    c[2].metric("US 10Y", fmt_number(market_data["nominal"].get("values", {}).get("10Y"), 3, "%"))
     c = st.columns(3)
-    c[0].metric("Real 10Y",
-                fmt_number(market_data.get("real_yield", {}).get("value"), 3, "%"))
-    c[1].metric("Breakeven",
-                fmt_number(market_data.get("breakeven", {}).get("value"), 2, "%"))
+    c[0].metric("Real 10Y", fmt_number(market_data.get("real_yield", {}).get("value"), 3, "%"))
+    c[1].metric("Breakeven", fmt_number(market_data.get("breakeven", {}).get("value"), 2, "%"))
     c[2].metric("جودة البيانات", f"{market_data['quality_score']}/100")
 
     fusion = build_fusion(market_data, ohlc_res)
@@ -1543,14 +1594,12 @@ def page_dashboard():
         "NO_TRADE": ("signal-no-trade", "⛔", "لا تداول"),
     }.get(fb, ("signal-neutral", "🟡", "حياد"))
     reasons_html = (
-        "<p style='color:#f87171;margin:6px 0 0;font-size:13px;'>"
+        "<p style='color:#dc2626;margin:6px 0 0;font-size:13px;'>"
         + " • ".join(fusion["no_trade_reasons"]) + "</p>"
         if fusion["no_trade_reasons"] else ""
     )
     st.markdown(
-        f'<div class="{card[0]}">'
-        f'<h3>{card[1]} {card[2]} — ثقة {fusion["confidence"]}%</h3>'
-        f'{reasons_html}</div>',
+        f'<div class="{card[0]}"><h3>{card[1]} {card[2]} — ثقة {fusion["confidence"]}%</h3>{reasons_html}</div>',
         unsafe_allow_html=True,
     )
 
@@ -1593,7 +1642,6 @@ def page_calendar():
     cal = build_news_calendar(get_secret("FRED_API_KEY"))
     if cal.empty: st.warning("لا أجندة — تحقق من FRED_API_KEY.")
     else: st.dataframe(cal, use_container_width=True, hide_index=True)
-
     st.markdown("### 📝 Consensus يدوي")
     with st.form("cons_form"):
         c1, c2, c3, c4 = st.columns(4)
@@ -1603,11 +1651,9 @@ def page_calendar():
         ac = c4.number_input("الفعلي", value=0.0)
         if st.form_submit_button("💾 حفظ") and ev:
             st.session_state.manual_consensus[ev] = {"event": ev, "consensus": co,
-                                                      "previous": pv,
-                                                      "actual": ac if ac != 0 else None}
+                                                      "previous": pv, "actual": ac if ac != 0 else None}
             log_action("manual_input", "add_consensus", new_value=ev)
             st.success("تم.")
-
     if st.session_state.manual_consensus:
         analysis = analyze_consensus(list(st.session_state.manual_consensus.values()))
         for s in analysis["signals"]: st.markdown(f"- {s}")
@@ -1670,7 +1716,6 @@ def page_cot():
         st.dataframe(hist, use_container_width=True, hide_index=True)
     else:
         st.warning("بيانات COT Disaggregated غير متاحة.")
-
     with st.expander("📜 COT Legacy"):
         cot = market_data.get("cot", {}); ll = cot.get("latest", {})
         if ll:
@@ -1695,11 +1740,9 @@ def page_smc():
 def page_tech():
     render_hero("المؤشرات الفنية")
     df = ohlc_res.get("df")
-    if df is None:
-        st.error("OHLC غير متاح."); return
+    if df is None: st.error("OHLC غير متاح."); return
     ind = compute_indicators(df)
-    if ind.get("status") != "OK":
-        st.warning(ind.get("detail")); return
+    if ind.get("status") != "OK": st.warning(ind.get("detail")); return
     c = st.columns(4)
     c[0].metric("ATR(14)", f"${ind['atr14']:.2f}")
     c[1].metric("Vol20", f"{ind['vol20']:.1f}%")
@@ -1791,8 +1834,7 @@ def page_backtest():
     if st.button("▶️ تشغيل"):
         with st.spinner("جاري..."):
             o = fetch_gold_ohlc(r, "1d")
-        if o.get("df") is None:
-            st.error("OHLC غير متاح."); return
+        if o.get("df") is None: st.error("OHLC غير متاح."); return
         res = backtest_smc_signals(o["df"], slm, tpm, 20, 0.5, mb)
         m = st.columns(5)
         m[0].metric("صفقات", res["total"])
@@ -1951,31 +1993,98 @@ def page_admin():
         st.cache_data.clear(); st.rerun()
 
 # ================================================================
-# ROUTING
+# SIDEBAR — Brand + Theme toggle + User + Actions
 # ================================================================
-routes = {
-    "🔥 MAIN DASHBOARD": page_dashboard,
-    "📊 DATA SOURCES": page_data_sources,
-    "📅 ECONOMIC CALENDAR": page_calendar,
-    "📈 ECONOMIC ANALYSIS": page_econ,
-    "💵 YIELDS & DOLLAR": page_yields,
-    "📋 COT & OI": page_cot,
-    "🧠 SMC/ICT": page_smc,
-    "📉 TECHNICAL INDICATORS": page_tech,
-    "🔗 CONSISTENCY": page_consistency,
-    "🔍 EVIDENCE MATRIX": page_evidence,
-    "✅ TRADE VALIDATOR": page_validator,
-    "🛡️ RISK MANAGEMENT": page_risk,
-    "🧪 BACKTESTING": page_backtest,
-    "📄 WEEKLY REPORT": page_weekly,
-    "📜 REPORT HISTORY": page_history,
-    "📓 TRADING JOURNAL": page_journal,
-    "🔎 AUDIT LOG": page_audit,
-    "⚙️ ADMIN": page_admin,
-}
-handler = routes.get(navigation)
-if handler: handler()
-else: st.info(f"{navigation} قيد التطوير.")
+with st.sidebar:
+    st.markdown(
+        '<div class="brand">'
+        '<div class="brand-mark">𓂀</div>'
+        '<div>'
+        '<div class="brand-title">Aho𓂀</div>'
+        '<div class="brand-sub">GOLD INTELLIGENCE</div>'
+        '</div></div>',
+        unsafe_allow_html=True,
+    )
 
+    # Theme toggle
+    st.radio(
+        "المظهر",
+        ["فاتح ☀️", "غامق 🌙"],
+        key="theme_choice",
+        horizontal=True,
+        label_visibility="collapsed",
+    )
+
+    # User info
+    role_label = {"admin": "🔑 مدير", "analyst": "📊 محلل",
+                  "auditor": "🔍 مدقق", "viewer": "👁️ قارئ"}.get(current_role, current_role)
+    st.caption(f"**{current_user['username']}** • {role_label}")
+
+    c1, c2 = st.columns(2)
+    with c1:
+        if st.button("↻ تحديث", key="sb_refresh"):
+            st.cache_data.clear(); st.rerun()
+    with c2:
+        if st.button("🚪 خروج", key="sb_logout"):
+            log_action("auth", "logout")
+            st.session_state.authenticated = False
+            st.session_state.user = None
+            st.rerun()
+
+    st.caption(f"آخر تحديث: {market_data['tested_at']}")
+
+# ================================================================
+# UPDATE BANNER (above main content)
+# ================================================================
+fresh_alerts = [a for a in new_alerts if not a["is_first"]]
+if fresh_alerts:
+    st.markdown(
+        '<div class="warning-box">🔔 <b>بيانات جديدة منذ آخر زيارة:</b><br>'
+        + "<br>".join(f"• {a['source']}: {a['old']} → {a['new']}" for a in fresh_alerts)
+        + '</div>',
+        unsafe_allow_html=True,
+    )
+
+# ================================================================
+# NAVIGATION (st.navigation + SVG Material icons)
+# ================================================================
+PAGE_DEFS = [
+    ("dashboard",     page_dashboard,      "لوحة القيادة",        ":material/dashboard:",      {"admin", "analyst", "viewer", "auditor"}),
+    ("data-sources",  page_data_sources,   "مصادر البيانات",      ":material/database:",       {"admin", "analyst", "viewer", "auditor"}),
+    ("calendar",      page_calendar,       "الأجندة الاقتصادية",  ":material/calendar_month:", {"admin", "analyst", "viewer", "auditor"}),
+    ("economics",     page_econ,           "التحليل الاقتصادي",   ":material/trending_up:",    {"admin", "analyst", "viewer", "auditor"}),
+    ("yields",        page_yields,         "العوائد والدولار",    ":material/payments:",       {"admin", "analyst", "viewer", "auditor"}),
+    ("cot",           page_cot,            "COT & OI",            ":material/bar_chart:",      {"admin", "analyst", "viewer", "auditor"}),
+    ("smc",           page_smc,            "SMC/ICT",             ":material/architecture:",   {"admin", "analyst", "auditor"}),
+    ("indicators",    page_tech,           "المؤشرات الفنية",     ":material/show_chart:",     {"admin", "analyst", "auditor"}),
+    ("consistency",   page_consistency,    "الاتساق",             ":material/compare_arrows:", {"admin", "analyst", "viewer", "auditor"}),
+    ("evidence",      page_evidence,       "مصفوفة الأدلة",       ":material/grid_view:",      {"admin", "analyst", "auditor"}),
+    ("validator",     page_validator,      "فاحص الصفقات",        ":material/verified:",       {"admin", "analyst", "auditor"}),
+    ("risk",          page_risk,           "إدارة المخاطر",       ":material/shield:",         {"admin", "analyst", "auditor"}),
+    ("backtest",      page_backtest,       "Backtesting",         ":material/science:",        {"admin", "analyst", "auditor"}),
+    ("weekly",        page_weekly,         "التقرير الأسبوعي",    ":material/description:",    {"admin", "analyst"}),
+    ("history",       page_history,        "سجل التقارير",        ":material/history:",        {"admin", "analyst", "auditor"}),
+    ("journal",       page_journal,        "سجل الصفقات",         ":material/menu_book:",      {"admin", "analyst", "auditor"}),
+    ("audit",         page_audit,          "سجل التدقيق",         ":material/search:",         {"admin", "auditor"}),
+    ("admin",         page_admin,          "Admin",               ":material/settings:",       {"admin"}),
+]
+
+nav_pages = []
+for key, fn, title, icon, roles in PAGE_DEFS:
+    if current_role in roles:
+        nav_pages.append(
+            st.Page(fn, title=title, icon=icon, url_path=key)
+        )
+
+if not nav_pages:
+    st.error("🚫 لا توجد صفحات متاحة لدورك الحالي.")
+    st.stop()
+
+pg = st.navigation(nav_pages, position="sidebar")
+pg.run()
+
+# ================================================================
+# FOOTER
+# ================================================================
 st.divider()
 st.caption(f"Aho𓂀  •  {APP_VERSION}  •  {now_utc_text()}")
