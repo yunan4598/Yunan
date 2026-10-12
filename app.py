@@ -129,9 +129,9 @@ with st.sidebar:
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown(f'<div class="status"><span class="status-dot"></span> COT / OI: متصل (CFTC)</div>', unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown(f'<div class="status"><span class="status-dot"></span> محرك التحليل والـ PA: مكتمل</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="status"><span class="status-dot"></span> الجلسات: نشطة حركياً</div>', unsafe_allow_html=True)
 
-st.markdown('''<div class="hero"><div class="eyebrow">MACROECONOMIC RESEARCH • XAUUSD</div><h1>مركز استخبارات الذهب</h1><p>من الأخبار الاقتصادية إلى العوائد الحقيقية والتمركز المؤسسي، ثم إلى سلوك السعر.</p><span class="pill">XAUUSD</span><span class="pill">FED & TREASURY</span><span class="pill">COT + OPEN INTEREST</span><span class="pill">PRICE ACTION & ENGINE</span></div>''', unsafe_allow_html=True)
+st.markdown('''<div class="hero"><div class="eyebrow">MACROECONOMIC RESEARCH • XAUUSD</div><h1>مركز استخبارات الذهب</h1><p>من الأخبار الاقتصادية إلى العوائد الحقيقية والتمركز المؤسسي، ثم إلى سلوك السعر والجلسات.</p><span class="pill">XAUUSD</span><span class="pill">FED & TREASURY</span><span class="pill">COT + OPEN INTEREST</span><span class="pill">TRADING SESSIONS</span></div>''', unsafe_allow_html=True)
 
 now = datetime.now(ZoneInfo(timezone_name))
 st.markdown(f'<div class="section-head"><h3>نظرة عامة</h3><span>وقت اللوحة: {now.strftime("%Y-%m-%d • %I:%M %p")} ({timezone_name})</span></div>', unsafe_allow_html=True)
@@ -183,6 +183,40 @@ def get_open_interest_data():
         {"المؤشر": "حجم التداول اليومي (Volume)", "القيمة الحالية": "241,500 عقد", "التغير اليومي": "+12.4%", "الدلالة": "زخم مرتفع ومشاركة قوية في الجلسة الأمريكية"}
     ]
 
+def get_trading_sessions(tz_name):
+    # تحويل أوقات الجلسات العالمية الموحدة إلى المنطقة الزمنية المختارة من قبل المستخدم
+    tz = ZoneInfo(tz_name)
+    now_local = datetime.now(tz)
+    
+    # تحديد نطاقات الجلسات بتوقيت UTC أولاً
+    sessions_utc = {
+        "جلسة آسيا (طوكيو)": {"open": 0, "close": 9},
+        "جلسة لندن (أوروبا)": {"open": 7, "close": 16},
+        "جلسة نيويورك (أمريكا)": {"open": 12, "close": 21},
+        "تداخل لندن / نيويورك": {"open": 12, "close": 16}
+    }
+    
+    result = []
+    for s_name, times in sessions_utc.items():
+        # إنشاء تواريخ الجلسات في UTC
+        start_utc = datetime.now(timezone.utc).replace(hour=times["open"], minute=0, second=0)
+        end_utc = datetime.now(timezone.utc).replace(hour=times["close"], minute=0, second=0)
+        
+        # تحويل للتوقيت المحلي للمستخدم
+        start_local = start_utc.astimezone(tz)
+        end_local = end_utc.astimezone(tz)
+        
+        is_active = start_local.time() <= now_local.time() <= end_local.time()
+        
+        result.append({
+            "الجلسة": s_name,
+            "الافتتاح المحلي": start_local.strftime("%I:%M %p"),
+            "الإغلاق المحلي": end_local.strftime("%I:%M %p"),
+            "الحالة الحالية": "🟢 نشطة الآن" if is_active else "⚪ مغلقة",
+            "مستوى السيولة": "عالي جداً" if "تداخل" in s_name or "نيويورك" in s_name else ("متوسط" if "لندن" in s_name else "منخفض / نطاق ضيق")
+        })
+    return result
+
 series_data={}; source_errors=[]
 if fred_key:
     for label, sid in FRED_SERIES.items():
@@ -208,8 +242,8 @@ for col,(sid,label) in zip(cards,card_series):
 if not fred_key:
     st.markdown('<div class="note">مصدر العوائد غير متصل بعد. أضف مفتاح FRED في إعدادات استضافة الموقع لتظهر البيانات الرسمية.</div>', unsafe_allow_html=True)
 
-st.markdown('<div class="section-head"><h3>مكوّنات المنظومة</h3><span>واجهة تفاعلية متكاملة</span></div>', unsafe_allow_html=True)
-t1,t2,t3,t4,t5=st.tabs(["التقويم الاقتصادي","العوائد والتضخم","COT و Open Interest","الدولار والذهب (تحليلي)","محرك التحليل والسيناريوهات"])
+st.markdown('<div class="section-head"><h3>مكوّنات المنظومة</h3><span>واجهة أولية — حالة الربط موضحة لكل وحدة</span></div>', unsafe_allow_html=True)
+t1,t2,t3,t4,t5,t6=st.tabs(["التقويم الاقتصادي","العوائد والتضخم","COT و Open Interest","الدولار والذهب","محرك التحليل","جلسات التداول والأخبار"])
 with t1:
     st.markdown("#### الأخبار الأمريكية: الفعلي مقابل المتوقع والسابق")
     c1,c2,c3=st.columns(3)
@@ -307,13 +341,17 @@ with t5:
           </p>
         </div>
         """, unsafe_allow_html=True)
+
+with t6:
+    st.markdown(f"#### جدول جلسات التداول بحسب المنطقة الزمنية المختارة ({timezone_name})")
+    sessions_df = pd.DataFrame(get_trading_sessions(timezone_name))
+    st.dataframe(sessions_df, use_container_width=True, hide_index=True)
     
-    st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("""
-    <div class="note">
-      <b>⚠️ شروط إبطال التحليل وحالات تجنب الدخول:</b><br>
-      * <b>إبطال السيناريو الصاعد:</b> إغلاق يومي تحت 2,630 $ أو ارتفاع مفاجئ في العائد الحقيقي فوق مستويات التوازن.<br>
-      * <b>متى تتجنب التداول؟</b> أثناء صدور بيانات التضخم الكبرى (CPI) أو تقرير الوظائف (NFP) وقبل تحديد اتجاه كسر السيولة (Stop Run).
+    <div class="note" style="margin-top:15px;">
+      <b>⚠️ تنبيه السبريد والسيولة قبل الأخبار:</b><br>
+      * تتسع الفروق السعرية (Spread) وتزداد الانزلاقات السعرية (Slippage) بشكل حاد قبل 5 دقائق من صدور الأخبار عالية التأثير مثل CPI و NFP.<br>
+      * يُنصح بتجنب فتح أوامر جديدة أثناء فترة التداخل بين الجلسات وفي فترات التذبذب العالي لمنع الضرب العشوائي لـ Stop Loss.
     </div>
     """, unsafe_allow_html=True)
 
