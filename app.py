@@ -101,18 +101,16 @@ def fetch_official_cot_data():
     if cot is None:
         return {"net": "DATA UNAVAILABLE", "long": "-", "short": "-", "date": "المكتبة غير مثبتة", "status": "أضف cot_reports لـ requirements.txt 🔴"}
     
-    # محاولة سحب السنة الحالية ثم السنة السابقة تلقائياً في حال تأخر تحديث الملفات الرسمية
+    # محاولة سحب السنة الحالية ثم السنة السابقة تلقائياً
     for target_year in [datetime.now().year, datetime.now().year - 1]:
         try:
             df_cot = cot.cot_year(year=target_year, cot_type='legacy_fut')
             if df_cot is not None and not df_cot.empty:
-                # البحث المرن عن عقد الذهب الرسمي
                 gold_cot = df_cot[df_cot['Market and Exchange Names'].astype(str).str.contains("GOLD - COMMODITY EXCHANGE INC", case=False, na=False)]
                 
                 if not gold_cot.empty:
                     latest = gold_cot.iloc[0]
                     
-                    # مطابقة أسماء الأعمدة ديناميكياً
                     long_col = [c for c in latest.index if 'noncommercial' in c.lower() and 'long' in c.lower()]
                     short_col = [c for c in latest.index if 'noncommercial' in c.lower() and 'short' in c.lower()]
                     date_col = [c for c in latest.index if 'date' in c.lower()]
@@ -182,7 +180,6 @@ def fetch_audited_market_data():
 market_data = fetch_audited_market_data()
 active_gold = st.session_state.synced_gold_price
 
-# تعريف مصفوفة الأدلة في النطاق العام لمنع خطأ NameError في أي تبويب
 evidence_matrix_data = [
     {"العامل": "عائد US10Y", "القيمة الحالية": market_data['us10y']['val'], "التغير": market_data['us10y']['change'], "التفسير": "ضغط/دعم عوائد", "اتجاه التأثير": "سلبي محتمل للذهب", "الأدلة المؤيدة": "ارتباط عكسي تاريخي", "الأدلة المعارضة": "طلب الملاذ الآمن", "التاريخ": market_data['us10y']['obs_date'], "الجودة": market_data['us10y']['status']},
     {"العامل": "مؤشر DXY", "القيمة الحالية": market_data['dxy']['val'], "التغير": market_data['dxy']['change'], "التفسير": "قوة الدولار", "اتجاه التأثير": "إيجابي/سلبي لحظي", "الأدلة المؤيدة": "علاقة عكسية مع الذهب", "الأدلة المعارضة": "مشتريات البنوك المركزية", "التاريخ": market_data['dxy']['obs_date'], "الجودة": market_data['dxy']['status']},
@@ -296,7 +293,7 @@ if navigation == "🔥 2. MAIN DASHBOARD (Fusion & Scenarios)":
     st.dataframe(pd.DataFrame(evidence_matrix_data), use_container_width=True, hide_index=True)
 
 # ==================================================
-# 7. COT AND OPEN INTEREST (المباشر من CFTC)
+# 7. COT AND OPEN INTEREST
 # ==================================================
 elif navigation == "7. COT & OPEN INTEREST (التمركز المؤسسي المباشر)":
     st.markdown("## 🏦 7. تقارير التمركز المؤسسي المباشرة من CFTC (Gold COT Report)")
