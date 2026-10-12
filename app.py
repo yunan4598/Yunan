@@ -856,7 +856,7 @@ def market():
          "tested_at": utc()}
     m["quality_score"] = quality(m)
     return m
-    
+  
 # ================================================================
 # AUTH GATE
 # ================================================================
@@ -898,9 +898,6 @@ active_gold = (float(st.session_state.manual_gold_price)
 
 def can_export(): return current_role in {"admin", "analyst"}
 
-# ================================================================
-# UPDATE BANNER
-# ================================================================
 def detect_new(m):
     alerts = []
     pairs = [
@@ -943,7 +940,7 @@ def pg_dashboard():
         "BEARISH": ("signal-bear", "🔴", "تحيز هابط"),
         "NO_TRADE": ("signal-no-trade", "⛔", "لا تداول"),
     }.get(fb, ("signal-neutral", "🟡", "حياد"))
-    rh = ("<p style='color:#E74C3C;margin:6px 0 0;font-size:13px;font-weight:600;'>"
+    rh = ("<p style='color:#E74C3C;margin:6px 0 0;font-size:13px;font-weight:700;'>"
           + " • ".join(fus["reasons"]) + "</p>") if fus["reasons"] else ""
     st.markdown(f'<div class="{cls[0]}"><h3>{cls[1]} {cls[2]} — ثقة {fus["confidence"]}%</h3>{rh}</div>',
                 unsafe_allow_html=True)
@@ -1469,10 +1466,10 @@ with st.sidebar:
 # ================================================================
 # UPDATE BANNER
 # ================================================================
-fresh = [a for a in new_alerts if not a["is_first"]]
-if fresh:
+fresh_alerts = [a for a in new_alerts if not a["is_first"]]
+if fresh_alerts:
     box_warn("🔔 <b>بيانات جديدة منذ آخر زيارة:</b><br>"
-             + "<br>".join(f"• {a['source']}: {a['old']} → {a['new']}" for a in fresh))
+             + "<br>".join(f"• {a['source']}: {a['old']} → {a['new']}" for a in fresh_alerts))
 
 # ================================================================
 # NAVIGATION
