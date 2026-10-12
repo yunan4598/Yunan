@@ -1,5 +1,5 @@
 # ================================================================
-# YUNAN GOLD INTELLIGENCE — v16.0 FINAL (SINGLE-FILE BUILD)
+# Aho𓂀 — GOLD INTELLIGENCE — v16.1 (THEME + BRAND UPDATE)
 # ================================================================
 from __future__ import annotations
 import os, re, json as _json, hmac, smtplib, ssl
@@ -16,49 +16,343 @@ import requests
 import streamlit as st
 import bcrypt
 
-APP_NAME = "YUNAN GOLD INTELLIGENCE"
-APP_VERSION = "16.0 — FINAL INTEGRATED BUILD"
+APP_NAME = "Aho𓂀"
+APP_NAME_LATIN = "AHO"
+APP_VERSION = "16.1 — GOLD INTELLIGENCE"
 REQUEST_TIMEOUT = 15
-USER_AGENT = "YunanGoldIntelligence/16.0"
+USER_AGENT = "AhoGoldIntelligence/16.1"
 
-st.set_page_config(page_title=APP_NAME, page_icon="◆",
-                   layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(
+    page_title="Aho𓂀 — Gold Intelligence",
+    page_icon="𓂀",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
 
 # ================================================================
-# CSS (مختصر)
+# THEME — Premium Dark (warm charcoal + gold)
 # ================================================================
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap');
-:root{--bg:#06090f;--panel:#0d131d;--line:#1e2c3d;--gold:#d9b56d;
---green:#00e676;--red:#ff5252;--yellow:#ffeb3b;--muted:#8b9bb4;--text:#eef2f7}
-html,body,[class*="css"]{font-family:'IBM Plex Sans Arabic','Inter',sans-serif;direction:rtl;text-align:right}
-.stApp{background:radial-gradient(circle at 50% 0%,#111b29 0%,var(--bg) 60%);color:var(--text)}
-.block-container{padding-top:1.2rem!important;max-width:1550px}
-[data-testid="stSidebar"]{background:#070b12;border-left:1px solid var(--line)}
-[data-testid="stSidebar"] *{text-align:right}
-.brand{display:flex;align-items:center;gap:12px;padding:4px 0 16px;border-bottom:1px solid var(--line);margin-bottom:14px}
-.brand-mark{width:42px;height:42px;border:1px solid #7a643b;border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:21px;background:linear-gradient(145deg,#221c13,#0d121a)}
-.brand-title{font-family:Inter,sans-serif;letter-spacing:1px;font-weight:800;font-size:15px;color:#f4f0e7}
-.brand-sub{color:var(--muted);font-size:10px;margin-top:2px}
-.hero{border:1px solid #233142;border-radius:16px;padding:20px 24px;background:linear-gradient(135deg,rgba(17,25,38,.95),rgba(8,12,18,.95));margin-bottom:16px}
-.eyebrow{color:var(--gold);letter-spacing:1.4px;font-size:11px;font-weight:700;font-family:Inter,sans-serif}
-.hero h1{margin:6px 0;font-size:22px;color:#f7f5ef;font-weight:700}
-.hero p{margin:0;color:#9fb0c6;line-height:1.7;font-size:13px}
-.fusion-card{background:#0b111a;border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:12px}
-.fusion-card h4{color:var(--gold);margin:0 0 8px;font-size:14px}
-.stButton button{border-radius:10px;border:1px solid #d9b56d!important;background:linear-gradient(135deg,#d9b56d,#b3914a)!important;color:#06090f!important;font-weight:800!important;width:100%;padding:9px}
-.warning-box{border:1px solid #7a5c22;background:#1b170d;border-radius:10px;padding:12px 14px;margin:8px 0;color:#f3d89b;font-size:13px}
-.signal-bull{border:1px solid #1a6b3a;background:#0a1f12;border-radius:10px;padding:14px;margin:8px 0}
-.signal-bear{border:1px solid #6b1a1a;background:#1f0a0a;border-radius:10px;padding:14px;margin:8px 0}
-.signal-neutral{border:1px solid #6b5a1a;background:#1f1a0a;border-radius:10px;padding:14px;margin:8px 0}
-.signal-no-trade{border:1px solid #444;background:#111;border-radius:10px;padding:14px;margin:8px 0}
-footer{visibility:hidden}
+
+:root {
+  --bg-base:      #141a24;
+  --bg-elev-1:    #1c2431;
+  --bg-elev-2:    #232d3d;
+  --border:       #2a3444;
+  --border-soft:  #22303f;
+  --gold:         #e8c98a;
+  --gold-dim:     #b39a5f;
+  --green:        #4ade80;
+  --red:          #f87171;
+  --amber:        #fbbf24;
+  --blue:         #60a5fa;
+  --text:         #f0f2f5;
+  --text-muted:   #b8c0cc;
+  --text-dim:     #8896a8;
+}
+
+html, body, [class*="css"] {
+  font-family: 'IBM Plex Sans Arabic', 'Inter', sans-serif;
+  direction: rtl; text-align: right; color: var(--text);
+}
+
+.stApp {
+  background:
+    radial-gradient(ellipse at 20% 0%, #1e2a3d 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 100%, #1a2535 0%, transparent 60%),
+    var(--bg-base);
+  color: var(--text);
+}
+
+.block-container {
+  padding-top: 1.4rem !important;
+  padding-bottom: 2.5rem !important;
+  max-width: 1550px;
+}
+
+/* ---------- Sidebar ---------- */
+[data-testid="stSidebar"] {
+  background: linear-gradient(180deg, #171f2b 0%, #131a24 100%);
+  border-left: 1px solid var(--border);
+  padding-top: 12px;
+}
+[data-testid="stSidebar"] * { text-align: right; }
+[data-testid="stSidebar"] .stRadio label {
+  color: var(--text-muted) !important; font-size: 13.5px;
+}
+
+/* ---------- Brand Aho𓂀 ---------- */
+.brand {
+  display: flex; align-items: center; gap: 12px;
+  padding: 6px 0 18px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 16px;
+}
+.brand-mark {
+  width: 46px; height: 46px;
+  border: 1px solid var(--gold-dim);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--gold); font-size: 24px; font-weight: 700;
+  background: linear-gradient(145deg, #2a2418, #1a2030);
+  box-shadow: 0 0 22px rgba(232, 201, 138, 0.18);
+  font-family: 'Segoe UI Historic', 'Noto Sans Egyptian Hieroglyphs', Inter, sans-serif;
+}
+.brand-title {
+  font-family: Inter, 'IBM Plex Sans Arabic', sans-serif;
+  letter-spacing: 1.4px; font-weight: 800;
+  font-size: 18px; color: var(--text);
+  text-shadow: 0 0 20px rgba(232, 201, 138, 0.25);
+}
+.brand-sub {
+  color: var(--text-dim); font-size: 10.5px;
+  margin-top: 3px; letter-spacing: 1.2px;
+}
+
+/* ---------- Hero ---------- */
+.hero {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 22px 26px;
+  background: linear-gradient(135deg,
+    rgba(35, 45, 61, 0.85) 0%,
+    rgba(28, 36, 49, 0.7) 100%);
+  margin-bottom: 18px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35),
+              inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+.eyebrow {
+  color: var(--gold); letter-spacing: 1.8px;
+  font-size: 11.5px; font-weight: 700;
+  font-family: Inter, sans-serif;
+}
+.hero h1 {
+  margin: 8px 0; font-size: 26px;
+  color: var(--text); font-weight: 700;
+  text-shadow: 0 0 30px rgba(232, 201, 138, 0.15);
+}
+.hero p {
+  margin: 0; color: var(--text-muted);
+  line-height: 1.75; font-size: 13.5px;
+}
+
+/* ---------- Metrics ---------- */
+[data-testid="stMetric"] {
+  background: var(--bg-elev-1);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 15px 17px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+  transition: all 0.2s ease;
+}
+[data-testid="stMetric"]:hover {
+  border-color: var(--gold-dim);
+  box-shadow: 0 4px 20px rgba(232, 201, 138, 0.12);
+}
+[data-testid="stMetricLabel"] {
+  color: var(--text-muted) !important;
+  font-size: 12.5px !important; font-weight: 500 !important;
+}
+[data-testid="stMetricValue"] {
+  color: var(--text) !important;
+  font-size: 24px !important; font-weight: 700 !important;
+  letter-spacing: 0.3px;
+  white-space: nowrap !important;
+  overflow: visible !important;
+  text-overflow: unset !important;
+  font-variant-numeric: tabular-nums !important;
+}
+[data-testid="stMetricValue"] > div,
+[data-testid="stMetricValue"] > div > div {
+  white-space: nowrap !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+}
+[data-testid="stMetricDelta"] {
+  font-size: 12px !important; font-weight: 600 !important;
+}
+
+/* ---------- Cards ---------- */
+.fusion-card {
+  background: var(--bg-elev-1);
+  border: 1px solid var(--border);
+  border-radius: 12px; padding: 18px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+}
+.fusion-card h4 {
+  color: var(--gold); margin: 0 0 10px;
+  font-size: 14.5px; font-weight: 600;
+}
+.fusion-card p {
+  color: var(--text-muted); font-size: 13px; line-height: 1.85;
+}
+
+/* ---------- Signal cards ---------- */
+.signal-bull {
+  border: 1px solid rgba(74, 222, 128, 0.35);
+  background: linear-gradient(135deg,
+    rgba(30, 60, 42, 0.6), rgba(22, 45, 32, 0.4));
+  border-radius: 12px; padding: 16px 18px; margin: 10px 0;
+  box-shadow: 0 0 24px rgba(74, 222, 128, 0.08);
+}
+.signal-bear {
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  background: linear-gradient(135deg,
+    rgba(60, 30, 32, 0.6), rgba(45, 22, 24, 0.4));
+  border-radius: 12px; padding: 16px 18px; margin: 10px 0;
+  box-shadow: 0 0 24px rgba(248, 113, 113, 0.08);
+}
+.signal-neutral {
+  border: 1px solid rgba(251, 191, 36, 0.35);
+  background: linear-gradient(135deg,
+    rgba(60, 50, 25, 0.6), rgba(45, 38, 20, 0.4));
+  border-radius: 12px; padding: 16px 18px; margin: 10px 0;
+  box-shadow: 0 0 24px rgba(251, 191, 36, 0.08);
+}
+.signal-no-trade {
+  border: 1px solid rgba(184, 192, 204, 0.25);
+  background: linear-gradient(135deg,
+    rgba(35, 45, 61, 0.7), rgba(28, 36, 49, 0.5));
+  border-radius: 12px; padding: 16px 18px; margin: 10px 0;
+}
+.signal-bull h3, .signal-bear h3,
+.signal-neutral h3, .signal-no-trade h3 {
+  color: var(--text) !important;
+  margin: 0 0 6px; font-size: 16px; font-weight: 700;
+}
+
+/* ---------- Warning ---------- */
+.warning-box {
+  border: 1px solid rgba(251, 191, 36, 0.4);
+  background: rgba(60, 50, 25, 0.4);
+  border-radius: 10px; padding: 13px 16px;
+  margin: 10px 0; color: #f5dc9a;
+  font-size: 13px; line-height: 1.7;
+}
+
+/* ---------- Buttons ---------- */
+.stButton button {
+  border-radius: 10px;
+  border: 1px solid var(--gold-dim) !important;
+  background: linear-gradient(135deg, #e8c98a 0%, #c9a961 100%) !important;
+  color: #131a24 !important; font-weight: 700 !important;
+  width: 100%; padding: 10px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 12px rgba(232, 201, 138, 0.15);
+}
+.stButton button:hover {
+  background: linear-gradient(135deg, #f0d49a 0%, #d9b972 100%) !important;
+  box-shadow: 0 4px 20px rgba(232, 201, 138, 0.3);
+  transform: translateY(-1px);
+}
+.stDownloadButton button {
+  border-radius: 10px;
+  border: 1px solid var(--border) !important;
+  background: var(--bg-elev-2) !important;
+  color: var(--text) !important; font-weight: 600 !important;
+}
+.stDownloadButton button:hover {
+  border-color: var(--gold-dim) !important;
+  background: var(--bg-elev-1) !important;
+}
+
+/* ---------- Inputs ---------- */
+.stTextInput input, .stNumberInput input,
+.stSelectbox div[data-baseweb="select"] > div,
+.stTextArea textarea {
+  background: var(--bg-elev-2) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text) !important;
+  border-radius: 8px !important;
+}
+.stTextInput input:focus, .stNumberInput input:focus,
+.stTextArea textarea:focus {
+  border-color: var(--gold-dim) !important;
+  box-shadow: 0 0 0 2px rgba(232, 201, 138, 0.15) !important;
+}
+
+/* ---------- Radio ---------- */
+.stRadio > div { gap: 4px; }
+.stRadio label {
+  padding: 8px 10px !important;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+.stRadio label:hover { background: rgba(232, 201, 138, 0.08); }
+
+/* ---------- Dataframe ---------- */
+[data-testid="stDataFrame"] {
+  border: 1px solid var(--border);
+  border-radius: 10px; overflow: hidden;
+}
+
+/* ---------- Expander ---------- */
+.streamlit-expanderHeader {
+  background: var(--bg-elev-1) !important;
+  border-radius: 10px !important;
+  color: var(--text) !important; font-weight: 600 !important;
+}
+
+/* ---------- Divider ---------- */
+hr { border-color: var(--border) !important; margin: 1.2rem 0 !important; }
+
+/* ---------- Caption ---------- */
+.stCaption, [data-testid="stCaptionContainer"] {
+  color: var(--text-dim) !important; font-size: 11.5px !important;
+}
+
+/* ---------- Headings ---------- */
+h1, h2, h3, h4, h5 { color: var(--text) !important; }
+h2 { font-size: 21px !important; font-weight: 700 !important; }
+h3 { font-size: 17px !important; font-weight: 600 !important; }
+
+/* ---------- Tabs ---------- */
+.stTabs [data-baseweb="tab-list"] {
+  gap: 4px; background: transparent;
+  border-bottom: 1px solid var(--border);
+}
+.stTabs [data-baseweb="tab"] {
+  background: transparent !important;
+  color: var(--text-muted) !important;
+  font-weight: 500; border-radius: 8px 8px 0 0;
+}
+.stTabs [aria-selected="true"] {
+  color: var(--gold) !important;
+  border-bottom: 2px solid var(--gold) !important;
+}
+
+footer { visibility: hidden; }
+
+/* ---------- Mobile ---------- */
+@media (max-width: 640px) {
+  .hero { padding: 18px; }
+  .hero h1 { font-size: 20px; }
+  [data-testid="stMetricValue"] { font-size: 19px !important; }
+  [data-testid="stMetricLabel"] { font-size: 11px !important; }
+  [data-testid="stMetric"] { padding: 12px 13px; }
+  .block-container {
+    padding-left: 0.8rem !important;
+    padding-right: 0.8rem !important;
+  }
+  .brand-mark { width: 40px; height: 40px; font-size: 20px; }
+  .brand-title { font-size: 15px; }
+}
+
+@media (max-width: 480px) {
+  [data-testid="stMetricValue"] {
+    font-size: 17px !important;
+    letter-spacing: 0 !important;
+  }
+  [data-testid="stMetricLabel"] { font-size: 10.5px !important; }
+}
 </style>
 """, unsafe_allow_html=True)
 
 # ================================================================
-# SECRETS & HELPERS
+# HELPERS
 # ================================================================
 def get_secret(name: str) -> str:
     v = ""
@@ -104,8 +398,18 @@ def display_status(s: str) -> str:
         "NOT TESTED": "⚪ NOT TESTED", "UNAVAILABLE": "🔴 UNAVAILABLE",
     }.get(s, s)
 
+def render_hero(title: str, subtitle: str = "") -> None:
+    sub = (f'<p>{subtitle}</p>' if subtitle
+           else '<p>منصة قرار موحدة لتحليل الذهب — بيانات رسمية، تحقق متقاطع، وقرار قابل للتتبع.</p>')
+    st.markdown(
+        f'<div class="hero">'
+        f'<div class="eyebrow">Aho𓂀  •  GOLD INTELLIGENCE</div>'
+        f'<h1>{title}</h1>{sub}</div>',
+        unsafe_allow_html=True,
+    )
+
 # ================================================================
-# FRESHNESS SYSTEM
+# FRESHNESS
 # ================================================================
 FRESHNESS_PROFILES = {
     "intraday":  {"max_age_hours": 6,   "label": "لحظي"},
@@ -133,7 +437,7 @@ def assess_freshness(obs_date: Any, profile: str) -> dict[str, Any]:
     return {"age": age, "usable": usable, "detail": detail, "profile": profile}
 
 # ================================================================
-# RBAC — bcrypt + 4 roles
+# RBAC
 # ================================================================
 def _get_users() -> dict[str, dict]:
     raw = get_secret("APP_USERS")
@@ -142,7 +446,8 @@ def _get_users() -> dict[str, dict]:
         except Exception: pass
     u = get_secret("APP_USERNAME"); p = get_secret("APP_PASSWORD")
     if u and p:
-        return {u: {"pw_hash": bcrypt.hashpw(p.encode(), bcrypt.gensalt(rounds=12)).decode(), "role": "admin"}}
+        return {u: {"pw_hash": bcrypt.hashpw(p.encode(), bcrypt.gensalt(rounds=12)).decode(),
+                    "role": "admin"}}
     return {}
 
 def _verify_password(pw: str, hashed: str) -> bool:
@@ -157,7 +462,7 @@ def _verify_credentials(user: str, pw: str) -> Optional[dict]:
     return None
 
 # ================================================================
-# AUDIT LOG
+# AUDIT
 # ================================================================
 if "audit_log" not in st.session_state:
     st.session_state.audit_log = []
@@ -166,15 +471,14 @@ def log_action(category: str, action: str, old_value: Any = None,
                new_value: Any = None, reason: str = "") -> None:
     st.session_state.audit_log.append({
         "time": now_utc_text(),
-        "user": st.session_state.get("user", {}).get("username", "—"),
-        "role": st.session_state.get("user", {}).get("role", "—"),
+        "user": st.session_state.get("user", {}).get("username", "—") if st.session_state.get("user") else "—",
+        "role": st.session_state.get("user", {}).get("role", "—") if st.session_state.get("user") else "—",
         "category": category, "action": action,
-        "old_value": old_value, "new_value": new_value,
-        "reason": reason,
+        "old_value": old_value, "new_value": new_value, "reason": reason,
     })
 
 # ================================================================
-# NOTIFICATIONS — Telegram + Gmail
+# NOTIFICATIONS
 # ================================================================
 def send_telegram(text: str) -> dict[str, Any]:
     token = get_secret("TELEGRAM_BOT_TOKEN")
@@ -182,19 +486,15 @@ def send_telegram(text: str) -> dict[str, Any]:
     if not token or not chat:
         return {"status": "NOT TESTED", "detail": "Telegram غير مضبوط."}
     try:
-        r = request_get(
-            f"https://api.telegram.org/bot{token}/sendMessage",
-            params={"chat_id": chat, "text": text, "parse_mode": "Markdown"},
-        )
+        r = request_get(f"https://api.telegram.org/bot{token}/sendMessage",
+                        params={"chat_id": chat, "text": text, "parse_mode": "Markdown"})
         r.raise_for_status()
         return {"status": "CONNECTED", "detail": "تم الإرسال."}
     except Exception as exc:
-        return {"status": classify_exception(exc),
-                "detail": f"Telegram: {type(exc).__name__}."}
+        return {"status": classify_exception(exc), "detail": f"Telegram: {type(exc).__name__}."}
 
 def send_email(subject: str, body: str, to_addr: str) -> dict[str, Any]:
-    user = get_secret("GMAIL_USER")
-    pw = get_secret("GMAIL_APP_PASSWORD")
+    user = get_secret("GMAIL_USER"); pw = get_secret("GMAIL_APP_PASSWORD")
     if not user or not pw or not to_addr:
         return {"status": "NOT TESTED", "detail": "Gmail SMTP غير مضبوط."}
     try:
@@ -203,15 +503,13 @@ def send_email(subject: str, body: str, to_addr: str) -> dict[str, Any]:
         msg.attach(MIMEText(body, "plain", "utf-8"))
         ctx = ssl.create_default_context()
         with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=ctx) as srv:
-            srv.login(user, pw)
-            srv.send_message(msg)
+            srv.login(user, pw); srv.send_message(msg)
         return {"status": "CONNECTED", "detail": "تم الإرسال."}
     except Exception as exc:
-        return {"status": "UNAVAILABLE",
-                "detail": f"SMTP: {type(exc).__name__}."}
+        return {"status": "UNAVAILABLE", "detail": f"SMTP: {type(exc).__name__}."}
 
 # ================================================================
-# YAHOO FINANCE
+# YAHOO
 # ================================================================
 def _yahoo_quote_impl(symbols: tuple[str, ...], label: str) -> dict[str, Any]:
     errors = []
@@ -220,12 +518,10 @@ def _yahoo_quote_impl(symbols: tuple[str, ...], label: str) -> dict[str, Any]:
         try:
             r = request_get(url, params={"range": "5d", "interval": "1d"})
             if r.status_code == 429:
-                return {"status": "RATE LIMITED", "label": label,
-                        "symbol": sym, "value": None, "change": None,
-                        "observation_date": "—", "timestamp": "—",
-                        "source": "Yahoo Finance",
-                        "url": "https://finance.yahoo.com/",
-                        "detail": "HTTP 429."}
+                return {"status": "RATE LIMITED", "label": label, "symbol": sym,
+                        "value": None, "change": None, "observation_date": "—",
+                        "timestamp": "—", "source": "Yahoo Finance",
+                        "url": "https://finance.yahoo.com/", "detail": "HTTP 429."}
             r.raise_for_status()
             res = (r.json().get("chart", {}).get("result") or [None])[0]
             if not res: continue
@@ -239,8 +535,8 @@ def _yahoo_quote_impl(symbols: tuple[str, ...], label: str) -> dict[str, Any]:
             obs = datetime.fromtimestamp(last_ts, timezone.utc)
             fr = assess_freshness(obs, "intraday")
             status = "CONNECTED" if fr["usable"] else "STALE"
-            return {"status": status, "label": label, "symbol": sym,
-                    "value": last_v, "change": (last_v - prev_v) if prev_v else None,
+            return {"status": status, "label": label, "symbol": sym, "value": last_v,
+                    "change": (last_v - prev_v) if prev_v else None,
                     "observation_date": obs.strftime("%Y-%m-%d"),
                     "timestamp": obs.strftime("%Y-%m-%d %H:%M UTC"),
                     "freshness_detail": fr["detail"],
@@ -249,10 +545,9 @@ def _yahoo_quote_impl(symbols: tuple[str, ...], label: str) -> dict[str, Any]:
                     "detail": f"{fr['detail']} • {sym}"}
         except Exception as exc:
             errors.append(f"{sym}: {type(exc).__name__}")
-    return {"status": "UNAVAILABLE", "label": label, "symbol": "—",
-            "value": None, "change": None, "observation_date": "—",
-            "timestamp": "—", "source": "Yahoo Finance",
-            "url": "https://finance.yahoo.com/",
+    return {"status": "UNAVAILABLE", "label": label, "symbol": "—", "value": None,
+            "change": None, "observation_date": "—", "timestamp": "—",
+            "source": "Yahoo Finance", "url": "https://finance.yahoo.com/",
             "detail": "تعذر الجلب: " + " | ".join(errors[:3])}
 
 @st.cache_data(ttl=300, show_spinner=False)
@@ -262,7 +557,7 @@ def fetch_yahoo_quote(symbols: tuple[str, ...], label: str) -> dict[str, Any]:
     return res
 
 # ================================================================
-# OHLC ENGINE (Yahoo chart endpoint)
+# OHLC
 # ================================================================
 @st.cache_data(ttl=900, show_spinner=False)
 def fetch_gold_ohlc(range_: str = "6mo", interval: str = "1d") -> dict[str, Any]:
@@ -295,8 +590,7 @@ def fetch_gold_ohlc(range_: str = "6mo", interval: str = "1d") -> dict[str, Any]
                 "freshness_detail": fr["detail"],
                 "detail": f"{len(df)} شمعة • {fr['detail']}"}
     except Exception as exc:
-        return {"status": classify_exception(exc), "df": None,
-                "detail": f"خطأ: {type(exc).__name__}."}
+        return {"status": classify_exception(exc), "df": None, "detail": f"خطأ: {type(exc).__name__}."}
 
 # ================================================================
 # TECHNICAL INDICATORS
@@ -306,21 +600,18 @@ def compute_indicators(df: pd.DataFrame) -> dict[str, Any]:
         return {"status": "NO DATA", "detail": "OHLC غير كافٍ."}
     close = df["close"].astype(float); high = df["high"].astype(float); low = df["low"].astype(float)
     log_ret = np.log(close / close.shift()).dropna()
-
     def atr(period):
         tr = pd.concat([high - low, (high - close.shift()).abs(),
                         (low - close.shift()).abs()], axis=1).max(axis=1)
         return float(tr.rolling(period).mean().iloc[-1])
-
     sma20 = close.rolling(20).mean(); std20 = close.rolling(20).std()
     sma50 = float(close.rolling(50).mean().iloc[-1]) if len(df) >= 50 else None
     trend = "UP" if sma50 and sma20.iloc[-1] > sma50 else "DOWN" if sma50 else "FLAT"
     highs, lows = high.values, low.values
-    swing_h, swing_l = [], []
+    sh, sl = [], []
     for i in range(2, len(df) - 2):
-        if highs[i] == max(highs[i-2:i+3]): swing_h.append(highs[i])
-        if lows[i] == min(lows[i-2:i+3]): swing_l.append(lows[i])
-
+        if highs[i] == max(highs[i-2:i+3]): sh.append(highs[i])
+        if lows[i] == min(lows[i-2:i+3]): sl.append(lows[i])
     def cluster(levels, tol=0.5):
         if not levels: return []
         levels = sorted(levels); groups = [[levels[0]]]
@@ -329,23 +620,19 @@ def compute_indicators(df: pd.DataFrame) -> dict[str, Any]:
                 groups[-1].append(lv)
             else: groups.append([lv])
         return [round(sum(g)/len(g), 2) for g in groups if len(g) >= 2]
-
-    return {
-        "status": "OK",
-        "atr14": round(atr(14), 2), "atr7": round(atr(7), 2),
-        "vol20": round(float(log_ret.tail(20).std() * np.sqrt(252) * 100), 2),
-        "vol60": round(float(log_ret.tail(60).std() * np.sqrt(252) * 100), 2),
-        "bb_upper": round(float((sma20 + 2*std20).iloc[-1]), 2),
-        "bb_mid": round(float(sma20.iloc[-1]), 2),
-        "bb_lower": round(float((sma20 - 2*std20).iloc[-1]), 2),
-        "year_high": round(float(high.tail(252).max()), 2) if len(df) >= 252 else round(float(high.max()), 2),
-        "year_low": round(float(low.tail(252).min()), 2) if len(df) >= 252 else round(float(low.min()), 2),
-        "supports": cluster(swing_l)[:3], "resistances": cluster(swing_h)[-3:],
-        "trend": trend, "bars": len(df),
-    }
+    return {"status": "OK", "atr14": round(atr(14), 2), "atr7": round(atr(7), 2),
+            "vol20": round(float(log_ret.tail(20).std() * np.sqrt(252) * 100), 2),
+            "vol60": round(float(log_ret.tail(60).std() * np.sqrt(252) * 100), 2),
+            "bb_upper": round(float((sma20 + 2*std20).iloc[-1]), 2),
+            "bb_mid": round(float(sma20.iloc[-1]), 2),
+            "bb_lower": round(float((sma20 - 2*std20).iloc[-1]), 2),
+            "year_high": round(float(high.tail(252).max()), 2) if len(df) >= 252 else round(float(high.max()), 2),
+            "year_low": round(float(low.tail(252).min()), 2) if len(df) >= 252 else round(float(low.min()), 2),
+            "supports": cluster(sl)[:3], "resistances": cluster(sh)[-3:],
+            "trend": trend, "bars": len(df)}
 
 # ================================================================
-# SMC/ICT ENGINE v2
+# SMC/ICT
 # ================================================================
 def detect_swings(df, left=2, right=2):
     if df is None or len(df) < left + right + 1: return {"highs": [], "lows": []}
@@ -386,11 +673,9 @@ def detect_sweeps(df, swings, atr):
 
 def analyze_smc_ict_v2(ohlc_res):
     df = ohlc_res.get("df")
-    out = {"status": ohlc_res.get("status", "NO DATA"),
-           "structure": "UNDEFINED", "bias": "NEUTRAL",
-           "signals": [], "sweeps": [], "atr": None,
-           "pdh": None, "pdl": None,
-           "source": ohlc_res.get("source", "—")}
+    out = {"status": ohlc_res.get("status", "NO DATA"), "structure": "UNDEFINED",
+           "bias": "NEUTRAL", "signals": [], "sweeps": [], "atr": None,
+           "pdh": None, "pdl": None, "source": ohlc_res.get("source", "—")}
     if df is None or len(df) < 10:
         out["signals"].append("⚠️ لا OHLC كافٍ.")
         return out
@@ -400,8 +685,7 @@ def analyze_smc_ict_v2(ohlc_res):
     tr = pd.concat([high - low, (high - close.shift()).abs(),
                     (low - close.shift()).abs()], axis=1).max(axis=1)
     out["atr"] = float(tr.rolling(14).mean().iloc[-1])
-    sw = detect_swings(df, 2, 2)
-    bi = detect_bos_choch(df, sw)
+    sw = detect_swings(df, 2, 2); bi = detect_bos_choch(df, sw)
     out["structure"] = bi["structure"]
     out["signals"].append(f"البنية: {bi['structure']}")
     if bi["last_bos"]:
@@ -414,15 +698,14 @@ def analyze_smc_ict_v2(ohlc_res):
     return out
 
 # ================================================================
-# TREASURY CURVE (CSV)
+# TREASURY
 # ================================================================
 def _norm_col(v): return re.sub(r"[^a-z0-9]", "", str(v).lower())
 
 def _find_yield_col(cols, years):
     norm = {c: _norm_col(c) for c in cols}
     for c, n in norm.items():
-        if n in {f"{years}yr", f"{years}year", f"{years}yrs", f"{years}years", f"{years}y", f"{years}mo"}:
-            return c
+        if n in {f"{years}yr", f"{years}year", f"{years}yrs", f"{years}years", f"{years}y", f"{years}mo"}: return c
     for c, n in norm.items():
         if n.startswith(str(years)) and ("yr" in n or "year" in n or n.endswith("y")): return c
     return None
@@ -457,8 +740,8 @@ def _treasury_impl(real: bool = False):
         obs = latest["_date"].strftime("%Y-%m-%d")
         fr = assess_freshness(obs, "daily")
         return {"status": "CONNECTED" if fr["usable"] else "STALE",
-                "source": "U.S. Treasury official data", "url": url,
-                "date": obs, "values": vals, "freshness_detail": fr["detail"],
+                "source": "U.S. Treasury official", "url": url, "date": obs,
+                "values": vals, "freshness_detail": fr["detail"],
                 "detail": f"نجح • {fr['detail']}"}
     except Exception as exc:
         return {"status": classify_exception(exc), "source": name, "url": url,
@@ -469,7 +752,7 @@ def fetch_treasury_curve(real: bool = False):
     r = _treasury_impl(real); r["tested_at"] = now_utc_text(); return r
 
 # ================================================================
-# FRED — observations + releases
+# FRED
 # ================================================================
 FRED_SERIES_META = {
     "DGS2": ("عائد 2Y", 8, "daily"), "DGS5": ("عائد 5Y", 8, "daily"),
@@ -484,16 +767,17 @@ def _fred_obs_impl(sid: str, key: str):
         r = request_get(url, params={"series_id": sid, "api_key": key,
                                      "file_type": "json", "sort_order": "desc", "limit": 12})
         if r.status_code == 429:
-            return {"status": "RATE LIMITED", "series": sid, "value": None, "date": "—", "source": "FRED API", "detail": "HTTP 429."}
+            return {"status": "RATE LIMITED", "series": sid, "value": None,
+                    "date": "—", "source": "FRED API", "detail": "HTTP 429."}
         r.raise_for_status()
         obs = [o for o in r.json().get("observations", []) if o.get("value") not in (None, ".", "")]
-        if not obs: return {"status": "NO DATA", "series": sid, "value": None, "date": "—", "source": "FRED API", "detail": "فارغ."}
+        if not obs: return {"status": "NO DATA", "series": sid, "value": None,
+                            "date": "—", "source": "FRED API", "detail": "فارغ."}
         lt = obs[0]; lbl, _, prof = FRED_SERIES_META.get(sid, (sid, 10, "daily"))
         fr = assess_freshness(lt.get("date"), prof)
-        return {"status": "CONNECTED" if fr["usable"] else "STALE",
-                "series": sid, "label": lbl, "value": float(lt["value"]),
-                "date": lt.get("date", "—"), "source": "FRED API",
-                "detail": fr["detail"], "freshness_detail": fr["detail"]}
+        return {"status": "CONNECTED" if fr["usable"] else "STALE", "series": sid,
+                "label": lbl, "value": float(lt["value"]), "date": lt.get("date", "—"),
+                "source": "FRED API", "detail": fr["detail"], "freshness_detail": fr["detail"]}
     except Exception as exc:
         return {"status": classify_exception(exc), "series": sid, "value": None,
                 "date": "—", "source": "FRED API", "detail": f"خطأ: {type(exc).__name__}."}
@@ -502,10 +786,11 @@ def _fred_obs_impl(sid: str, key: str):
 def fetch_fred_obs(sid: str, key: str):
     r = _fred_obs_impl(sid, key); r["tested_at"] = now_utc_text(); return r
 
-FRED_RELEASES = {10: ("CPI", "🔴", "BLS"), 50: ("Nonfarm Payrolls", "🔴", "BLS"),
-                 53: ("GDP", "🔴", "BEA"), 54: ("PCE / Personal Income", "🔴", "BEA"),
-                 9: ("Retail Sales", "🟠", "Census Bureau")}
-
+FRED_RELEASES = {
+    10: ("CPI", "🔴", "BLS"), 50: ("Nonfarm Payrolls", "🔴", "BLS"),
+    53: ("GDP", "🔴", "BEA"), 54: ("PCE / Personal Income", "🔴", "BEA"),
+    9: ("Retail Sales", "🟠", "Census Bureau"),
+}
 FOMC_DATES_2026 = ["2026-01-28", "2026-03-18", "2026-04-29", "2026-06-17",
                    "2026-07-29", "2026-09-16", "2026-10-28", "2026-12-09"]
 
@@ -636,19 +921,21 @@ def fetch_bls_v2(key: str = ""):
 def _bea_impl(key: str):
     url = "https://apps.bea.gov/api/data/"
     if not key:
-        return {"status": "NOT TESTED", "source": "BEA API",
-                "url": "https://apps.bea.gov/api/signup/", "detail": "لا مفتاح.", "value": None, "date": "—"}
+        return {"status": "NOT TESTED", "source": "BEA API", "url": "https://apps.bea.gov/api/signup/",
+                "detail": "لا مفتاح.", "value": None, "date": "—"}
     try:
         r = request_get(url, params={"UserID": key, "method": "GetData", "DataSetName": "NIPA",
                                      "TableName": "T10101", "Frequency": "Q", "Year": "X", "ResultFormat": "JSON"})
-        if r.status_code == 429: return {"status": "RATE LIMITED", "source": "BEA API", "url": url, "detail": "HTTP 429.", "value": None, "date": "—"}
+        if r.status_code == 429:
+            return {"status": "RATE LIMITED", "source": "BEA API", "url": url, "detail": "HTTP 429.", "value": None, "date": "—"}
         r.raise_for_status()
         res = (r.json().get("BEAAPI") or {}).get("Results") or {}
         if isinstance(res, dict) and "Error" in res:
             e = res["Error"]; msg = e.get("APIErrorDescription") if isinstance(e, dict) else str(e)
             return {"status": "NO DATA", "source": "BEA API", "url": url, "detail": f"BEA: {msg}", "value": None, "date": "—"}
         data = res.get("Data") if isinstance(res, dict) else None
-        if not data: return {"status": "NO DATA", "source": "BEA API", "url": url, "detail": "لا صفوف.", "value": None, "date": "—"}
+        if not data:
+            return {"status": "NO DATA", "source": "BEA API", "url": url, "detail": "لا صفوف.", "value": None, "date": "—"}
         lt = max(data, key=lambda x: (x.get("TimePeriod", ""), x.get("LineNumber", "")))
         try: v = float(str(lt.get("DataValue", "")).replace(",", ""))
         except ValueError: v = None
@@ -663,7 +950,7 @@ def fetch_bea(key: str):
     r = _bea_impl(key); r["tested_at"] = now_utc_text(); return r
 
 # ================================================================
-# CFTC COT — Legacy + Disaggregated
+# CFTC COT
 # ================================================================
 CFTC_LEGACY = "https://publicreporting.cftc.gov/resource/6dca-aqww.json"
 CFTC_DISAGG = "https://publicreporting.cftc.gov/resource/kh3c-gbw2.json"
@@ -673,21 +960,26 @@ def _cot_legacy_impl():
     try:
         r = request_get(CFTC_LEGACY, params={"$where": f"cftc_contract_market_code='{GOLD_CODE}'",
                                              "$order": "report_date_as_yyyy_mm_dd DESC", "$limit": 12})
-        if r.status_code == 429: return {"status": "RATE LIMITED", "rows": [], "source": "CFTC Legacy", "url": CFTC_LEGACY, "detail": "HTTP 429."}
+        if r.status_code == 429:
+            return {"status": "RATE LIMITED", "rows": [], "source": "CFTC Legacy", "url": CFTC_LEGACY, "detail": "HTTP 429."}
         r.raise_for_status()
         raw = r.json()
-        if not raw: return {"status": "NO DATA", "rows": [], "source": "CFTC Legacy", "url": CFTC_LEGACY, "detail": "لا صفوف."}
+        if not raw:
+            return {"status": "NO DATA", "rows": [], "source": "CFTC Legacy", "url": CFTC_LEGACY, "detail": "لا صفوف."}
         req = ("noncomm_positions_long_all", "noncomm_positions_short_all",
                "open_interest_all", "report_date_as_yyyy_mm_dd")
         rows = []
         for x in raw:
             if not all(k in x for k in req): continue
-            try: l = float(x["noncomm_positions_long_all"]); s = float(x["noncomm_positions_short_all"]); oi = float(x["open_interest_all"])
+            try:
+                l = float(x["noncomm_positions_long_all"]); s = float(x["noncomm_positions_short_all"])
+                oi = float(x["open_interest_all"])
             except (TypeError, ValueError): continue
             rows.append({"date": str(x["report_date_as_yyyy_mm_dd"])[:10],
                          "long": l, "short": s, "net": l-s, "open_interest": oi,
                          "market": x.get("market_and_exchange_names", "")})
-        if not rows: return {"status": "NO DATA", "rows": [], "source": "CFTC Legacy", "url": CFTC_LEGACY, "detail": "حقول مفقودة."}
+        if not rows:
+            return {"status": "NO DATA", "rows": [], "source": "CFTC Legacy", "url": CFTC_LEGACY, "detail": "حقول مفقودة."}
         rows.sort(key=lambda z: z["date"], reverse=True)
         lt = rows[0]; pv = rows[1] if len(rows) > 1 else None
         lt["net_change_wow"] = (lt["net"] - pv["net"]) if pv else None
@@ -698,16 +990,19 @@ def _cot_legacy_impl():
                 "url": CFTC_LEGACY, "freshness_detail": fr["detail"],
                 "detail": f"آخر تقرير {lt['date']} • {fr['detail']}"}
     except Exception as exc:
-        return {"status": classify_exception(exc), "rows": [], "source": "CFTC Legacy", "url": CFTC_LEGACY, "detail": f"خطأ: {type(exc).__name__}."}
+        return {"status": classify_exception(exc), "rows": [], "source": "CFTC Legacy",
+                "url": CFTC_LEGACY, "detail": f"خطأ: {type(exc).__name__}."}
 
 def _cot_disagg_impl():
     try:
         r = request_get(CFTC_DISAGG, params={"$where": f"cftc_contract_market_code='{GOLD_CODE}'",
                                              "$order": "report_date_as_yyyy_mm_dd DESC", "$limit": 12})
-        if r.status_code == 429: return {"status": "RATE LIMITED", "rows": [], "source": "CFTC Disaggregated", "url": CFTC_DISAGG, "detail": "HTTP 429."}
+        if r.status_code == 429:
+            return {"status": "RATE LIMITED", "rows": [], "source": "CFTC Disaggregated", "url": CFTC_DISAGG, "detail": "HTTP 429."}
         r.raise_for_status()
         raw = r.json()
-        if not raw: return {"status": "NO DATA", "rows": [], "source": "CFTC Disaggregated", "url": CFTC_DISAGG, "detail": "لا صفوف."}
+        if not raw:
+            return {"status": "NO DATA", "rows": [], "source": "CFTC Disaggregated", "url": CFTC_DISAGG, "detail": "لا صفوف."}
         req = ("prod_merc_positions_long", "prod_merc_positions_short",
                "swap_positions_long_all", "swap__positions_short_all",
                "m_money_positions_long_all", "m_money_positions_short_all",
@@ -726,7 +1021,8 @@ def _cot_disagg_impl():
                          "managed_money_net": mml-mms, "managed_money_long": mml,
                          "managed_money_short": mms, "open_interest": oi,
                          "market": x.get("market_and_exchange_names", "")})
-        if not rows: return {"status": "NO DATA", "rows": [], "source": "CFTC Disaggregated", "url": CFTC_DISAGG, "detail": "حقول مفقودة."}
+        if not rows:
+            return {"status": "NO DATA", "rows": [], "source": "CFTC Disaggregated", "url": CFTC_DISAGG, "detail": "حقول مفقودة."}
         rows.sort(key=lambda z: z["date"], reverse=True)
         lt = rows[0]; pv = rows[1] if len(rows) > 1 else None
         for k in ("managed_money_net", "swap_net", "open_interest"):
@@ -737,7 +1033,8 @@ def _cot_disagg_impl():
                 "url": CFTC_DISAGG, "freshness_detail": fr["detail"],
                 "detail": f"آخر تقرير {lt['date']} • {fr['detail']}"}
     except Exception as exc:
-        return {"status": classify_exception(exc), "rows": [], "source": "CFTC Disaggregated", "url": CFTC_DISAGG, "detail": f"خطأ: {type(exc).__name__}."}
+        return {"status": classify_exception(exc), "rows": [], "source": "CFTC Disaggregated",
+                "url": CFTC_DISAGG, "detail": f"خطأ: {type(exc).__name__}."}
 
 @st.cache_data(ttl=7200, show_spinner=False)
 def fetch_cot_legacy():
@@ -748,14 +1045,15 @@ def fetch_cot_disagg():
     r = _cot_disagg_impl(); r["tested_at"] = now_utc_text(); return r
 
 # ================================================================
-# GOLD MULTI-SOURCE (Yahoo GC=F primary, gold-api fallback)
+# GOLD MULTI-SOURCE
 # ================================================================
 def _goldapi_impl():
     url = "https://api.gold-api.com/price/XAU"
     try:
         r = request_get(url); r.raise_for_status()
         d = r.json(); p = d.get("price"); up = d.get("updatedAt", "")
-        if p is None: return {"status": "NO DATA", "value": None, "source": "gold-api", "url": url, "detail": "لا سعر."}
+        if p is None:
+            return {"status": "NO DATA", "value": None, "source": "gold-api", "url": url, "detail": "لا سعر."}
         fr = assess_freshness(up or datetime.now(timezone.utc), "intraday")
         return {"status": "CONNECTED" if fr["usable"] else "STALE", "value": float(p),
                 "source": "gold-api.com", "url": url,
@@ -763,7 +1061,8 @@ def _goldapi_impl():
                 "timestamp": up or "—", "freshness_detail": fr["detail"],
                 "detail": f"gold-api • {fr['detail']}"}
     except Exception as exc:
-        return {"status": classify_exception(exc), "value": None, "source": "gold-api", "url": url, "detail": f"خطأ: {type(exc).__name__}."}
+        return {"status": classify_exception(exc), "value": None, "source": "gold-api",
+                "url": url, "detail": f"خطأ: {type(exc).__name__}."}
 
 @st.cache_data(ttl=120, show_spinner=False)
 def fetch_gold_multi():
@@ -786,7 +1085,7 @@ def fetch_gold_multi():
             "tested_at": now_utc_text()}
 
 # ================================================================
-# CROSS-SOURCE CONSISTENCY
+# CONSISTENCY
 # ================================================================
 CONSISTENCY_THRESHOLDS = {"gold": 0.5, "nominal_10y": 0.05, "real_10y": 0.05, "breakeven_10y": 0.10}
 
@@ -795,8 +1094,7 @@ def check_consistency(label, va, vb, sa, sb, th, is_pct=True):
            "consistent": None, "diff": None, "diff_pct": None, "threshold": th, "detail": ""}
     if va is None or vb is None:
         out["detail"] = "مصدر واحد أو أكثر غير متاح."; return out
-    d = abs(va - vb)
-    base = max(abs(va), abs(vb), 1e-9)
+    d = abs(va - vb); base = max(abs(va), abs(vb), 1e-9)
     dp = (d / base * 100) if is_pct else d
     out["diff"] = round(d, 4); out["diff_pct"] = round(dp, 3)
     if dp <= th:
@@ -828,7 +1126,7 @@ def run_consistency(market):
     return checks
 
 # ================================================================
-# CONSENSUS (يدوي أساسًا)
+# CONSENSUS
 # ================================================================
 if "manual_consensus" not in st.session_state:
     st.session_state.manual_consensus = {}
@@ -854,11 +1152,10 @@ def analyze_consensus(events):
     out["confidence"] = min(out["confidence"], 60); return out
 
 # ================================================================
-# QUALITY SCORE
+# QUALITY
 # ================================================================
 def source_quality_score(src):
-    s = 0.0
-    st_ = src.get("status")
+    s = 0.0; st_ = src.get("status")
     if st_ == "CONNECTED": s += 40
     elif st_ == "STALE": s += 20
     if src.get("value") is not None or src.get("rows") or src.get("series"): s += 25
@@ -901,13 +1198,16 @@ def analyze_economics(market):
     r10 = fred.get("DFII10", {}).get("value")
     if r10 is not None:
         if r10 > 2.0:
-            out["signals"].append(f"عائد حقيقي مرتفع ({r10}%) → ضغط"); out["bias"] = "BEARISH_GOLD"; out["confidence"] += 20
+            out["signals"].append(f"عائد حقيقي مرتفع ({r10}%) → ضغط")
+            out["bias"] = "BEARISH_GOLD"; out["confidence"] += 20
         elif r10 < 1.0:
-            out["signals"].append(f"عائد حقيقي منخفض ({r10}%) → دعم"); out["bias"] = "BULLISH_GOLD"; out["confidence"] += 20
+            out["signals"].append(f"عائد حقيقي منخفض ({r10}%) → دعم")
+            out["bias"] = "BULLISH_GOLD"; out["confidence"] += 20
         else: out["signals"].append(f"عائد حقيقي معتدل ({r10}%)")
     be = fred.get("T10YIE", {}).get("value")
     if be is not None:
-        if be > 2.5: out["signals"].append(f"تضخم متوقع مرتفع ({be}%) → دعم"); out["confidence"] += 10
+        if be > 2.5:
+            out["signals"].append(f"تضخم متوقع مرتفع ({be}%) → دعم"); out["confidence"] += 10
         else: out["signals"].append(f"تضخم متوقع {be}%")
     out["confidence"] = min(out["confidence"], 100)
     if out["confidence"] < 25:
@@ -985,14 +1285,16 @@ def calc_risk(bal, pct, e, sl, tp, cs=100.0):
             "sl_distance": round(sld, 2), "tp_distance": round(tpd, 2)}
 
 # ================================================================
-# BACKTEST (with slippage)
+# BACKTEST
 # ================================================================
 def backtest_smc_signals(df, atr_mult_sl=1.5, atr_mult_tp=3.0, lookback=20,
                          slippage_usd=0.5, max_bars: Optional[int] = None):
-    if df is None or len(df) < 60: return {"status": "NO DATA", "detail": "OHLC غير كافٍ."}
+    if df is None or len(df) < 60:
+        return {"status": "NO DATA", "detail": "OHLC غير كافٍ."}
     df = df.reset_index(drop=True).copy()
     high, low, close = df["high"], df["low"], df["close"]
-    tr = pd.concat([high - low, (high - close.shift()).abs(), (low - close.shift()).abs()], axis=1).max(axis=1)
+    tr = pd.concat([high - low, (high - close.shift()).abs(),
+                    (low - close.shift()).abs()], axis=1).max(axis=1)
     df["atr"] = tr.rolling(14).mean()
     trades = []; pos = None
     for i in range(lookback + 5, len(df)):
@@ -1079,9 +1381,17 @@ if "user" not in st.session_state: st.session_state.user = None
 
 users = _get_users()
 if users and not st.session_state.authenticated:
-    st.markdown('<div class="hero"><div class="eyebrow">YUNAN GOLD INTELLIGENCE</div><h1>تسجيل الدخول</h1></div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="hero">'
+        '<div class="eyebrow">Aho𓂀  •  GOLD INTELLIGENCE</div>'
+        '<h1>تسجيل الدخول</h1>'
+        '<p>أدخل بياناتك للوصول إلى المنصة.</p>'
+        '</div>',
+        unsafe_allow_html=True,
+    )
     with st.form("login"):
-        u = st.text_input("اسم المستخدم"); p = st.text_input("كلمة المرور", type="password")
+        u = st.text_input("اسم المستخدم")
+        p = st.text_input("كلمة المرور", type="password")
         ok = st.form_submit_button("دخول")
     if ok:
         s = _verify_credentials(u, p)
@@ -1097,15 +1407,12 @@ current_user = st.session_state.user or {"username": "local", "role": "admin"}
 current_role = current_user["role"]
 
 # ================================================================
-# SESSION STATE
+# SESSION
 # ================================================================
 for k, v in {"manual_gold_price": None, "trade_journal": [], "report_history": [],
              "current_report": None, "seen_observations": {}}.items():
     if k not in st.session_state: st.session_state[k] = v
 
-# ================================================================
-# LOAD DATA
-# ================================================================
 with st.spinner("⏳ تحميل البيانات..."):
     market_data = build_market_data()
 with st.spinner("⏳ تحميل OHLC..."):
@@ -1126,7 +1433,8 @@ def detect_new(market):
     for name, obs in pairs:
         if not obs or obs == "—": continue
         if seen.get(name) != obs:
-            alerts.append({"source": name, "old": seen.get(name, "—"), "new": obs, "is_first": name not in seen})
+            alerts.append({"source": name, "old": seen.get(name, "—"),
+                           "new": obs, "is_first": name not in seen})
             seen[name] = obs
     return alerts
 
@@ -1163,7 +1471,15 @@ def can_export(): return current_role in {"admin", "analyst"}
 def can_modify(): return current_role in {"admin", "analyst"}
 
 with st.sidebar:
-    st.markdown('<div class="brand"><div class="brand-mark">◆</div><div><div class="brand-title">YUNAN GOLD</div><div class="brand-sub">TERMINAL v16</div></div></div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="brand">'
+        '<div class="brand-mark">𓂀</div>'
+        '<div>'
+        '<div class="brand-title">Aho𓂀</div>'
+        '<div class="brand-sub">GOLD INTELLIGENCE</div>'
+        '</div></div>',
+        unsafe_allow_html=True,
+    )
     nav_items = allowed_nav(current_role)
     navigation = st.radio("القائمة", nav_items, label_visibility="collapsed")
     role_label = {"admin": "🔑 مدير", "analyst": "📊 محلل",
@@ -1171,7 +1487,9 @@ with st.sidebar:
     st.caption(f"**{current_user['username']}** • {role_label}")
     if st.button("🚪 تسجيل الخروج"):
         log_action("auth", "logout")
-        st.session_state.authenticated = False; st.session_state.user = None; st.rerun()
+        st.session_state.authenticated = False
+        st.session_state.user = None
+        st.rerun()
     st.divider()
     if st.button("↻ تحديث البيانات"):
         st.cache_data.clear(); st.rerun()
@@ -1190,34 +1508,54 @@ else:
 # ================================================================
 fresh_alerts = [a for a in new_alerts if not a["is_first"]]
 if fresh_alerts:
-    st.markdown('<div class="warning-box">🔔 <b>بيانات جديدة منذ آخر زيارة:</b><br>' +
-                "<br>".join(f"• {a['source']}: {a['old']} → {a['new']}" for a in fresh_alerts) +
-                '</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="warning-box">🔔 <b>بيانات جديدة منذ آخر زيارة:</b><br>'
+        + "<br>".join(f"• {a['source']}: {a['old']} → {a['new']}" for a in fresh_alerts)
+        + '</div>',
+        unsafe_allow_html=True,
+    )
 
 # ================================================================
 # PAGES
 # ================================================================
 def page_dashboard():
-    st.markdown('<div class="hero"><div class="eyebrow">YUNAN GOLD INTELLIGENCE</div><h1>لوحة القرار الموحد</h1></div>', unsafe_allow_html=True)
-    cols = st.columns(6)
-    cols[0].metric("XAUUSD", fmt_number(active_gold, 2, " $") if active_gold else "—")
-    cols[1].metric("DXY", fmt_number(market_data["dxy"].get("value"), 2))
-    cols[2].metric("US 10Y", fmt_number(market_data["nominal"].get("values", {}).get("10Y"), 3, "%"))
-    cols[3].metric("Real 10Y", fmt_number(market_data.get("real_yield", {}).get("value"), 3, "%"))
-    cols[4].metric("Breakeven", fmt_number(market_data.get("breakeven", {}).get("value"), 2, "%"))
-    cols[5].metric("جودة", f"{market_data['quality_score']}/100")
+    render_hero("لوحة القرار الموحد")
+
+    c = st.columns(3)
+    c[0].metric("XAUUSD (GC=F)",
+                fmt_number(active_gold, 2, " $") if active_gold else "—")
+    c[1].metric("DXY", fmt_number(market_data["dxy"].get("value"), 2))
+    c[2].metric("US 10Y",
+                fmt_number(market_data["nominal"].get("values", {}).get("10Y"), 3, "%"))
+
+    c = st.columns(3)
+    c[0].metric("Real 10Y",
+                fmt_number(market_data.get("real_yield", {}).get("value"), 3, "%"))
+    c[1].metric("Breakeven",
+                fmt_number(market_data.get("breakeven", {}).get("value"), 2, "%"))
+    c[2].metric("جودة البيانات", f"{market_data['quality_score']}/100")
 
     fusion = build_fusion(market_data, ohlc_res)
     fb = fusion["final_bias"]
-    card = {"BULLISH": ("signal-bull", "🟢", "تحيز صاعد"),
-            "BEARISH": ("signal-bear", "🔴", "تحيز هابط"),
-            "NO_TRADE": ("signal-no-trade", "⛔", "لا تداول"),
-            }.get(fb, ("signal-neutral", "🟡", "حياد"))
-    st.markdown(f'<div class="{card[0]}"><h3 style="margin:0 0 8px;">{card[1]} {card[2]} (ثقة: {fusion["confidence"]}%)</h3>' +
-                ("<p style='color:#ff8a8a;'>" + " • ".join(fusion["no_trade_reasons"]) + "</p>" if fusion["no_trade_reasons"] else "") +
-                '</div>', unsafe_allow_html=True)
+    card = {
+        "BULLISH":  ("signal-bull", "🟢", "تحيز صاعد"),
+        "BEARISH":  ("signal-bear", "🔴", "تحيز هابط"),
+        "NO_TRADE": ("signal-no-trade", "⛔", "لا تداول"),
+    }.get(fb, ("signal-neutral", "🟡", "حياد"))
+    reasons_html = (
+        "<p style='color:#f87171;margin:6px 0 0;font-size:13px;'>"
+        + " • ".join(fusion["no_trade_reasons"]) + "</p>"
+        if fusion["no_trade_reasons"] else ""
+    )
+    st.markdown(
+        f'<div class="{card[0]}">'
+        f'<h3>{card[1]} {card[2]} — ثقة {fusion["confidence"]}%</h3>'
+        f'{reasons_html}</div>',
+        unsafe_allow_html=True,
+    )
 
-    v = fusion["votes"]; vc = st.columns(3)
+    v = fusion["votes"]
+    vc = st.columns(3)
     vc[0].metric("صاعد", f"{v.get('BULLISH', 0):.0f}%")
     vc[1].metric("هابط", f"{v.get('BEARISH', 0):.0f}%")
     vc[2].metric("حياد", f"{v.get('NEUTRAL', 0):.0f}%")
@@ -1230,7 +1568,7 @@ def page_dashboard():
         st.markdown('<div class="fusion-card"><h4>هابط</h4><p>• كسر PDL<br>• ارتفاع العائد الحقيقي<br>• MM Net متراجع<br><b>تأكيد:</b> إغلاق 4H تحت PDL<br><b>إبطال:</b> عودة فوقه</p></div>', unsafe_allow_html=True)
 
 def page_data_sources():
-    st.markdown("## 📊 تدقيق مصادر البيانات")
+    render_hero("تدقيق مصادر البيانات")
     rows = []
     for name, src, req in [("الذهب", market_data["gold"], "XAUUSD (GC=F)"),
                            ("الدولار", market_data["dxy"], "DXY"),
@@ -1251,12 +1589,10 @@ def page_data_sources():
     st.metric("الجودة الإجمالية", f"{market_data['quality_score']}/100")
 
 def page_calendar():
-    st.markdown("## 📅 الأجندة الاقتصادية")
+    render_hero("الأجندة الاقتصادية")
     cal = build_news_calendar(get_secret("FRED_API_KEY"))
-    if cal.empty:
-        st.warning("لا أجندة — تحقق من FRED_API_KEY.")
-    else:
-        st.dataframe(cal, use_container_width=True, hide_index=True)
+    if cal.empty: st.warning("لا أجندة — تحقق من FRED_API_KEY.")
+    else: st.dataframe(cal, use_container_width=True, hide_index=True)
 
     st.markdown("### 📝 Consensus يدوي")
     with st.form("cons_form"):
@@ -1266,7 +1602,8 @@ def page_calendar():
         pv = c3.number_input("السابق", value=0.0)
         ac = c4.number_input("الفعلي", value=0.0)
         if st.form_submit_button("💾 حفظ") and ev:
-            st.session_state.manual_consensus[ev] = {"event": ev, "consensus": co, "previous": pv,
+            st.session_state.manual_consensus[ev] = {"event": ev, "consensus": co,
+                                                      "previous": pv,
                                                       "actual": ac if ac != 0 else None}
             log_action("manual_input", "add_consensus", new_value=ev)
             st.success("تم.")
@@ -1277,7 +1614,7 @@ def page_calendar():
         st.markdown(f"**التحيز:** {analysis['bias']} • **الثقة:** {analysis['confidence']}%")
 
 def page_econ():
-    st.markdown("## 📈 التحليل الاقتصادي")
+    render_hero("التحليل الاقتصادي")
     econ = analyze_economics(market_data)
     st.markdown(f"**التحيز:** {econ['bias']} • **الثقة:** {econ['confidence']}%")
     bls = market_data.get("bls", {}).get("series", {})
@@ -1290,19 +1627,22 @@ def page_econ():
         st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
     fred = market_data.get("fred", {})
     if fred:
-        rows = [{"السلسلة": k, "الوصف": v.get("label", k), "القيمة": fmt_number(v.get("value"), 3),
+        rows = [{"السلسلة": k, "الوصف": v.get("label", k),
+                 "القيمة": fmt_number(v.get("value"), 3),
                  "التاريخ": v.get("date", "—")} for k, v in fred.items()]
         st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
     for s in econ["signals"]: st.markdown(f"- {s}")
 
 def page_yields():
-    st.markdown("## 💵 العوائد والدولار")
+    render_hero("العوائد والدولار")
     vals = market_data.get("nominal", {}).get("values", {})
     if vals:
         cols = st.columns(len(vals))
-        for i, (k, v) in enumerate(sorted(vals.items())): cols[i].metric(k, fmt_number(v, 3, "%"))
-    st.metric("Real 10Y", fmt_number(market_data.get("real_yield", {}).get("value"), 3, "%"))
-    st.metric("Breakeven", fmt_number(market_data.get("breakeven", {}).get("value"), 2, "%"))
+        for i, (k, v) in enumerate(sorted(vals.items())):
+            cols[i].metric(k, fmt_number(v, 3, "%"))
+    c = st.columns(2)
+    c[0].metric("Real 10Y", fmt_number(market_data.get("real_yield", {}).get("value"), 3, "%"))
+    c[1].metric("Breakeven", fmt_number(market_data.get("breakeven", {}).get("value"), 2, "%"))
     dxy = market_data.get("dxy", {})
     dc = st.columns(3)
     dc[0].metric("DXY", fmt_number(dxy.get("value"), 2))
@@ -1310,7 +1650,7 @@ def page_yields():
     dc[2].metric("آخر تحديث", dxy.get("timestamp", "—"))
 
 def page_cot():
-    st.markdown("## 📋 COT & Open Interest")
+    render_hero("COT & Open Interest")
     cot_d = market_data.get("cot_disagg", {})
     lt = cot_d.get("latest", {})
     if lt:
@@ -1335,26 +1675,31 @@ def page_cot():
         cot = market_data.get("cot", {}); ll = cot.get("latest", {})
         if ll:
             cc = st.columns(4)
-            cc[0].metric("Long", f"{ll['long']:,.0f}"); cc[1].metric("Short", f"{ll['short']:,.0f}")
-            cc[2].metric("Net", f"{ll['net']:,.0f}"); cc[3].metric("OI", f"{ll['open_interest']:,.0f}")
+            cc[0].metric("Long", f"{ll['long']:,.0f}")
+            cc[1].metric("Short", f"{ll['short']:,.0f}")
+            cc[2].metric("Net", f"{ll['net']:,.0f}")
+            cc[3].metric("OI", f"{ll['open_interest']:,.0f}")
             hist = pd.DataFrame(cot.get("rows", []))[["date", "long", "short", "net", "open_interest"]]
             hist.columns = ["التاريخ", "Long", "Short", "Net", "OI"]
             st.dataframe(hist, use_container_width=True, hide_index=True)
 
 def page_smc():
-    st.markdown("## 🧠 SMC/ICT")
+    render_hero("SMC/ICT Analysis")
     smc = analyze_smc_ict_v2(ohlc_res)
     st.markdown(f"**البنية:** {smc['structure']} • **التحيز:** {smc['bias']}")
-    if smc["pdh"]: st.markdown(f"PDH: {smc['pdh']:.2f} • PDL: {smc['pdl']:.2f} • ATR: {smc['atr']:.2f}")
+    if smc["pdh"]:
+        st.markdown(f"PDH: {smc['pdh']:.2f} • PDL: {smc['pdl']:.2f} • ATR: {smc['atr']:.2f}")
     for s in smc["signals"]: st.markdown(f"- {s}")
     for s in smc["sweeps"]: st.warning(s["detail"])
 
 def page_tech():
-    st.markdown("## 📉 المؤشرات الفنية")
+    render_hero("المؤشرات الفنية")
     df = ohlc_res.get("df")
-    if df is None: st.error("OHLC غير متاح."); return
+    if df is None:
+        st.error("OHLC غير متاح."); return
     ind = compute_indicators(df)
-    if ind.get("status") != "OK": st.warning(ind.get("detail")); return
+    if ind.get("status") != "OK":
+        st.warning(ind.get("detail")); return
     c = st.columns(4)
     c[0].metric("ATR(14)", f"${ind['atr14']:.2f}")
     c[1].metric("Vol20", f"{ind['vol20']:.1f}%")
@@ -1373,29 +1718,35 @@ def page_tech():
         for r in ind["resistances"]: st.markdown(f"- ${r:,.2f}")
 
 def page_consistency():
-    st.markdown("## 🔗 الاتساق بين المصادر")
+    render_hero("الاتساق بين المصادر")
     checks = run_consistency(market_data)
     rows = []
     for c in checks:
         flag = "🟢" if c["consistent"] else ("🔴" if c["consistent"] is False else "⚪")
-        rows.append({"المقياس": c["metric"], "A": f"{c['source_a']}={fmt_number(c['value_a'], 4)}",
+        rows.append({"المقياس": c["metric"],
+                     "A": f"{c['source_a']}={fmt_number(c['value_a'], 4)}",
                      "B": f"{c['source_b']}={fmt_number(c['value_b'], 4)}",
-                     "فرق%": fmt_number(c["diff_pct"], 3), "الحد": c["threshold"],
-                     "الحالة": flag, "التفصيل": c["detail"]})
+                     "فرق%": fmt_number(c["diff_pct"], 3),
+                     "الحد": c["threshold"], "الحالة": flag,
+                     "التفصيل": c["detail"]})
     st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
 
 def page_evidence():
-    st.markdown("## 🔍 مصفوفة الأدلة")
+    render_hero("مصفوفة الأدلة")
     fusion = build_fusion(market_data, ohlc_res)
     evidence = []
-    for e in fusion["econ"]["signals"]: evidence.append({"الفئة": "اقتصادي", "الدليل": e, "الاتجاه": fusion["econ"]["bias"]})
-    for e in fusion["smc"]["signals"]: evidence.append({"الفئة": "SMC/ICT", "الدليل": e, "الاتجاه": fusion["smc"]["bias"]})
-    for e in fusion["cot_signals"]: evidence.append({"الفئة": "COT", "الدليل": e, "الاتجاه": fusion["cot_bias"]})
-    if evidence: st.dataframe(pd.DataFrame(evidence), use_container_width=True, hide_index=True)
+    for e in fusion["econ"]["signals"]:
+        evidence.append({"الفئة": "اقتصادي", "الدليل": e, "الاتجاه": fusion["econ"]["bias"]})
+    for e in fusion["smc"]["signals"]:
+        evidence.append({"الفئة": "SMC/ICT", "الدليل": e, "الاتجاه": fusion["smc"]["bias"]})
+    for e in fusion["cot_signals"]:
+        evidence.append({"الفئة": "COT", "الدليل": e, "الاتجاه": fusion["cot_bias"]})
+    if evidence:
+        st.dataframe(pd.DataFrame(evidence), use_container_width=True, hide_index=True)
     st.markdown(f"**القرار:** {fusion['final_bias']} • **الثقة:** {fusion['confidence']}%")
 
 def page_validator():
-    st.markdown("## ✅ فاحص الصفقات")
+    render_hero("فاحص الصفقات")
     fusion = build_fusion(market_data, ohlc_res)
     with st.form("trade_form"):
         d = st.selectbox("الاتجاه", ["LONG", "SHORT"])
@@ -1409,7 +1760,7 @@ def page_validator():
             for ic, msg, _ in r["checks"]: st.markdown(f"{ic} {msg}")
 
 def page_risk():
-    st.markdown("## 🛡️ حاسبة المخاطر")
+    render_hero("حاسبة المخاطر")
     with st.form("risk_form"):
         c1, c2 = st.columns(2)
         bal = c1.number_input("الرصيد ($)", value=10000.0)
@@ -1429,7 +1780,7 @@ def page_risk():
                 c[2].metric("ربح", f"${r['expected_profit']:,.2f}")
 
 def page_backtest():
-    st.markdown("## 🧪 Backtesting")
+    render_hero("Backtesting")
     st.markdown('<div class="warning-box">⚠️ إشارات سعرية فقط (BOS+ATR) مع slippage 0.5$. لا يشمل COT/عوائد/أخبار.</div>', unsafe_allow_html=True)
     c = st.columns(3)
     r = c[0].selectbox("الفترة", ["1y", "2y", "5y", "max"], index=1)
@@ -1440,7 +1791,8 @@ def page_backtest():
     if st.button("▶️ تشغيل"):
         with st.spinner("جاري..."):
             o = fetch_gold_ohlc(r, "1d")
-        if o.get("df") is None: st.error("OHLC غير كافٍ."); return
+        if o.get("df") is None:
+            st.error("OHLC غير متاح."); return
         res = backtest_smc_signals(o["df"], slm, tpm, 20, 0.5, mb)
         m = st.columns(5)
         m[0].metric("صفقات", res["total"])
@@ -1456,9 +1808,10 @@ def page_backtest():
 def generate_weekly_report(market):
     fusion = build_fusion(market, ohlc_res)
     now = now_utc_text()
-    md = [f"# 📊 تقرير YUNAN GOLD الأسبوعي", f"**التوليد:** {now}",
-          f"**المستخدم:** {current_user['username']} ({current_role})", "", "---", "",
-          "## 1️⃣ الأسعار"]
+    md = [f"# 𓂀 Aho — تقرير الذهب الأسبوعي",
+          f"**التوليد:** {now}",
+          f"**المستخدم:** {current_user['username']} ({current_role})",
+          "", "---", "", "## 1️⃣ الأسعار"]
     md.append(f"- **XAUUSD:** {fmt_number(market['gold'].get('value'), 2, ' $')}")
     md.append(f"- **DXY:** {fmt_number(market['dxy'].get('value'), 2)}")
     md.append(f"- **US 10Y:** {fmt_number(market['nominal'].get('values', {}).get('10Y'), 3, '%')}")
@@ -1472,7 +1825,8 @@ def generate_weekly_report(market):
         if chg is not None: md.append(f"- **تغير WoW:** {chg:+,.0f}")
         md.append(f"- **OI:** {cd.get('open_interest', 0):,.0f}")
     md.append(""); md.append("## 3️⃣ الاقتصاد")
-    for k, lbl in [("headline_cpi", "CPI"), ("core_cpi", "Core CPI"), ("unemployment", "البطالة"), ("nonfarm_payrolls", "الوظائف")]:
+    for k, lbl in [("headline_cpi", "CPI"), ("core_cpi", "Core CPI"),
+                   ("unemployment", "البطالة"), ("nonfarm_payrolls", "الوظائف")]:
         s = market.get("bls", {}).get("series", {}).get(k, {})
         if s.get("level") is not None:
             line = f"- **{lbl}:** {fmt_number(s['level'], 2)}"
@@ -1485,15 +1839,16 @@ def generate_weekly_report(market):
     md.append(""); md.append("## 5️⃣ الفيوجن")
     md.append(f"- **التحيز:** {fusion['final_bias']} • **الثقة:** {fusion['confidence']}%")
     md.append(f"- **جودة البيانات:** {market.get('quality_score', 0)}/100")
-    if fusion["no_trade_reasons"]: md.append(f"- **أسباب NO TRADE:** " + " • ".join(fusion["no_trade_reasons"]))
+    if fusion["no_trade_reasons"]:
+        md.append(f"- **أسباب NO TRADE:** " + " • ".join(fusion["no_trade_reasons"]))
     md.append(""); md.append("## 6️⃣ الإشارات")
     for s in fusion["econ"]["signals"]: md.append(f"- {s}")
     for s in fusion["smc"]["signals"]: md.append(f"- {s}")
-    md.append(""); md.append(f"*{APP_NAME} • {APP_VERSION}*")
+    md.append(""); md.append(f"*Aho𓂀 • {APP_VERSION}*")
     return "\n".join(md)
 
 def page_weekly():
-    st.markdown("## 📄 التقرير الأسبوعي")
+    render_hero("التقرير الأسبوعي")
     if st.button("📝 توليد"):
         with st.spinner("..."):
             st.session_state.current_report = generate_weekly_report(market_data)
@@ -1504,38 +1859,42 @@ def page_weekly():
         ts = datetime.now().strftime("%Y%m%d_%H%M")
         if can_export():
             c = st.columns(2)
-            c[0].download_button("⬇️ Markdown", data=st.session_state.current_report.encode("utf-8"),
-                                 file_name=f"weekly_{ts}.md", mime="text/markdown")
-            csv = pd.DataFrame([{"date": now_utc_text()[:10], "gold": market_data["gold"].get("value"),
+            c[0].download_button("⬇️ Markdown",
+                                 data=st.session_state.current_report.encode("utf-8"),
+                                 file_name=f"aho_weekly_{ts}.md", mime="text/markdown")
+            csv = pd.DataFrame([{"date": now_utc_text()[:10],
+                                 "gold": market_data["gold"].get("value"),
                                  "dxy": market_data["dxy"].get("value"),
                                  "quality": market_data.get("quality_score")}]).to_csv(index=False).encode("utf-8-sig")
-            c[1].download_button("⬇️ CSV", data=csv, file_name=f"weekly_{ts}.csv", mime="text/csv")
+            c[1].download_button("⬇️ CSV", data=csv,
+                                 file_name=f"aho_weekly_{ts}.csv", mime="text/csv")
         if st.button("📤 إرسال عبر Telegram"):
             r = send_telegram(st.session_state.current_report[:4000])
             st.info(r["detail"])
         with st.form("email_form"):
             to = st.text_input("إرسال إلى (بريد)")
             if st.form_submit_button("📧 إرسال Email") and to:
-                r = send_email(f"Weekly Report {now_utc_text()}", st.session_state.current_report, to)
+                r = send_email(f"Aho Weekly Report {now_utc_text()}",
+                               st.session_state.current_report, to)
                 st.info(r["detail"])
         if not can_export():
             st.info("🔒 دورك لا يسمح بالتصدير.")
 
 def page_history():
-    st.markdown("## 📜 سجل التقارير")
+    render_hero("سجل التقارير")
     if st.button("💾 حفظ التقرير الحالي"):
         fusion = build_fusion(market_data, ohlc_res)
-        st.session_state.report_history.append({"time": now_utc_text(),
-                                                "bias": fusion["final_bias"],
-                                                "confidence": fusion["confidence"],
-                                                "quality": market_data["quality_score"],
-                                                "gold": active_gold})
+        st.session_state.report_history.append({
+            "time": now_utc_text(), "bias": fusion["final_bias"],
+            "confidence": fusion["confidence"],
+            "quality": market_data["quality_score"], "gold": active_gold})
         log_action("report", "save_snapshot")
     if st.session_state.report_history:
-        st.dataframe(pd.DataFrame(st.session_state.report_history[::-1]), use_container_width=True, hide_index=True)
+        st.dataframe(pd.DataFrame(st.session_state.report_history[::-1]),
+                     use_container_width=True, hide_index=True)
 
 def page_journal():
-    st.markdown("## 📓 سجل الصفقات")
+    render_hero("سجل الصفقات")
     with st.form("journal_form"):
         c1, c2 = st.columns(2)
         d = c1.selectbox("الاتجاه", ["LONG", "SHORT"])
@@ -1545,29 +1904,36 @@ def page_journal():
         res = c2.selectbox("النتيجة", ["OPEN", "WIN", "LOSS", "BE"])
         notes = st.text_area("ملاحظات")
         if st.form_submit_button("➕ إضافة") and can_modify():
-            st.session_state.trade_journal.append({"time": now_utc_text(), "direction": d,
-                                                    "entry": e, "sl": sl, "tp": tp,
-                                                    "result": res, "notes": notes})
+            st.session_state.trade_journal.append({
+                "time": now_utc_text(), "direction": d, "entry": e,
+                "sl": sl, "tp": tp, "result": res, "notes": notes})
             log_action("journal", "add_trade", new_value=f"{d}@{e}")
     if st.session_state.trade_journal:
-        st.dataframe(pd.DataFrame(st.session_state.trade_journal[::-1]), use_container_width=True, hide_index=True)
+        st.dataframe(pd.DataFrame(st.session_state.trade_journal[::-1]),
+                     use_container_width=True, hide_index=True)
         w = sum(1 for t in st.session_state.trade_journal if t["result"] == "WIN")
         l = sum(1 for t in st.session_state.trade_journal if t["result"] == "LOSS")
-        if w + l > 0: st.metric("نسبة الربح", f"{w/(w+l)*100:.1f}%")
+        if w + l > 0:
+            st.metric("نسبة الربح", f"{w/(w+l)*100:.1f}%")
 
 def page_audit():
-    if current_role not in {"admin", "auditor"}: st.error("🔒 للمدقق/المدير فقط."); return
-    st.markdown("## 🔎 سجل التدقيق")
-    if not st.session_state.audit_log: st.info("لا سجلات."); return
+    if current_role not in {"admin", "auditor"}:
+        st.error("🔒 للمدقق/المدير فقط."); return
+    render_hero("سجل التدقيق")
+    if not st.session_state.audit_log:
+        st.info("لا سجلات."); return
     df = pd.DataFrame(st.session_state.audit_log[::-1])
     st.dataframe(df, use_container_width=True, hide_index=True)
     if can_export():
-        st.download_button("⬇️ CSV", data=df.to_csv(index=False).encode("utf-8-sig"),
-                           file_name=f"audit_{datetime.now().strftime('%Y%m%d')}.csv", mime="text/csv")
+        st.download_button("⬇️ CSV",
+                           data=df.to_csv(index=False).encode("utf-8-sig"),
+                           file_name=f"aho_audit_{datetime.now().strftime('%Y%m%d')}.csv",
+                           mime="text/csv")
 
 def page_admin():
-    if current_role != "admin": st.error("🔒 للمدير فقط."); return
-    st.markdown("## ⚙️ Admin")
+    if current_role != "admin":
+        st.error("🔒 للمدير فقط."); return
+    render_hero("Admin")
     st.markdown("### حالة المفاتيح")
     for k in ["FRED_API_KEY", "BLS_API_KEY", "BEA_API_KEY",
               "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID",
@@ -1581,7 +1947,8 @@ def page_admin():
                     ("BEA", market_data["bea"])]:
         st.markdown(f"- {name}: {display_status(s.get('status', 'NO DATA'))}")
     st.metric("الجودة الإجمالية", f"{market_data['quality_score']}/100")
-    if st.button("🧹 تصفير الكاش"): st.cache_data.clear(); st.rerun()
+    if st.button("🧹 تصفير الكاش"):
+        st.cache_data.clear(); st.rerun()
 
 # ================================================================
 # ROUTING
@@ -1611,4 +1978,4 @@ if handler: handler()
 else: st.info(f"{navigation} قيد التطوير.")
 
 st.divider()
-st.caption(f"{APP_NAME} • {APP_VERSION} • {now_utc_text()}")
+st.caption(f"Aho𓂀  •  {APP_VERSION}  •  {now_utc_text()}")
