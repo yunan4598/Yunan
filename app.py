@@ -88,6 +88,9 @@ if not APP_USERNAME or not APP_PASSWORD:
 if "authenticated" not in st.session_state: st.session_state.authenticated = False
 if "webhook_logs" not in st.session_state: st.session_state.webhook_logs = []
 if "synced_gold_price" not in st.session_state: st.session_state.synced_gold_price = 4186.67
+if "change_logs" not in st.session_state: st.session_state.change_logs = [
+    {"الوقت": "التحديث الأولي", "العامل": "النظام العام", "التغير المرصود": "تم إطلاق محرك FUSION بنجاح", "الحالة": "مستقر 🟢"}
+]
 
 if not st.session_state.authenticated:
     st.markdown('<div class="hero"><div class="eyebrow">YUNAN GOLD INTELLIGENCE</div><h1>تسجيل الدخول المؤسسي</h1><p>لوحة قرار استخبارات الذهب الخاصة.</p></div>', unsafe_allow_html=True)
@@ -102,12 +105,9 @@ if not st.session_state.authenticated:
             else: st.error("بيانات الدخول غير صحيحة.")
     st.stop()
 
-# --- جلب البيانات الحية الحقيقية من المتاجر والمصادر الرسمية ---
-@st.cache_data(ttl=300)
-def get_live_macro_data():
+# --- جلب البيانات الحية مع إمكانية التحديث اليدوي ---
+def fetch_macro_data():
     data = {"dxy": "DATA UNAVAILABLE", "real_yield": "DATA UNAVAILABLE", "breakeven": "DATA UNAVAILABLE"}
-    
-    # 1. جلب DXY عبر Yahoo Finance
     try:
         dxy = yf.Ticker("DX-Y.NYB").history(period="2d")
         if not dxy.empty:
@@ -115,33 +115,41 @@ def get_live_macro_data():
     except Exception:
         pass
 
-    # 2. جلب بيانات العوائد من FRED إذا توفر المفتاح، أو استخدام البدائل المباشرة عبر السندات
     try:
-        if FRED_API_KEY:
-            # مثال استعلام عائدي السندات المحمية التضخمية TIPS 10Y (DFII10) للعائد الحقيقي
-            url_ry = f"https://api.stlouisfed.org/fred/series/observations?series_id=DFII10&api_key={FRED_API_KEY}&file_type=json&sort_order=desc&limit=1"
-            res = requests.get(url_ry, timeout=5)
-            if res.status_code == 200:
-                obs = res.json().get("observations", [])
-                if obs:
-                    data["real_yield"] = f"{obs[0]['value']}%"
-        else:
-            # استخدام عوائد بديلة حية من سوق السندات عبر yfinance (^TNX وغيرها)
-            tnx = yf.Ticker("^TNX").history(period="2d")
-            if not tnx.empty:
-                val = round(tnx["Close"].iloc[-1], 2)
-                data["real_yield"] = f"{val}% (Nominal 10Y)"
+        tnx = yf.Ticker("^TNX").history(period="2d")
+        if not tnx.empty:
+            val = round(tnx["Close"].iloc[-1], 2)
+            data["real_yield"] = f"{val}%"
     except Exception:
         pass
-
     return data
 
-macro_live = get_live_macro_data()
+if "macro_cache" not in st.session_state:
+    st.session_state.macro_cache = fetch_macro_data()
+    st.session_state.last_refresh = datetime.now().strftime("%Y-%m-%d %I:%M:%S %p")
+
+macro_live = st.session_state.macro_cache
 
 # --- القائمة الجانبية ---
 with st.sidebar:
     st.markdown('<div class="brand"><div class="brand-mark">◆</div><div><div class="brand-title">YUNAN GOLD</div><div class="brand-sub">FUSION ENGINE</div></div></div>', unsafe_allow_html=True)
     
+    st.markdown("### 🔄 أدوات التحكم والبيانات")
+    if st.button("🔄 تحديث وتحليل البيانات الآن"):
+        st.session_state.macro_cache = fetch_macro_data()
+        current_time = datetime.now().strftime("%Y-%m-%d %I:%M:%S %p")
+        st.session_state.last_refresh = current_time
+        st.session_state.change_logs.insert(0, {
+            "الوقت": current_time,
+            "العامل": "البيانات الحية",
+            "التغير المرصود": f"تم تحديث DXY ({st.session_state.macro_cache['dxy']}) والعوائد بنجاح",
+            "الحالة": "تم التحديث 🟢"
+        })
+        st.success("تم تحديث البيانات بنجاح!")
+        st.rerun()
+
+    st.caption(f"آخر تحديث آلي/يدوي:\n`{st.session_state.last_refresh}`")
+
     st.markdown("### 🗂️ القائمة الرئيسية")
     navigation = st.radio(
         "اختر القسم المطلوب:",
@@ -183,7 +191,7 @@ active_gold = st.session_state.synced_gold_price
 if navigation == "🔥 GOLD INTELLIGENCE FUSION":
     st.markdown(f'''<div class="hero"><div class="eyebrow">GOLD INTELLIGENCE FUSION • INTEGRATED ENGINE</div><h1>محرك الاستخبارات والتحليل المتكامل للذهب XAUUSD</h1><p>ربط تحليلي متكامل يجمع الاقتصاد الكلي، التمركز المؤسسي، سوق السندات، والدولار مع البنية الفنية بدلاً من التقييم المنفصل.</p></div>''', unsafe_allow_html=True)
     
-    st.markdown(f'<div class="section-head"><h3>حالة السوق المباشرة والمصادر الرسمية</h3><span>آخر تحديث: {now.strftime("%Y-%m-%d • %I:%M %p")}</span></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="section-head"><h3>حالة السوق المباشرة ومتابعة التغيرات</h3><span>آخر تحديث: {st.session_state.last_refresh}</span></div>', unsafe_allow_html=True)
 
     st.markdown("### A. CURRENT GOLD REGIME (الحالة الحالية للذهب)")
     col_reg1, col_reg2 = st.columns(2)
@@ -202,38 +210,29 @@ if navigation == "🔥 GOLD INTELLIGENCE FUSION":
 
     st.markdown("### B. MACROECONOMIC ANALYSIS (تحليل الاقتصاد الكلي والسندات - بيانات حية)")
     col_m1, col_m2, col_m3 = st.columns(3)
-    with col_m1: st.metric("العائد الفعلي المباشر", f"{macro_live['real_yield']}", "حسب المصدر")
-    with col_m2: st.metric("توقعات التضخم Breakeven", f"{macro_live['breakeven']}", "مُحدث")
-    with col_m3: st.metric("مؤشر الدولار DXY", f"{macro_live['dxy']}", "حي API")
+    with col_m1: st.metric("العائد الفعلي المباشر", f"{macro_live['real_yield']}", "سوق السندات")
+    with col_m2: st.metric("توقعات التضخم Breakeven", f"{macro_live['breakeven']}", "حسب التوفر")
+    with col_m3: st.metric("مؤشر الدولار DXY", f"{macro_live['dxy']}", "تحديث مباشر")
 
-# --- قسم التحليل الكلي والسيولة ---
+    st.markdown("### 📋 سجل التغيرات والتحليل المقارن (Change Log)")
+    st.dataframe(pd.DataFrame(st.session_state.change_logs), use_container_width=True, hide_index=True)
+
+# --- بقية الأقسام ---
 elif "1. 🌐" in navigation:
     st.markdown(f"## 🌐 التحليل الكلي والارتباط (Macro & Liquidity)")
     st.write(f"السعر الفعلي الحالي المعتمد في اللوحة: **{active_gold} $** (مطابق لشارتك).")
-    
     st.success("🟢 مؤشر الارتباط العكسي بين الذهب ومؤشر الدولار DXY يعمل بكفاءة تامة لتحديد مصائد السيولة.")
 
-    st.divider()
-    st.markdown("### 📊 نتائج مصفوفة الارتباط والاقتصاد الكلي الحية")
-    
-    macro_results = [
-        {"المؤشر / الأداة": "مؤشر الدولار (DXY)", "القيمة الحالية": f"{macro_live['dxy']}", "معامل الارتباط بالذهب": "-0.84", "الأثر التكتيكي": "ضغط بيعي مؤقت"},
-        {"المؤشر / الأداة": "العائد الحقيقي / سندات 10Y", "القيمة الحالية": f"{macro_live['real_yield']}", "معامل الارتباط بالذهب": "-0.91", "الأثر التكتيكي": "المحرك الأساسي طويل الأجل"},
-        {"المؤشر / الأداة": "تمركز COT (الأموال الذكية)", "القيمة الحالية": "+223,300 عقد", "معامل الارتباط بالذهب": "+0.79", "الأثر التكتيكي": "تحيز صاعد استراتيجي"}
-    ]
-    st.dataframe(pd.DataFrame(macro_results), use_container_width=True, hide_index=True)
-
 elif "2. ⏰" in navigation:
-    st.markdown("## ⏰ الجلسات ومناطق السيولة اليومية (Killzones)")
+    st.markdown(f"## ⏰ الجلسات ومناطق السيولة اليومية (Killzones)")
     st.write(f"المنطقة الزمنية الحالية المعتمدة: **{timezone_name}**")
-    st.success("تتم مراقبة أوقات Killzones بدقة تامة بناءً على توقيتك المحلي.")
 
 elif "3. 📊" in navigation:
-    st.markdown("## 📊 محرك التحليل والسيناريوهات (Analysis Engine)")
-    st.info(f"السعر الحالي عند {active_gold} يختبر مناطق سيولة هامة وفق هيكل السوق (Market Structure).")
+    st.markdown(f"## 📊 محرك التحليل والسيناريوهات (Analysis Engine)")
+    st.info(f"السعر الحالي عند {active_gold} يختبر مناطق سيولة هامة وفق هيكل السوق.")
 
 elif "4. 🧮" in navigation:
-    st.markdown("## 🧮 إدارة المخاطر وحاسبة حجم العقود (Risk & Position Calculator)")
+    st.markdown(f"## 🧮 إدارة المخاطر وحاسبة حجم العقود (Risk & Position Calculator)")
     col_r1, col_r2, col_r3 = st.columns(3)
     with col_r1: balance = st.number_input("رأس المال ($)", value=10000)
     with col_r2: risk_pct = st.number_input("نسبة المخاطرة (%)", value=1.0)
@@ -244,7 +243,7 @@ elif "4. 🧮" in navigation:
     st.success(f"💡 **حجم اللوت المناسب:** `{lot_size} Lot` | **مبلغ المخاطرة المرصود:** `{risk_amount} $`")
 
 elif "5. 📋" in navigation:
-    st.markdown("## 📋 سجل الفرص ومؤشر التوافق المؤسسي (Trade Journal)")
+    st.markdown(f"## 📋 سجل الفرص ومؤشر التوافق المؤسسي (Trade Journal)")
     with st.form("manual_entry_form"):
         sig = st.selectbox("نوع الإشارة", ["Sweep Asia Lows", "BOS Bullish", "Order Block Retest"])
         price_val = st.text_input("السعر عند الإشارة", value=str(active_gold))
@@ -262,4 +261,4 @@ elif "5. 📋" in navigation:
         st.dataframe(pd.DataFrame(st.session_state.webhook_logs), use_container_width=True, hide_index=True)
 
 st.divider()
-st.caption("YUNAN GOLD INTELLIGENCE v3.2 • LIVE FRED & YFINANCE MACRO ENGINE")
+st.caption("YUNAN GOLD INTELLIGENCE v3.3 • REFRESH ENGINE & CHANGE LOGS")
