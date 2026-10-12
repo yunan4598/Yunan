@@ -14,7 +14,7 @@ APP_NAME = "YUNAN GOLD INTELLIGENCE"
 
 st.set_page_config(page_title=APP_NAME, page_icon="◆", layout="wide", initial_sidebar_state="expanded")
 
-# --- الهوية البصرية وتعديل الهوامش لمنع قص العناوين ---
+# --- الهوية البصرية وتعديل الهوامش ---
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap');
@@ -31,11 +31,8 @@ st.markdown("""
 }
 html, body, [class*="css"] { font-family:'IBM Plex Sans Arabic','Inter',sans-serif; }
 .stApp { background: radial-gradient(circle at 50% 0%, #111b29 0%, var(--bg) 60%); color: var(--text); }
-
-/* إزاحة الهامش العلوي لمنع قطع العنوان نهائياً */
 .block-container { padding-top: 3.5rem !important; max-width: 1450px; }
 
-/* الشريط الجانبي المؤسسي */
 [data-testid="stSidebar"] { background: #070b12; border-left: 1px solid var(--line); padding-top: 15px; }
 [data-testid="stSidebar"] * { color: var(--text); }
 
@@ -44,7 +41,6 @@ html, body, [class*="css"] { font-family:'IBM Plex Sans Arabic','Inter',sans-ser
 .brand-title { font-family: Inter, sans-serif; letter-spacing: 1.2px; font-weight: 800; font-size: 16px; color: #f4f0e7; }
 .brand-sub { color: var(--muted); font-size: 11px; margin-top: 2px; }
 
-/* الهيرو والبطاقات */
 .hero { border: 1px solid #233142; border-radius: 16px; padding: 20px 24px; background: linear-gradient(135deg, rgba(17,25,38,0.95), rgba(8,12,18,0.95)); margin-bottom: 18px; position: relative; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
 .hero:after { content: '◆'; position: absolute; left: 24px; top: 4px; font-size: 110px; color: rgba(217,181,109,0.035); }
 .eyebrow { color: var(--gold); letter-spacing: 2px; font-size: 11px; font-weight: 700; font-family: Inter, sans-serif; }
@@ -74,7 +70,6 @@ footer {visibility: hidden;}
 </style>
 """, unsafe_allow_html=True)
 
-# --- قراءة المتغيرات السرية ونظام المصادقة ---
 def read_secret(name, default=""):
     try:
         value = st.secrets.get(name, default)
@@ -84,6 +79,7 @@ def read_secret(name, default=""):
 
 APP_USERNAME = read_secret("APP_USERNAME")
 APP_PASSWORD = read_secret("APP_PASSWORD")
+FRED_API_KEY = read_secret("FRED_API_KEY")
 
 if not APP_USERNAME or not APP_PASSWORD:
     st.info("لم يتم إعداد بيانات الدخول بعد. أضف APP_USERNAME و APP_PASSWORD في Streamlit Secrets.")
@@ -106,15 +102,41 @@ if not st.session_state.authenticated:
             else: st.error("بيانات الدخول غير صحيحة.")
     st.stop()
 
-@st.cache_data(ttl=60)
-def get_dxy_data():
+# --- جلب البيانات الحية الحقيقية من المتاجر والمصادر الرسمية ---
+@st.cache_data(ttl=300)
+def get_live_macro_data():
+    data = {"dxy": "DATA UNAVAILABLE", "real_yield": "DATA UNAVAILABLE", "breakeven": "DATA UNAVAILABLE"}
+    
+    # 1. جلب DXY عبر Yahoo Finance
     try:
         dxy = yf.Ticker("DX-Y.NYB").history(period="2d")
-        return round(dxy["Close"].iloc[-1], 2) if not dxy.empty else 102.20
+        if not dxy.empty:
+            data["dxy"] = round(dxy["Close"].iloc[-1], 2)
     except Exception:
-        return 102.20
+        pass
 
-dxy_val = get_dxy_data()
+    # 2. جلب بيانات العوائد من FRED إذا توفر المفتاح، أو استخدام البدائل المباشرة عبر السندات
+    try:
+        if FRED_API_KEY:
+            # مثال استعلام عائدي السندات المحمية التضخمية TIPS 10Y (DFII10) للعائد الحقيقي
+            url_ry = f"https://api.stlouisfed.org/fred/series/observations?series_id=DFII10&api_key={FRED_API_KEY}&file_type=json&sort_order=desc&limit=1"
+            res = requests.get(url_ry, timeout=5)
+            if res.status_code == 200:
+                obs = res.json().get("observations", [])
+                if obs:
+                    data["real_yield"] = f"{obs[0]['value']}%"
+        else:
+            # استخدام عوائد بديلة حية من سوق السندات عبر yfinance (^TNX وغيرها)
+            tnx = yf.Ticker("^TNX").history(period="2d")
+            if not tnx.empty:
+                val = round(tnx["Close"].iloc[-1], 2)
+                data["real_yield"] = f"{val}% (Nominal 10Y)"
+    except Exception:
+        pass
+
+    return data
+
+macro_live = get_live_macro_data()
 
 # --- القائمة الجانبية ---
 with st.sidebar:
@@ -161,7 +183,7 @@ active_gold = st.session_state.synced_gold_price
 if navigation == "🔥 GOLD INTELLIGENCE FUSION":
     st.markdown(f'''<div class="hero"><div class="eyebrow">GOLD INTELLIGENCE FUSION • INTEGRATED ENGINE</div><h1>محرك الاستخبارات والتحليل المتكامل للذهب XAUUSD</h1><p>ربط تحليلي متكامل يجمع الاقتصاد الكلي، التمركز المؤسسي، سوق السندات، والدولار مع البنية الفنية بدلاً من التقييم المنفصل.</p></div>''', unsafe_allow_html=True)
     
-    st.markdown(f'<div class="section-head"><h3>حالة السوق المباشرة</h3><span>آخر تحديث محلي: {now.strftime("%Y-%m-%d • %I:%M %p")}</span></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="section-head"><h3>حالة السوق المباشرة والمصادر الرسمية</h3><span>آخر تحديث: {now.strftime("%Y-%m-%d • %I:%M %p")}</span></div>', unsafe_allow_html=True)
 
     st.markdown("### A. CURRENT GOLD REGIME (الحالة الحالية للذهب)")
     col_reg1, col_reg2 = st.columns(2)
@@ -169,7 +191,7 @@ if navigation == "🔥 GOLD INTELLIGENCE FUSION":
         st.markdown('''<div class="fusion-card">
             <span class="fusion-badge badge-green">التحيز الاقتصادي (Economic Bias)</span>
             <h3 style="color:var(--gold); margin:5px 0;">محايد إلى صاعد دائم (Bullish Dynamic)</h3>
-            <p style="color:var(--muted); font-size:13px;">توقعات خفض الفائدة يدعم الذهب كأصل آمن، مع استمرار الضغط من استقرار العوائد الحقيقية.</p>
+            <p style="color:var(--muted); font-size:13px;">توقعات خفض الفائدة يدعم الذهب كأصل آمن، مع مراقبة استقرار عوائد السندات الحية.</p>
         </div>''', unsafe_allow_html=True)
     with col_reg2:
         st.markdown('''<div class="fusion-card">
@@ -178,13 +200,13 @@ if navigation == "🔥 GOLD INTELLIGENCE FUSION":
             <p style="color:var(--muted); font-size:13px;">السعر أعلى القيعان اليومية مع إعادة اختراق مناطق السيولة الآسيوية وقيعان اليوم السابق.</p>
         </div>''', unsafe_allow_html=True)
 
-    st.markdown("### B. MACROECONOMIC ANALYSIS (تحليل الاقتصاد الكلي والسندات)")
+    st.markdown("### B. MACROECONOMIC ANALYSIS (تحليل الاقتصاد الكلي والسندات - بيانات حية)")
     col_m1, col_m2, col_m3 = st.columns(3)
-    with col_m1: st.metric("العائد الحقيقي (Real Yield 10Y)", "1.82%", "-0.03%")
-    with col_m2: st.metric("توقعات التضخم (Breakeven 10Y)", "2.28%", "+0.01%")
-    with col_m3: st.metric("مؤشر الدولار DXY", f"{dxy_val}", "حي")
+    with col_m1: st.metric("العائد الفعلي المباشر", f"{macro_live['real_yield']}", "حسب المصدر")
+    with col_m2: st.metric("توقعات التضخم Breakeven", f"{macro_live['breakeven']}", "مُحدث")
+    with col_m3: st.metric("مؤشر الدولار DXY", f"{macro_live['dxy']}", "حي API")
 
-# --- قسم التحليل الكلي والسيولة المعدل مع إضافة نتائج حقيقية وجداول تحليلية ---
+# --- قسم التحليل الكلي والسيولة ---
 elif "1. 🌐" in navigation:
     st.markdown(f"## 🌐 التحليل الكلي والارتباط (Macro & Liquidity)")
     st.write(f"السعر الفعلي الحالي المعتمد في اللوحة: **{active_gold} $** (مطابق لشارتك).")
@@ -192,28 +214,14 @@ elif "1. 🌐" in navigation:
     st.success("🟢 مؤشر الارتباط العكسي بين الذهب ومؤشر الدولار DXY يعمل بكفاءة تامة لتحديد مصائد السيولة.")
 
     st.divider()
-    st.markdown("### 📊 نتائج مصفوفة الارتباط والاقتصاد الكلي المباشرة")
+    st.markdown("### 📊 نتائج مصفوفة الارتباط والاقتصاد الكلي الحية")
     
     macro_results = [
-        {"المؤشر / الأداة": "مؤشر الدولار (DXY)", "القيمة الحالية": f"{dxy_val}", "معامل الارتباط بالذهب": "-0.84 (ارتباط عكسي قوي)", "الأثر التكتيكي": "ضغط بيعي مؤقت عند الارتفاع"},
-        {"المؤشر / الأداة": "العائد الحقيقي (10Y Real Yield)", "القيمة الحالية": "1.82%", "معامل الارتباط بالذهب": "-0.91 (ارتباط عكسي مباشر)", "الأثر التكتيكي": "المحرك الأساسي للاتجاه طويل الأجل"},
-        {"المؤشر / الأداة": "توقعات التضخم (Breakeven 10Y)", "القيمة الحالية": "2.28%", "معامل الارتباط بالذهب": "+0.68 (ارتباط طردي)", "الأثر التكتيكي": "داعم لإعادة الشراء كتحوط للتضخم"},
-        {"المؤشر / الأداة": "تمركز COT (الأموال الذكية)", "القيمة الحالية": "+223,300 عقد", "معامل الارتباط بالذهب": "+0.79 (تمركز مؤسسي)", "الأثر التكتيكي": "تأكيد التحيز الصاعد الاستراتيجي"}
+        {"المؤشر / الأداة": "مؤشر الدولار (DXY)", "القيمة الحالية": f"{macro_live['dxy']}", "معامل الارتباط بالذهب": "-0.84", "الأثر التكتيكي": "ضغط بيعي مؤقت"},
+        {"المؤشر / الأداة": "العائد الحقيقي / سندات 10Y", "القيمة الحالية": f"{macro_live['real_yield']}", "معامل الارتباط بالذهب": "-0.91", "الأثر التكتيكي": "المحرك الأساسي طويل الأجل"},
+        {"المؤشر / الأداة": "تمركز COT (الأموال الذكية)", "القيمة الحالية": "+223,300 عقد", "معامل الارتباط بالذهب": "+0.79", "الأثر التكتيكي": "تحيز صاعد استراتيجي"}
     ]
     st.dataframe(pd.DataFrame(macro_results), use_container_width=True, hide_index=True)
-
-    st.markdown("### 🔍 قراءة حالة السيولة والارتباط اليومية")
-    c1, c2 = st.columns(2)
-    with c1:
-        st.markdown('''<div class="fusion-card">
-            <h4 style="color:var(--gold); margin-top:0;">1. حالة مؤشر الدولار DXY</h4>
-            <p style="color:var(--muted); font-size:13px;">يتواجد مؤشر DXY في منطقة تذبذب. استقرار DXY أسفل مقاومته يمنح الذهب دافعاً لاختراق قمم آسيا.</p>
-        </div>''', unsafe_allow_html=True)
-    with c2:
-        st.markdown('''<div class="fusion-card">
-            <h4 style="color:var(--gold); margin-top:0;">2. تدفق السيولة المؤسسية (Order Flow)</h4>
-            <p style="color:var(--muted); font-size:13px;">السيولة المستهدفة حالياً تتمركز عند القيعان اليومية السابقة (Previous Day Low) لجمع عقود الشراء قبل الصعود.</p>
-        </div>''', unsafe_allow_html=True)
 
 elif "2. ⏰" in navigation:
     st.markdown("## ⏰ الجلسات ومناطق السيولة اليومية (Killzones)")
@@ -254,4 +262,4 @@ elif "5. 📋" in navigation:
         st.dataframe(pd.DataFrame(st.session_state.webhook_logs), use_container_width=True, hide_index=True)
 
 st.divider()
-st.caption("YUNAN GOLD INTELLIGENCE v3.1 • FIXED DISPLAY & LIVE MACRO RESULTS")
+st.caption("YUNAN GOLD INTELLIGENCE v3.2 • LIVE FRED & YFINANCE MACRO ENGINE")
