@@ -14,50 +14,87 @@ import requests
 import streamlit as st
 
 # ================================================================
-# ♱Aho𓂀GOLD INTELLIGENCE — DATA-AWARE REBUILD (v16.7)
+# Aho𓂀 GOLD — DATA-AWARE REBUILD
+# Important: successful connection != real-time market data.
+# No placeholder economic values, COT fallback numbers, or fixed gold price.
 # ================================================================
-APP_NAME = "♱Aho𓂀GOLD INTELLIGENCE"
-APP_VERSION = "16.7 — INTEGRATED SAFETY REPAIR"
+APP_NAME = "Aho𓂀 GOLD"
+APP_VERSION = "16.8 — Aho𓂀 VISUAL REPAIR"
 REQUEST_TIMEOUT = 12
-USER_AGENT = "YunanGoldIntelligence/16.7 (public-data-source-check)"
+USER_AGENT = "AhoGoldIntelligence/16.8 (public-data-source-check)"
 
 st.set_page_config(page_title=APP_NAME, page_icon="◆", layout="wide", initial_sidebar_state="expanded")
 
-st.markdown("""
-<style>
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap');
-:root { --bg:#06090f; --panel:#0d131d; --line:#1e2c3d; --gold:#d9b56d; --green:#00e676; --red:#ff5252; --yellow:#ffeb3b; --muted:#8b9bb4; --text:#eef2f7; }
-html, body, [class*="css"] { font-family:'IBM Plex Sans Arabic','Inter',sans-serif; direction:rtl; text-align:right; }
-.stApp { background:radial-gradient(circle at 50% 0%, #111b29 0%, var(--bg) 60%); color:var(--text); }
-.block-container { padding-top:1.6rem!important; padding-bottom:2rem!important; max-width:1500px; margin: 0 auto; }
-
-/* إزالة خطوط المنتصف والفواصل غير المقصدوة */
-hr {
-    border: none !important;
-    border-top: 1px solid var(--line) !important;
-    margin: 1.5rem 0 !important;
-}
-
-[data-testid="stSidebar"] { background:#070b12; border-left:1px solid var(--line); padding-top:15px; }
-[data-testid="stSidebar"] * { text-align:right; }
-.brand { display:flex; align-items:center; gap:12px; padding:4px 0 16px; border-bottom:1px solid var(--line); margin-bottom:15px; }
-.brand-mark { width:42px;height:42px;border:1px solid #7a643b;border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:21px;background:linear-gradient(145deg,#221c13,#0d121a); }
-.brand-title { font-family:Inter,sans-serif;letter-spacing:1px;font-weight:800;font-size:15px;color:#f4f0e7; }
-.brand-sub { color:var(--muted);font-size:10px;margin-top:2px; }
-.hero { border:1px solid #233142;border-radius:16px;padding:20px 24px;background:linear-gradient(135deg,rgba(17,25,38,.95),rgba(8,12,18,.95));margin-bottom:18px;box-shadow:0 8px 32px rgba(0,0,0,.25); border-right: 4px solid var(--gold); }
-.eyebrow { color:var(--gold);letter-spacing:1.4px;font-size:11px;font-weight:700;font-family:Inter,sans-serif; }
-.hero h1 { margin:6px 0;font-size:23px;color:#f7f5ef;font-weight:700; }
-.hero p { margin:0;color:#9fb0c6;line-height:1.7;font-size:13px; }
-.data-banner { background:#0b111a;border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin-bottom:15px;font-size:12.5px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px; }
-.fusion-card { background:#0b111a;border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:12px; border-top: 2px solid var(--gold); }
-.stButton button { border-radius:10px;border:1px solid #d9b56d!important;background:linear-gradient(135deg,#d9b56d,#b3914a)!important;color:#06090f!important;font-weight:800!important;width:100%;padding:9px; }
-.stButton button:hover { background:linear-gradient(135deg,#e6c37d,#c5a159)!important;color:#000!important; }
-.small-muted { font-size:12px;color:#8b9bb4; }
-.warning-box { border:1px solid #7a5c22;background:#1b170d;border-radius:10px;padding:12px 14px;margin:8px 0;color:#f3d89b; }
-footer { visibility:hidden; }
-@media(max-width:768px){.block-container{padding-left:.8rem!important;padding-right:.8rem!important}.hero{padding:15px!important}.hero h1{font-size:18px!important}.stApp { overflow-x: hidden !important; }}
-</style>
-""", unsafe_allow_html=True)
+# Theme-aware styling: Streamlit's native light/dark selector is preserved.
+try:
+    ACTIVE_THEME = st.context.theme.type or "dark"
+except Exception:
+    ACTIVE_THEME = "dark"
+if ACTIVE_THEME == "light":
+    CSS = """
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap');
+    :root{--bg:#f4f7f2;--panel:#ffffff;--line:#d9e3d8;--gold:#a77b16;--green:#177245;--red:#b42332;--yellow:#8a6500;--muted:#5f6f68;--text:#18251e;--panel2:#eaf1e9;}
+    html,body,[class*="css"]{font-family:'IBM Plex Sans Arabic','Inter',sans-serif;direction:rtl;text-align:right}
+    .stApp{background:linear-gradient(135deg,#f7faf5 0%,#edf4ed 55%,#f9f8f0 100%);color:var(--text)}
+    .block-container{padding-top:1rem!important;padding-bottom:2rem!important;max-width:1500px}
+    [data-testid="stSidebar"]{background:#eaf1e9;border-left:0!important;border-right:1px solid #d5e1d4;padding-top:12px}
+    [data-testid="stSidebar"] *{text-align:right}
+    [data-testid="stSidebarNav"]{display:none}
+    .brand{display:flex;align-items:center;gap:12px;padding:4px 0 16px;border-bottom:1px solid var(--line);margin-bottom:15px}
+    .brand-mark{width:44px;height:44px;border:1px solid #c8a44b;border-radius:14px;display:flex;align-items:center;justify-content:center;color:#987018;font-size:22px;background:linear-gradient(145deg,#fffdf5,#e4eee2)}
+    .brand-title{font-family:Inter,sans-serif;letter-spacing:.5px;font-weight:800;font-size:17px;color:#244a35}
+    .brand-sub{color:var(--muted);font-size:11px;margin-top:3px}
+    .hero{border:1px solid #d8e3d4;border-radius:18px;padding:20px 24px;background:linear-gradient(135deg,#fff 0%,#f0f6ee 100%);margin-bottom:18px;box-shadow:0 8px 28px rgba(28,67,42,.07);border-right:5px solid #b89539}
+    .eyebrow{color:#987018;letter-spacing:1px;font-size:11px;font-weight:800;font-family:Inter,sans-serif}
+    .hero h1{margin:6px 0;font-size:23px;color:#203d2c;font-weight:800}
+    .hero p{margin:0;color:#5e7065;line-height:1.8;font-size:14px}
+    .data-banner,.fusion-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:13px;color:var(--muted)}
+    .stButton button{border-radius:11px;border:1px solid #b89539!important;background:linear-gradient(135deg,#c6a34a,#e0c66e)!important;color:#183b2b!important;font-weight:800!important;width:100%;padding:9px}
+    .stButton button:hover{filter:brightness(1.04)}
+    .small-muted{font-size:12px;color:var(--muted)}
+    .warning-box{border:1px solid #dfc982;background:#fff8df;border-radius:10px;padding:12px 14px;margin:8px 0;color:#705514}
+    .good-box{border:1px solid #9bc9ad;background:#edf8f0;border-radius:10px;padding:12px 14px;margin:8px 0;color:#205b3b}
+    .bad-box{border:1px solid #e3b0b0;background:#fff0ef;border-radius:10px;padding:12px 14px;margin:8px 0;color:#8e2630}
+    [data-testid="stMetric"]{background:#fff;border:1px solid #dce6d9;border-radius:12px;padding:12px}
+    [data-testid="stDataFrame"]{border:1px solid var(--line);border-radius:10px}
+    footer{visibility:hidden}
+    @media(max-width:768px){.block-container{padding-left:.75rem!important;padding-right:.75rem!important}.hero{padding:15px!important}.hero h1{font-size:19px!important}[data-testid="stHorizontalBlock"]{gap:.5rem!important}}
+    </style>
+    """
+else:
+    CSS = """
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap');
+    :root{--bg:#111923;--panel:#192532;--line:#344555;--gold:#e1bd63;--green:#51d69a;--red:#ff7777;--yellow:#f2d36e;--muted:#a8b7c5;--text:#f2f6f8;--panel2:#202f3d;}
+    html,body,[class*="css"]{font-family:'IBM Plex Sans Arabic','Inter',sans-serif;direction:rtl;text-align:right}
+    .stApp{background:radial-gradient(circle at 50% 0%,#263747 0%,#141e29 58%,#101720 100%);color:var(--text)}
+    .block-container{padding-top:1rem!important;padding-bottom:2rem!important;max-width:1500px}
+    [data-testid="stSidebar"]{background:#17232e;border-left:0!important;border-right:1px solid #344555;padding-top:12px}
+    [data-testid="stSidebar"] *{text-align:right}
+    [data-testid="stSidebarNav"]{display:none}
+    .brand{display:flex;align-items:center;gap:12px;padding:4px 0 16px;border-bottom:1px solid var(--line);margin-bottom:15px}
+    .brand-mark{width:44px;height:44px;border:1px solid #8e783e;border-radius:14px;display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:22px;background:linear-gradient(145deg,#34404a,#1b2732)}
+    .brand-title{font-family:Inter,sans-serif;letter-spacing:.5px;font-weight:800;font-size:17px;color:var(--gold)}
+    .brand-sub{color:var(--muted);font-size:11px;margin-top:3px}
+    .hero{border:1px solid #3b4b59;border-radius:18px;padding:20px 24px;background:linear-gradient(135deg,rgba(36,52,66,.98),rgba(23,34,45,.98));margin-bottom:18px;box-shadow:0 8px 28px rgba(0,0,0,.16);border-right:5px solid var(--gold)}
+    .eyebrow{color:var(--gold);letter-spacing:1px;font-size:11px;font-weight:800;font-family:Inter,sans-serif}
+    .hero h1{margin:6px 0;font-size:23px;color:#fff;font-weight:800}
+    .hero p{margin:0;color:#c0cbd4;line-height:1.8;font-size:14px}
+    .data-banner,.fusion-card{background:#1a2733;border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:13px;color:var(--muted)}
+    .stButton button{border-radius:11px;border:1px solid #d5b85f!important;background:linear-gradient(135deg,#d5b85f,#f0d77f)!important;color:#17232e!important;font-weight:800!important;width:100%;padding:9px}
+    .stButton button:hover{filter:brightness(1.06)}
+    .small-muted{font-size:12px;color:var(--muted)}
+    .warning-box{border:1px solid #78652d;background:#2b281b;border-radius:10px;padding:12px 14px;margin:8px 0;color:#f0d98c}
+    .good-box{border:1px solid #28684d;background:#182f28;border-radius:10px;padding:12px 14px;margin:8px 0;color:#9ce8be}
+    .bad-box{border:1px solid #814348;background:#321f26;border-radius:10px;padding:12px 14px;margin:8px 0;color:#ffb3b3}
+    [data-testid="stMetric"]{background:#1a2733;border:1px solid #344555;border-radius:12px;padding:12px}
+    [data-testid="stDataFrame"]{border:1px solid var(--line);border-radius:10px}
+    footer{visibility:hidden}
+    @media(max-width:768px){.block-container{padding-left:.75rem!important;padding-right:.75rem!important}.hero{padding:15px!important}.hero h1{font-size:19px!important}[data-testid="stHorizontalBlock"]{gap:.5rem!important}}
+    </style>
+    """
+st.markdown(CSS, unsafe_allow_html=True)
 
 # ---------------------- Secrets / Authentication ----------------------
 def get_secret(name: str) -> str:
@@ -77,11 +114,10 @@ if not APP_USERNAME or not APP_PASSWORD:
     st.error("التطبيق مقفول افتراضيًا: لم تُضبط بيانات الدخول. أضف APP_USERNAME وAPP_PASSWORD إلى Streamlit Secrets أو متغيرات البيئة، ثم أعد تشغيل التطبيق.")
     st.code('APP_USERNAME = "اسم_مستخدم_جديد"\nAPP_PASSWORD = "كلمة_مرور_طويلة_وفريدة"', language="toml")
     st.stop()
-
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 if not st.session_state.authenticated:
-    st.markdown('<div class="hero"><div class="eyebrow">YUNAN GOLD INTELLIGENCE</div><h1>تسجيل الدخول</h1><p>تُفعَّل المصادقة باستخدام APP_USERNAME وAPP_PASSWORD في Secrets أو متغيرات البيئة.</p></div>', unsafe_allow_html=True)
+    st.markdown('<div class="hero"><div class="eyebrow">Aho𓂀 GOLD</div><h1>تسجيل الدخول</h1><p>تُفعَّل المصادقة باستخدام APP_USERNAME وAPP_PASSWORD في Secrets أو متغيرات البيئة.</p></div>', unsafe_allow_html=True)
     with st.form("login"):
         username_input = st.text_input("اسم المستخدم")
         password_input = st.text_input("كلمة المرور", type="password")
@@ -116,7 +152,7 @@ def validate_trade_levels(direction: str, entry: float, stop: float, target: flo
     rr = abs(target - entry) / abs(entry - stop)
     if not math.isfinite(rr) or rr < min_rr:
         return {"valid": False, "reason": f"نسبة R:R أقل من الحد الأدنى المطلوب ({min_rr:.2f}).", "rr": rr}
-    return {"valid": True, "reason": "اجتازت المستويات فحص الاتجاه وR:R.", "rr": rr}
+    return {"valid": True, "reason": "اجتازت المستويات فحص الاتجاه وR:R فقط؛ لا يعني ذلك أن الصفقة رابحة.", "rr": rr}
 
 def calculate_position_size(balance: float, risk_percent: float, entry: float, stop: float,
                             target: float, contract_size: float, direction: str,
@@ -126,7 +162,7 @@ def calculate_position_size(balance: float, risk_percent: float, entry: float, s
     if not all(math.isfinite(float(v)) for v in nums):
         return {"valid": False, "reason": "توجد قيمة غير رقمية أو غير منتهية."}
     if balance <= 0 or contract_size <= 0 or not 0 < risk_percent <= 5:
-        return {"valid": False, "reason": "الرصيد وحجم العقد يجب أن يكونا موجبين، والمخاطرة بين 0% و5%."}
+        return {"valid": False, "reason": "الرصيد وحجم العقد يجب أن يكونا موجبين، والمخاطرة يجب أن تكون أكبر من صفر ولا تتجاوز 5%."}
     check = validate_trade_levels(direction, entry, stop, target, min_rr)
     if not check["valid"]:
         return check
@@ -204,7 +240,7 @@ def source_result(source: str, requested: str, status: str, detail: str,
         "تفاصيل الاختبار": detail, "فحص وصول فقط؟": "نعم" if access_only else "لا", "رابط المصدر": url,
     }
 
-# ---------------------- Data fetchers ----------------------
+# ---------------------- Data Fetchers ----------------------
 def _fetch_yahoo_quote_impl(symbols: tuple[str, ...], label: str) -> dict[str, Any]:
     errors: list[str] = []
     for symbol in symbols:
@@ -464,7 +500,7 @@ def check_page_access(name: str, url: str) -> dict[str, Any]:
 
 def build_market_data() -> dict[str, Any]:
     dxy = fetch_yahoo_quote(("DX-Y.NYB",), "DXY")
-    gold = fetch_yahoo_quote(("XAUUSD=X",), "XAUUSD proxy")
+    gold = fetch_yahoo_quote(("XAUUSD=X", "GC=F"), "XAUUSD spot proxy")
     gold_futures = fetch_yahoo_quote(("GC=F",), "COMEX Gold Futures")
     nominal = fetch_treasury_curve(False)
     real_curve = fetch_treasury_curve(True)
@@ -535,22 +571,22 @@ def make_evidence_rows() -> list[dict[str, Any]]:
 evidence_matrix_data = make_evidence_rows()
 
 NAV_ITEMS = [
-    "🔥 2. MAIN DASHBOARD (Fusion & Scenarios)",
-    "3. DATA SOURCES (مصادر البيانات والتدقيق)",
-    "4. WEEKLY ECONOMIC EVENTS (أجندة الأخبار الرسمية)",
-    "5. ECONOMIC ANALYSIS (البيانات الاقتصادية المنشورة)",
-    "6. YIELDS & DOLLAR (العوائد والدولار)",
-    "7. COT & OPEN INTEREST (التمركز والفائدة المفتوحة)",
-    "8. SMC/ICT ANALYSIS (البنية والسيولة)",
-    "9. EVIDENCE MATRIX (مصفوفة الأدلة)",
-    "11. TRADE VALIDATOR (فاحص الصفقات)",
-    "12. RISK MANAGEMENT (حاسبة المخاطر)",
-    "13. REPORT HISTORY (سجل التقارير)",
-    "14. TRADING JOURNAL (سجل الصفقات)",
+    "🔥 لوحة القرار والتحليل",
+    "مصادر البيانات والتدقيق",
+    "أجندة الأخبار الاقتصادية",
+    "البيانات الاقتصادية المنشورة",
+    "العوائد والدولار",
+    "COT والفائدة المفتوحة",
+    "تحليل SMC / ICT",
+    "مصفوفة الأدلة",
+    "فاحص الصفقات",
+    "حاسبة المخاطر",
+    "سجل التقارير",
+    "دفتر الصفقات",
 ]
 
 with st.sidebar:
-    st.markdown('<div class="brand"><div class="brand-mark">◆</div><div><div class="brand-title">YUNAN GOLD</div><div class="brand-sub">TERMINAL</div></div></div>', unsafe_allow_html=True)
+    st.markdown('<div class="brand"><div class="brand-mark">𓂀</div><div><div class="brand-title">Aho𓂀 GOLD</div><div class="brand-sub">TERMINAL</div></div></div>', unsafe_allow_html=True)
     navigation = st.radio("القائمة الرئيسية", NAV_ITEMS, label_visibility="collapsed")
     st.divider()
     st.markdown("### مطابقة سعر الذهب")
@@ -568,7 +604,7 @@ with st.sidebar:
     st.caption(f"السعر المعتمد: {fmt_number(active_gold, 2, ' $') if active_gold is not None else 'غير متاح'}")
 
 if navigation == NAV_ITEMS[0]:
-    st.markdown('<div class="hero"><div class="eyebrow">YUNAN GOLD INTELLIGENCE</div><h1>لوحة القرار الموحد للذهب</h1><p>دمج التحليل الفني والاقتصادي وتمركزات المؤسسات.</p></div>', unsafe_allow_html=True)
+    st.markdown('<div class="hero"><div class="eyebrow">Aho𓂀 GOLD INTELLIGENCE</div><h1>لوحة القرار الموحد للذهب</h1><p>دمج التحليل الفني والاقتصادي وتمركزات المؤسسات.</p></div>', unsafe_allow_html=True)
     cols = st.columns(4)
     cols[0].metric("XAUUSD المعتمد", fmt_number(active_gold, 2, " $") if active_gold is not None else "غير متاح")
     cols[1].metric("DXY", fmt_number(market_data["dxy"].get("value"), 2))
@@ -605,7 +641,7 @@ elif navigation == NAV_ITEMS[9]:
         st.warning(calc.get("reason", "أدخل مستويات صحيحة."))
 
 elif navigation == NAV_ITEMS[11]:
-    st.markdown("## سجل الصفقات")
+    st.markdown("## دفتر الصفقات")
     with st.form("journal_form"):
         c1, c2, c3 = st.columns(3)
         with c1: trade_type = st.selectbox("النوع", ["شراء", "بيع"])
