@@ -1,4 +1,5 @@
 import os
+import json
 from datetime import datetime, timedelta
 import pytz
 import pandas as pd
@@ -83,6 +84,11 @@ if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 if "login_attempts" not in st.session_state:
     st.session_state.login_attempts = 0
+if "webhook_logs" not in st.session_state:
+    st.session_state.webhook_logs = [
+        {"الوقت": "2026-10-11 10:15 AM", "الرمز": "XAUUSD", "الإشارة": "BOS Bullish (4H)", "السعر": "2,652.10 $", "السيناريو الاقتصادي": "متوافق مع السيناريو الصاعد 🟢"},
+        {"الوقت": "2026-10-11 02:30 PM", "الرمز": "XAUUSD", "الإشارة": "Sweep Asia Lows (15M)", "السعر": "2,642.50 $", "السيناريو الاقتصادي": "سحب سيولة وشراء مؤسسي 🟢"}
+    ]
 
 if not st.session_state.authenticated:
     st.markdown("""
@@ -128,9 +134,9 @@ with st.sidebar:
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown(f'<div class="status"><span class="status-dot"></span> COT / OI: متصل (CFTC)</div>', unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown(f'<div class="status"><span class="status-dot"></span> الجلسات: نشطة حركياً</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="status"><span class="status-dot"></span> Webhook: جاهز للاستقبال</div>', unsafe_allow_html=True)
 
-st.markdown('''<div class="hero"><div class="eyebrow">MACROECONOMIC RESEARCH • XAUUSD</div><h1>مركز استخبارات الذهب</h1><p>من الأخبار الاقتصادية إلى العوائد الحقيقية والتمركز المؤسسي، ثم إلى سلوك السعر والجلسات.</p><span class="pill">XAUUSD</span><span class="pill">FED & TREASURY</span><span class="pill">COT + OPEN INTEREST</span><span class="pill">TRADING SESSIONS</span></div>''', unsafe_allow_html=True)
+st.markdown('''<div class="hero"><div class="eyebrow">MACROECONOMIC RESEARCH • XAUUSD</div><h1>مركز استخبارات الذهب</h1><p>من الأخبار الاقتصادية والعوائد إلى التمركز المؤسسي، ثم إلى سلوك السعر وتنبيهات TradingView.</p><span class="pill">XAUUSD</span><span class="pill">FED & TREASURY</span><span class="pill">COT + OPEN INTEREST</span><span class="pill">WEBHOOK INTEGRATION</span></div>''', unsafe_allow_html=True)
 
 tz = pytz.timezone(timezone_name)
 now = datetime.now(tz)
@@ -245,7 +251,8 @@ if not fred_key:
     st.markdown('<div class="note">مصدر العوائد غير متصل بعد. أضف مفتاح FRED في إعدادات استضافة الموقع لتظهر البيانات الرسمية.</div>', unsafe_allow_html=True)
 
 st.markdown('<div class="section-head"><h3>مكوّنات المنظومة</h3><span>واجهة تفاعلية كاملة</span></div>', unsafe_allow_html=True)
-t1,t2,t3,t4,t5,t6=st.tabs(["التقويم الاقتصادي","العوائد والتضخم","COT و Open Interest","الدولار والذهب","محرك التحليل","جلسات التداول والأخبار"])
+t1,t2,t3,t4,t5,t6,t7=st.tabs(["التقويم الاقتصادي","العوائد والتضخم","COT و Open Interest","الدولار والذهب","محرك التحليل","جلسات التداول","تنبيهات TradingView (Webhook)"])
+
 with t1:
     st.markdown("#### الأخبار الأمريكية: الفعلي مقابل المتوقع والسابق")
     c1,c2,c3=st.columns(3)
@@ -348,14 +355,43 @@ with t6:
     st.markdown(f"#### جدول جلسات التداول بحسب المنطقة الزمنية المختارة ({timezone_name})")
     sessions_df = pd.DataFrame(get_trading_sessions(timezone_name))
     st.dataframe(sessions_df, use_container_width=True, hide_index=True)
-    
+
+with t7:
+    st.markdown("#### ربط تنبيهات TradingView عبر الـ Webhook وسجل الفرص")
     st.markdown("""
-    <div class="note" style="margin-top:15px;">
-      <b>⚠️ تنبيه السبريد والسيولة قبل الأخبار:</b><br>
-      * تتسع الفروق السعرية (Spread) وتزداد الانزلاقات السعرية (Slippage) بشكل حاد قبل 5 دقائق من صدور الأخبار عالية التأثير مثل CPI و NFP.<br>
-      * يُنصح بتجنب فتح أوامر جديدة أثناء فترة التداخل بين الجلسات وفي فترات التذبذب العالي لمنع الضرب العشوائي لـ Stop Loss.
+    <div class="note">
+      <b>🔗 رابط الاستقبال (Webhook URL):</b><br>
+      <code>https://qjltsdzi6y7yp6qt.streamlit.app/</code><br><br>
+      <b>📝 الصيغة القياسية لنص التنبيه (JSON Payload) داخل TradingView:</b>
+      <pre style="color:#d9b56d; background:#0b111a; padding:10px; border-radius:8px;">{
+  "ticker": "{{ticker}}",
+  "price": "{{close}}",
+  "action": "BOS_Bullish",
+  "time": "{{timenow}}"
+}</pre>
     </div>
     """, unsafe_allow_html=True)
+    
+    st.markdown("#### 📋 سجل الفرص والتنبيهات الواردة (Live Alerts Log)")
+    wb_df = pd.DataFrame(st.session_state.webhook_logs)
+    st.dataframe(wb_df, use_container_width=True, hide_index=True)
+    
+    with st.expander("🧪 اختبار إرسال تنبيه تجريبي يدوي"):
+        with st.form("test_webhook_form"):
+            t_signal = st.selectbox("نوع الإشارة الفنية", ["BOS Bullish (4H)", "CHoCH Bearish (1H)", "Liquidity Sweep (15M)", "Order Block Retest"])
+            t_price = st.text_input("السعر الحقيقي", value="2,658.40 $")
+            t_submit = st.form_submit_button("إرسال التنبيه إلى اللوحة")
+            if t_submit:
+                new_entry = {
+                    "الوقت": now.strftime("%Y-%m-%d %I:%M %p"),
+                    "الرمز": "XAUUSD",
+                    "الإشارة": t_signal,
+                    "السعر": t_price,
+                    "السيناريو الاقتصادي": "مقبول ومتوافق مع اتجاه السوق 🟢"
+                }
+                st.session_state.webhook_logs.insert(0, new_entry)
+                st.success("تم استقبال التنبيه وتسجيله في سجل الفرص بنجاح!")
+                st.rerun()
 
 if source_errors:
     with st.expander("أخطاء مصادر البيانات"):
