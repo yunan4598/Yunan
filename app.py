@@ -77,6 +77,34 @@ if ACTIVE_THEME == "light":
         border-left: none !important;
         border-right: none !important;
         box-shadow: none !important;
+        outline: none !important;
+    }
+
+    /* إزالة أي حدود داخلية داخل الشريط الجانبي */
+    [data-testid="stSidebar"] > div,
+    [data-testid="stSidebar"] > div:first-child,
+    [data-testid="stSidebarContent"],
+    [data-testid="stSidebarUserContent"],
+    [data-testid="stSidebarHeader"] {
+        border-left: none !important;
+        border-right: none !important;
+        border-top: none !important;
+        border-bottom: none !important;
+        box-shadow: none !important;
+        outline: none !important;
+    }
+
+    /* إخفاء مقبض السحب الرأسي الذي يظهر كخط في منتصف الشاشة */
+    [data-testid="stSidebarResizeHandle"],
+    [data-testid="stSidebar"] > div[role="separator"],
+    [data-testid="stSidebar"] > div[aria-orientation="vertical"],
+    [data-testid="stSidebarCollapseButton"] {
+        display: none !important;
+        width: 0 !important;
+        min-width: 0 !important;
+        border: none !important;
+        background: transparent !important;
+        box-shadow: none !important;
     }
     
     [data-testid="stSidebar"] * {
@@ -226,6 +254,34 @@ else:
         background: #111b26 !important;
         border-left: none !important;
         border-right: none !important;
+        box-shadow: none !important;
+        outline: none !important;
+    }
+
+    /* إزالة أي حدود داخلية داخل الشريط الجانبي */
+    [data-testid="stSidebar"] > div,
+    [data-testid="stSidebar"] > div:first-child,
+    [data-testid="stSidebarContent"],
+    [data-testid="stSidebarUserContent"],
+    [data-testid="stSidebarHeader"] {
+        border-left: none !important;
+        border-right: none !important;
+        border-top: none !important;
+        border-bottom: none !important;
+        box-shadow: none !important;
+        outline: none !important;
+    }
+
+    /* إخفاء مقبض السحب الرأسي الذي يظهر كخط في منتصف الشاشة */
+    [data-testid="stSidebarResizeHandle"],
+    [data-testid="stSidebar"] > div[role="separator"],
+    [data-testid="stSidebar"] > div[aria-orientation="vertical"],
+    [data-testid="stSidebarCollapseButton"] {
+        display: none !important;
+        width: 0 !important;
+        min-width: 0 !important;
+        border: none !important;
+        background: transparent !important;
         box-shadow: none !important;
     }
     
