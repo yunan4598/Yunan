@@ -856,7 +856,7 @@ def market():
          "tested_at": utc()}
     m["quality_score"] = quality(m)
     return m
-  
+
 # ================================================================
 # AUTH GATE
 # ================================================================
@@ -940,7 +940,7 @@ def pg_dashboard():
         "BEARISH": ("signal-bear", "🔴", "تحيز هابط"),
         "NO_TRADE": ("signal-no-trade", "⛔", "لا تداول"),
     }.get(fb, ("signal-neutral", "🟡", "حياد"))
-    rh = ("<p style='color:#E74C3C;margin:6px 0 0;font-size:13px;font-weight:700;'>"
+    rh = ("<p style='color:#ff6b6b;margin:6px 0 0;font-size:13px;font-weight:700;'>"
           + " • ".join(fus["reasons"]) + "</p>") if fus["reasons"] else ""
     st.markdown(f'<div class="{cls[0]}"><h3>{cls[1]} {cls[2]} — ثقة {fus["confidence"]}%</h3>{rh}</div>',
                 unsafe_allow_html=True)
